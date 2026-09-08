@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Moneylix — Project Document</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f8fafc;
+    color: #1e293b;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* Cover Page */
+  .cover {
+    background: linear-gradient(135deg, #0f172a 0%, #0d2137 50%, #0a1628 100%);
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 40px;
+    page-break-after: always;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .cover::after {
+    content: '';
+    position: absolute;
+    bottom: -50px; left: -50px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(6,182,212,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .cover-logo {
+    width: 90px; height: 90px;
+    background: linear-gradient(135deg, #10b981, #06b6d4);
+    border-radius: 24px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px; font-weight: 900;
+    color: #0f172a;
+    margin-bottom: 32px;
+    position: relative; z-index: 1;
+    box-shadow: 0 20px 60px rgba(16,185,129,0.4);
+  }
+  .cover h1 {
+    font-size: 64px; font-weight: 900;
+    background: linear-gradient(135deg, #10b981, #06b6d4);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: -2px;
+    position: relative; z-index: 1;
+    margin-bottom: 8px;
+  }
+  .cover-sub { font-size: 18px; color: #94a3b8; font-weight: 500; position: relative; z-index: 1; margin-bottom: 48px; }
+  .cover-divider { width: 80px; height: 3px; background: linear-gradient(90deg, #10b981, #06b6d4); border-radius: 2px; margin: 0 auto 48px; position: relative; z-index: 1; }
+  .cover-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 500px; position: relative; z-index: 1; }
+  .cover-meta-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px 20px; text-align: left; }
+  .cover-meta-item .label { font-size: 10px; font-weight: 700; color: #10b981; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; }
+  .cover-meta-item .value { font-size: 14px; font-weight: 600; color: #e2e8f0; }
+  .cover-footer { position: absolute; bottom: 40px; font-size: 11px; color: #475569; z-index: 1; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; }
+
+  /* TOC Page */
+  .toc-page { padding: 60px 60px; page-break-after: always; background: white; }
+  .toc-title { font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+  .toc-sub { font-size: 13px; color: #64748b; margin-bottom: 40px; font-weight: 500; }
+  .toc-list { list-style: none; }
+  .toc-list li { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; }
+  .toc-list li:last-child { border-bottom: none; }
+  .toc-num { width: 36px; height: 36px; background: linear-gradient(135deg, #10b981, #06b6d4); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: white; flex-shrink: 0; margin-right: 16px; }
+  .toc-text { flex: 1; font-size: 15px; font-weight: 600; color: #1e293b; }
+  .toc-dots { flex: 1; border-bottom: 2px dotted #cbd5e1; margin: 0 12px; }
+  .toc-page-num { font-size: 13px; font-weight: 700; color: #10b981; }
+
+  /* Content */
+  .content { max-width: 900px; margin: 0 auto; padding: 60px; background: white; }
+
+  /* Section */
+  .section { margin-bottom: 60px; page-break-inside: avoid; }
+  .section-header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; padding-bottom: 16px; border-bottom: 3px solid #f1f5f9; }
+  .section-num { width: 44px; height: 44px; background: linear-gradient(135deg, #10b981, #06b6d4); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; color: white; flex-shrink: 0; }
+  .section-title { font-size: 24px; font-weight: 800; color: #0f172a; }
+  .section-desc { font-size: 13px; color: #64748b; font-weight: 500; margin-top: 2px; }
+
+  h3 { font-size: 16px; font-weight: 700; color: #0f172a; margin: 28px 0 12px; padding-left: 12px; border-left: 3px solid #10b981; }
+
+  p { color: #475569; margin-bottom: 12px; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 13px; }
+  thead tr { background: linear-gradient(135deg, #10b981, #06b6d4); }
+  thead th { color: white; font-weight: 700; text-align: left; padding: 12px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; }
+  tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.1s; }
+  tbody tr:nth-child(even) { background: #f8fafc; }
+  tbody td { padding: 11px 16px; color: #374151; vertical-align: top; }
+  tbody td:first-child { font-weight: 600; color: #1e293b; }
+
+  /* Code blocks */
+  pre {
+    background: #0f172a;
+    color: #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.8;
+    overflow-x: auto;
+    margin: 16px 0 24px;
+    border: 1px solid #1e293b;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: #f1f5f9;
+    color: #10b981;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  pre code { background: none; color: #e2e8f0; padding: 0; }
+
+  /* Info cards */
+  .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 16px 0 24px; }
+  .card-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 16px 0 24px; }
+  .info-card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; background: white; }
+  .info-card .card-label { font-size: 10px; font-weight: 700; color: #10b981; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px; }
+  .info-card .card-value { font-size: 14px; font-weight: 600; color: #0f172a; }
+  .info-card .card-desc { font-size: 12px; color: #64748b; margin-top: 4px; }
+
+  /* Highlight boxes */
+  .highlight-box { background: linear-gradient(135deg, rgba(16,185,129,0.06), rgba(6,182,212,0.04)); border: 1px solid rgba(16,185,129,0.2); border-radius: 12px; padding: 20px 24px; margin: 16px 0 24px; }
+  .highlight-box p { color: #374151; margin: 0; }
+
+  /* Badge */
+  .badge { display: inline-block; background: linear-gradient(135deg, #10b981, #06b6d4); color: white; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.8px; margin-left: 8px; vertical-align: middle; }
+  .badge-yellow { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+  .badge-blue { background: linear-gradient(135deg, #3b82f6, #8b5cf6); }
+
+  /* Stats row */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 20px 0; }
+  .stat-card { background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: 12px; padding: 20px; text-align: center; }
+  .stat-num { font-size: 28px; font-weight: 900; background: linear-gradient(135deg, #10b981, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .stat-label { font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+  /* Checklist */
+  .checklist { list-style: none; margin: 12px 0 20px; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; color: #475569; font-size: 13px; }
+  .checklist li::before { content: '✓'; color: #10b981; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .checklist li.pending::before { content: '○'; color: #f59e0b; }
+
+  /* Page break */
+  .page-break { page-break-after: always; }
+
+  /* Print styles */
+  @media print {
+    body { background: white; }
+    .cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    thead tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .section-num { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .stat-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    pre { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-logo">M</div>
+  <h1>MONEYLIX</h1>
+  <p class="cover-sub">Complete Project Documentation — v1.0</p>
+  <div class="cover-divider"></div>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <div class="label">Live URL</div>
+      <div class="value">moneylix.in</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="label">Platform</div>
+      <div class="value">Web + iOS + Android</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="label">Stack</div>
+      <div class="value">Next.js · SQLite · Capacitor</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="label">Date</div>
+      <div class="value">Updated June 8, 2026</div>
+    </div>
+  </div>
+  <div class="cover-footer">Confidential — Built by Abishek Elumalai</div>
+</div>
+
+<!-- TOC -->
+<div class="toc-page">
+  <div class="toc-title">Table of Contents</div>
+  <div class="toc-sub">Moneylix Finance Management SaaS — Complete Documentation</div>
+  <ul class="toc-list">
+    <li><div class="toc-num">1</div><span class="toc-text">Project Overview</span><span class="toc-dots"></span><span class="toc-page-num">3</span></li>
+    <li><div class="toc-num">2</div><span class="toc-text">Tech Stack</span><span class="toc-dots"></span><span class="toc-page-num">4</span></li>
+    <li><div class="toc-num">3</div><span class="toc-text">System Architecture</span><span class="toc-dots"></span><span class="toc-page-num">5</span></li>
+    <li><div class="toc-num">4</div><span class="toc-text">Complete File Structure (130 files)</span><span class="toc-dots"></span><span class="toc-page-num">6</span></li>
+    <li><div class="toc-num">5</div><span class="toc-text">Database Design</span><span class="toc-dots"></span><span class="toc-page-num">9</span></li>
+    <li><div class="toc-num">6</div><span class="toc-text">API Reference (55+ endpoints)</span><span class="toc-dots"></span><span class="toc-page-num">10</span></li>
+    <li><div class="toc-num">7</div><span class="toc-text">Features by Page</span><span class="toc-dots"></span><span class="toc-page-num">12</span></li>
+    <li><div class="toc-num">8</div><span class="toc-text">Pricing Plans</span><span class="toc-dots"></span><span class="toc-page-num">14</span></li>
+    <li><div class="toc-num">9</div><span class="toc-text">Mobile App (iOS + Android)</span><span class="toc-dots"></span><span class="toc-page-num">15</span></li>
+    <li><div class="toc-num">10</div><span class="toc-text">Server & Deployment</span><span class="toc-dots"></span><span class="toc-page-num">16</span></li>
+    <li><div class="toc-num">11</div><span class="toc-text">Email System</span><span class="toc-dots"></span><span class="toc-page-num">17</span></li>
+    <li><div class="toc-num">12</div><span class="toc-text">Security</span><span class="toc-dots"></span><span class="toc-page-num">17</span></li>
+    <li><div class="toc-num">13</div><span class="toc-text">Project Statistics & Pending Work</span><span class="toc-dots"></span><span class="toc-page-num">18</span></li>
+  </ul>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+<!-- SECTION 1 -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <div>
+      <div class="section-title">Project Overview</div>
+      <div class="section-desc">What Moneylix is and who it's for</div>
+    </div>
+  </div>
+
+  <div class="highlight-box">
+    <p><strong>Moneylix</strong> is a full-stack SaaS finance management application built for Indian freelancers, creators, and small businesses. It allows users to track income and expenses, manage receivables, view analytics, and get AI-powered investment advice — available on Web, iOS, and Android.</p>
+  </div>
+
+  <h3>Key Objectives</h3>
+  <table>
+    <thead><tr><th>Objective</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>Income & Expense Tracking</td><td>Log all transactions with categories, notes, tags, and payment method</td></tr>
+      <tr><td>Multi-Business Support</td><td>Switch between multiple businesses with fully isolated data</td></tr>
+      <tr><td>Receivables Management</td><td>Track pending client payments with due-date reminders</td></tr>
+      <tr><td>AI Investment Advisor</td><td>Claude AI gives personalized investment suggestions (SIP, Gold, FD)</td></tr>
+      <tr><td>Analytics Dashboard</td><td>Cash flow charts, spending split, savings rate</td></tr>
+      <tr><td>Plan-Based Access</td><td>Free / Pro / Premium tiers with Razorpay payments</td></tr>
+      <tr><td>Mobile App</td><td>Native iOS and Android app via Capacitor WebView</td></tr>
+      <tr><td>Admin Panel</td><td>Full admin control of users, plans, and platform stats</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Target Users</h3>
+  <ul class="checklist">
+    <li>Freelancers — designers, developers, consultants</li>
+    <li>Small business owners</li>
+    <li>Creators and solopreneurs in India</li>
+  </ul>
+</div>
+
+<!-- SECTION 2 -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <div>
+      <div class="section-title">Tech Stack</div>
+      <div class="section-desc">All technologies used in the project</div>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>Category</th><th>Technology</th><th>Version</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>Framework</td><td>Next.js (App Router)</td><td>14.2.3</td><td>Full-stack React framework</td></tr>
+      <tr><td>Language</td><td>TypeScript</td><td>5.x</td><td>Type safety across entire codebase</td></tr>
+      <tr><td>Styling</td><td>Tailwind CSS</td><td>3.x</td><td>Utility-first CSS framework</td></tr>
+      <tr><td>Database</td><td>SQLite (better-sqlite3)</td><td>12.x</td><td>Embedded relational database, async-wrapped via db.async.ts</td></tr>
+      <tr><td>Postgres Prep</td><td>pg (node-postgres)</td><td>—</td><td>db.postgres.ts layer prepped for future cutover</td></tr>
+      <tr><td>Bank Sync</td><td>Setu Account Aggregator</td><td>—</td><td>RBI-regulated bank statement fetch (lib/setu/client.ts)</td></tr>
+      <tr><td>Auth</td><td>JWT + bcryptjs</td><td>—</td><td>Session tokens + password hashing</td></tr>
+      <tr><td>AI</td><td>Anthropic Claude SDK</td><td>0.90.0</td><td>AI financial advisor</td></tr>
+      <tr><td>Payments</td><td>Razorpay</td><td>2.9.6</td><td>Indian payment gateway</td></tr>
+      <tr><td>Email</td><td>Resend</td><td>6.x</td><td>Transactional email delivery</td></tr>
+      <tr><td>Charts</td><td>Recharts</td><td>2.x</td><td>Dashboard data visualizations</td></tr>
+      <tr><td>Mobile</td><td>Capacitor</td><td>8.x</td><td>iOS and Android WebView wrapper</td></tr>
+      <tr><td>PWA</td><td>next-pwa</td><td>5.x</td><td>Installable Progressive Web App</td></tr>
+      <tr><td>OCR</td><td>Tesseract.js</td><td>7.x</td><td>Receipt scanning</td></tr>
+      <tr><td>Rate Limiting</td><td>Upstash Redis</td><td>—</td><td>API rate limiting per IP</td></tr>
+      <tr><td>Validation</td><td>Zod</td><td>4.x</td><td>Input schema validation</td></tr>
+      <tr><td>Icons</td><td>Lucide React</td><td>0.378</td><td>UI icon library</td></tr>
+      <tr><td>Animation</td><td>Framer Motion</td><td>12.x</td><td>Page transitions</td></tr>
+      <tr><td>CSV</td><td>PapaParse</td><td>5.x</td><td>CSV import/export parsing</td></tr>
+      <tr><td>Server</td><td>PM2 + Nginx</td><td>—</td><td>Process management + reverse proxy</td></tr>
+      <tr><td>SSL</td><td>Let's Encrypt</td><td>—</td><td>Free HTTPS certificate</td></tr>
+      <tr><td>DNS</td><td>Cloudflare</td><td>—</td><td>Domain and CDN management</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SECTION 3 -->
+<div class="section page-break">
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <div>
+      <div class="section-title">System Architecture</div>
+      <div class="section-desc">How all layers connect together</div>
+    </div>
+  </div>
+
+  <pre>
+┌──────────────────────────────────────────────────────────────────┐
+│                         CLIENT LAYER                             │
+│   Browser (moneylix.in)  │   iOS App   │   Android App          │
+│              React 18 + Next.js App Router                       │
+└──────────────────────────────┬───────────────────────────────────┘
+                               │  HTTPS / SSL
+┌──────────────────────────────▼───────────────────────────────────┐
+│                    NGINX (Reverse Proxy)                         │
+│           SSL Termination → Port 3006 (Next.js)                  │
+│                      Cloudflare CDN                              │
+└──────────────────────────────┬───────────────────────────────────┘
+                               │
+┌──────────────────────────────▼───────────────────────────────────┐
+│               NEXT.JS APP ROUTER SERVER                          │
+│                                                                  │
+│   ┌─────────────────┐    ┌──────────────────────────────────┐   │
+│   │   Page Routes   │    │         API Routes (/api/*)       │   │
+│   │  (RSC + Client) │    │  Auth │ Trans │ Plans │ AI │ Pay  │   │
+│   └─────────────────┘    └──────────────────┬───────────────┘   │
+└──────────────────────────────────────────────┼───────────────────┘
+                                               │
+                ┌──────────────────────────────▼──────────────┐
+                │              SQLITE DATABASE                 │
+                │        moneylix.db (WAL mode, FK on)         │
+                └──────────────────────────────────────────────┘
+
+External Services:
+  ├── Anthropic API (Claude)  →  AI investment recommendations
+  ├── Razorpay                →  Payment processing + webhooks
+  ├── Resend                  →  Transactional email delivery
+  └── Upstash Redis           →  API rate limiting</pre>
+
+  <h3>Infrastructure</h3>
+  <div class="card-grid">
+    <div class="info-card">
+      <div class="card-label">Server</div>
+      <div class="card-value">Proxmox VM 104</div>
+      <div class="card-desc">abishek-ubuntu1 · Ubuntu 22.04 · 4 CPU · 4GB RAM · 200GB Disk</div>
+    </div>
+    <div class="info-card">
+      <div class="card-label">Network</div>
+      <div class="card-value">192.168.86.245 (LAN)</div>
+      <div class="card-desc">Public: 172.91.220.192 · Proxmox: 192.168.86.110:8006</div>
+    </div>
+    <div class="info-card">
+      <div class="card-label">Process Manager</div>
+      <div class="card-value">PM2</div>
+      <div class="card-desc">Process name: moneylix · Port: 3006</div>
+    </div>
+    <div class="info-card">
+      <div class="card-label">SSL / Domain</div>
+      <div class="card-value">moneylix.in</div>
+      <div class="card-desc">Let's Encrypt · Expires 2026-08-06 · Cloudflare DNS</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4 -->
+<div class="section page-break">
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <div>
+      <div class="section-title">Complete File Structure</div>
+      <div class="section-desc">All 130 source files with purpose</div>
+    </div>
+  </div>
+
+  <h3>Pages — Public & Auth</h3>
+  <table>
+    <thead><tr><th>File</th><th>Route</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>app/page.tsx</td><td>/</td><td>Landing / marketing page. Detects native app → redirects to login</td></tr>
+      <tr><td>app/layout.tsx</td><td>—</td><td>Root layout, PWA meta tags, viewport config for iOS notch</td></tr>
+      <tr><td>app/not-found.tsx</td><td>404</td><td>Custom 404 error page</td></tr>
+      <tr><td>app/icon.tsx</td><td>/icon</td><td>Dynamic app icon generator</td></tr>
+      <tr><td>app/offline/page.tsx</td><td>/offline</td><td>PWA offline fallback page</td></tr>
+      <tr><td>app/onboarding/page.tsx</td><td>/onboarding</td><td>First-time business setup wizard for new users</td></tr>
+      <tr><td>app/auth/login/page.tsx</td><td>/auth/login</td><td>Sign in form with demo login option</td></tr>
+      <tr><td>app/auth/register/page.tsx</td><td>/auth/register</td><td>Create account form</td></tr>
+      <tr><td>app/auth/forgot-password/page.tsx</td><td>/auth/forgot-password</td><td>Request password reset email</td></tr>
+      <tr><td>app/auth/reset-password/page.tsx</td><td>/auth/reset-password</td><td>Set new password via token link</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Pages — Dashboard</h3>
+  <table>
+    <thead><tr><th>File</th><th>Route</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>dashboard/layout.tsx</td><td>—</td><td>Sidebar (desktop), bottom nav (mobile), header with business switcher</td></tr>
+      <tr><td>dashboard/page.tsx</td><td>/dashboard</td><td>Stats cards, cash flow chart, spending split, recent transactions</td></tr>
+      <tr><td>dashboard/transactions/page.tsx</td><td>/dashboard/transactions</td><td>Full transactions list, add/edit/delete, filter, search, bulk ops, import/export</td></tr>
+      <tr><td>dashboard/categories/page.tsx</td><td>/dashboard/categories</td><td>Income and expense category management with colors</td></tr>
+      <tr><td>dashboard/receivables/page.tsx</td><td>/dashboard/receivables</td><td>Pending client payments tracker with due dates</td></tr>
+      <tr><td>dashboard/overall/page.tsx</td><td>/dashboard/overall</td><td>Cross-business combined analytics view</td></tr>
+      <tr><td>dashboard/bank/page.tsx</td><td>/dashboard/bank</td><td>Bank Sync: Setu AA connections, transactions, AI categorisation (Pro+)</td></tr>
+      <tr><td>dashboard/bank/status/page.tsx</td><td>/dashboard/bank/status</td><td>Setu consent approval redirect/status handler</td></tr>
+      <tr><td>dashboard/recurring/page.tsx</td><td>/dashboard/recurring</td><td>Recurring/scheduled transaction templates</td></tr>
+      <tr><td>dashboard/ai/page.tsx</td><td>/dashboard/ai</td><td>Claude AI investment advisor chat</td></tr>
+      <tr><td>dashboard/calculator/page.tsx</td><td>/dashboard/calculator</td><td>Financial calculator with calculation history</td></tr>
+      <tr><td>dashboard/profile/page.tsx</td><td>/dashboard/profile</td><td>User profile: name, email, password, delete account</td></tr>
+      <tr><td>dashboard/settings/page.tsx</td><td>/dashboard/settings</td><td>Currency, data export/import, quick links</td></tr>
+      <tr><td>dashboard/pricing/page.tsx</td><td>/dashboard/pricing</td><td>Free/Pro/Premium plan cards with Razorpay payment</td></tr>
+      <tr><td>dashboard/help/page.tsx</td><td>/dashboard/help</td><td>FAQs and support center</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Pages — Admin Panel</h3>
+  <table>
+    <thead><tr><th>File</th><th>Route</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>admin/layout.tsx</td><td>—</td><td>Admin sidebar navigation layout</td></tr>
+      <tr><td>admin/login/page.tsx</td><td>/admin/login</td><td>Admin login with bcrypt verification</td></tr>
+      <tr><td>admin/page.tsx</td><td>/admin</td><td>Platform KPIs, plan distribution, renewal alerts, password change</td></tr>
+      <tr><td>admin/users/page.tsx</td><td>/admin/users</td><td>View and manage all user accounts</td></tr>
+      <tr><td>admin/admins/page.tsx</td><td>/admin/admins</td><td>Manage admin accounts</td></tr>
+      <tr><td>admin/subscriptions/page.tsx</td><td>/admin/subscriptions</td><td>All active subscriptions and billing</td></tr>
+      <tr><td>admin/broadcast/page.tsx</td><td>/admin/broadcast</td><td>Send notification messages to all users</td></tr>
+      <tr><td>admin/features/page.tsx</td><td>/admin/features</td><td>Feature flags and user voting</td></tr>
+      <tr><td>admin/tickets/page.tsx</td><td>/admin/tickets</td><td>Support ticket management</td></tr>
+    </tbody>
+  </table>
+
+  <h3>API Routes</h3>
+  <table>
+    <thead><tr><th>File</th><th>Endpoint</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>api/auth/login</td><td>POST /api/auth/login</td><td>Login → returns JWT session token</td></tr>
+      <tr><td>api/auth/register</td><td>POST /api/auth/register</td><td>Create new user account</td></tr>
+      <tr><td>api/auth/me</td><td>GET /api/auth/me</td><td>Get logged-in user profile</td></tr>
+      <tr><td>api/auth/forgot-password</td><td>POST /api/auth/forgot-password</td><td>Send password reset email</td></tr>
+      <tr><td>api/auth/reset-password</td><td>POST /api/auth/reset-password</td><td>Set new password via token</td></tr>
+      <tr><td>api/auth/verify-email</td><td>GET /api/auth/verify-email</td><td>Confirm email address via token</td></tr>
+      <tr><td>api/auth/demo</td><td>POST /api/auth/demo</td><td>Instant demo login</td></tr>
+      <tr><td>api/businesses</td><td>GET / POST</td><td>List businesses / create new</td></tr>
+      <tr><td>api/businesses/[id]</td><td>PUT / DELETE</td><td>Rename / delete business</td></tr>
+      <tr><td>api/transactions</td><td>GET / POST</td><td>List (filtered+paginated) / create</td></tr>
+      <tr><td>api/transactions/[id]</td><td>PUT / DELETE</td><td>Edit / delete transaction</td></tr>
+      <tr><td>api/transactions/bulk</td><td>POST / PUT</td><td>Bulk create / bulk update category</td></tr>
+      <tr><td>api/categories</td><td>GET / POST</td><td>List / create categories</td></tr>
+      <tr><td>api/categories/[id]</td><td>PUT / DELETE</td><td>Edit / delete category</td></tr>
+      <tr><td>api/recurring</td><td>GET / POST</td><td>List / create recurring transaction schedules</td></tr>
+      <tr><td>api/recurring/[id]</td><td>PATCH / DELETE</td><td>Update, pause/resume, or delete a schedule</td></tr>
+      <tr><td>api/bank/create-consent</td><td>POST</td><td>Start Setu AA consent flow</td></tr>
+      <tr><td>api/bank/consent-status</td><td>GET</td><td>Poll consent approval status</td></tr>
+      <tr><td>api/bank/connections</td><td>GET / DELETE</td><td>List / revoke bank connections</td></tr>
+      <tr><td>api/bank/sync</td><td>POST</td><td>Fetch latest statement from FIP</td></tr>
+      <tr><td>api/bank/sync-status</td><td>GET</td><td>Poll sync progress / result</td></tr>
+      <tr><td>api/bank/transactions</td><td>GET</td><td>List fetched bank transactions</td></tr>
+      <tr><td>api/bank/categorise</td><td>POST</td><td>AI-categorise bank transactions</td></tr>
+      <tr><td>api/bank/setu-webhook</td><td>POST</td><td>Setu AA notification webhook</td></tr>
+      <tr><td>api/dashboard</td><td>GET</td><td>Balance, income, expense summary stats</td></tr>
+      <tr><td>api/charts</td><td>GET</td><td>Daily cashflow + category spend data</td></tr>
+      <tr><td>api/overall</td><td>GET</td><td>Cross-business combined totals</td></tr>
+      <tr><td>api/export</td><td>GET</td><td>Download CSV or JSON export</td></tr>
+      <tr><td>api/ai-recommendations</td><td>POST</td><td>Claude AI financial advice</td></tr>
+      <tr><td>api/payments/create-order</td><td>POST</td><td>Create Razorpay payment order</td></tr>
+      <tr><td>api/payments/verify</td><td>POST</td><td>Verify payment + activate plan</td></tr>
+      <tr><td>api/payments/webhook</td><td>POST</td><td>Handle Razorpay subscription events</td></tr>
+      <tr><td>api/user/plan</td><td>GET</td><td>Get current plan + expiry date</td></tr>
+      <tr><td>api/user/profile</td><td>GET / PUT</td><td>Get / update name, email, password</td></tr>
+      <tr><td>api/user/delete-account</td><td>POST</td><td>Permanently delete account and all data</td></tr>
+      <tr><td>api/user/notifications</td><td>GET</td><td>Get in-app notifications</td></tr>
+      <tr><td>api/cron/expire-subscriptions</td><td>GET</td><td>Auto-expire old plans (cron job)</td></tr>
+      <tr><td>api/cron/process-recurring</td><td>GET</td><td>Generate due transactions from recurring schedules</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Components, Contexts & Library</h3>
+  <table>
+    <thead><tr><th>File</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>components/BusinessSwitcher.tsx</td><td>Multi-business dropdown with compact (desktop) and full (mobile) modes</td></tr>
+      <tr><td>components/CurrencySelector.tsx</td><td>Currency picker with all supported currencies</td></tr>
+      <tr><td>components/Scanner.tsx</td><td>OCR receipt scanner using Tesseract.js (Premium feature)</td></tr>
+      <tr><td>components/PWAInstallPrompt.tsx</td><td>Add to home screen prompt for PWA</td></tr>
+      <tr><td>components/BankSyncCard.tsx</td><td>Bank connection status card with manual sync trigger</td></tr>
+      <tr><td>components/CookieBanner.tsx</td><td>GDPR/cookie consent banner shown site-wide</td></tr>
+      <tr><td>components/PlanGate.tsx</td><td>Wrapper that locks features by plan tier</td></tr>
+      <tr><td>lib/db.ts</td><td>SQLite connection (sync, legacy), WAL mode, migrations runner, admin seed</td></tr>
+      <tr><td>lib/db.async.ts</td><td>Async Promise wrapper around db.ts — current default DB import for all routes</td></tr>
+      <tr><td>lib/db.postgres.ts</td><td>Future PostgreSQL layer (pg Pool) — prepped for cutover, not yet wired in</td></tr>
+      <tr><td>lib/audit.ts</td><td>RBI compliance audit logging — writes to audit_logs table</td></tr>
+      <tr><td>lib/setu/client.ts</td><td>Setu Account Aggregator API client (consent + data fetch)</td></tr>
+      <tr><td>lib/auth/password.ts</td><td>bcrypt hash (cost 12) and verify functions</td></tr>
+      <tr><td>lib/auth/session.ts</td><td>JWT sign and verify helpers</td></tr>
+      <tr><td>lib/email/resend.ts</td><td>All 5 email templates: welcome, verification, reset, plan upgrade, weekly recap</td></tr>
+      <tr><td>lib/contexts/BusinessContext.tsx</td><td>Active business global state across all pages</td></tr>
+      <tr><td>lib/contexts/CurrencyContext.tsx</td><td>User currency preference (INR default)</td></tr>
+      <tr><td>lib/contexts/PlanContext.tsx</td><td>Plan features and gate checks</td></tr>
+      <tr><td>lib/razorpay.ts</td><td>Razorpay client initialization</td></tr>
+      <tr><td>types/index.ts</td><td>TypeScript interfaces: Transaction, Category, Business, DashboardSummary</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SECTION 5 -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">5</div>
+    <div>
+      <div class="section-title">Database Design</div>
+      <div class="section-desc">SQLite schema — 16 tables, WAL mode, foreign keys enabled, accessed via async wrapper</div>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>Table</th><th>Key Columns</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>users</td><td>id, username, email, password (bcrypt), role, created_at</td><td>All user accounts — staff and admin</td></tr>
+      <tr><td>sessions</td><td>id, user_id, token (JWT), expires_at</td><td>Active login sessions</td></tr>
+      <tr><td>businesses</td><td>id, user_id, name, created_at</td><td>User business profiles</td></tr>
+      <tr><td>transactions</td><td>id, user_id, business_id, type, amount, category_id, date, note, method, tags, status, currency</td><td>All financial records</td></tr>
+      <tr><td>categories</td><td>id, user_id, name, type (credit/debit/both), color</td><td>Transaction categories</td></tr>
+      <tr><td>subscriptions</td><td>id, user_id, plan, status, expires_at, amount_paid, payment_method</td><td>Plan billing and expiry</td></tr>
+      <tr><td>password_resets</td><td>id, user_id, token, expires_at, used_at</td><td>Password reset tokens (1 hour TTL)</td></tr>
+      <tr><td>notifications</td><td>id, user_id, type, message, read_at</td><td>In-app notifications</td></tr>
+      <tr><td>support_tickets</td><td>id, user_id, subject, message, status</td><td>Help and support requests</td></tr>
+      <tr><td>feature_requests / feature_votes</td><td>id, user_id, feature, voted_at</td><td>Feature request voting system</td></tr>
+      <tr><td>currencies</td><td>code, name, symbol</td><td>Supported currency list</td></tr>
+      <tr><td>user_settings</td><td>user_id, key, value</td><td>Per-user key/value preferences</td></tr>
+      <tr><td>bank_connections</td><td>id, user_id, consent_id, status, fip_id, masked_account_number, bank_name, consent_expiry, last_synced_at</td><td>Setu AA bank account links</td></tr>
+      <tr><td>bank_transactions</td><td>id, bank_connection_id, user_id, txn_id, type, amount, date, narration, category_id, ai_category_suggestion, ai_confidence, is_categorised, linked_transaction_id, is_duplicate, ignored</td><td>Statement lines fetched from connected banks</td></tr>
+      <tr><td>recurring_transactions</td><td>id, user_id, business_id, type, amount, category_id, frequency, interval_value, start_date, end_date, next_run_date, last_run_date, total_generated, status</td><td>Scheduled/recurring transaction templates</td></tr>
+      <tr><td>audit_logs</td><td>id, user_id, action, category, resource_type, resource_id, status, ip_address, user_agent, created_at</td><td>RBI compliance audit trail (consent, data access, admin actions)</td></tr>
+      <tr><td>schema_migrations</td><td>version, name, applied_at</td><td>Database migration tracking</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Key Relationships</h3>
+  <pre>users ──&lt; businesses ──&lt; transactions &gt;── categories
+users ──&lt; sessions
+users ──&lt; subscriptions
+users ──&lt; password_resets
+users ──&lt; notifications
+users ──&lt; support_tickets
+users ──&lt; bank_connections ──&lt; bank_transactions &gt;── categories
+                                      └──&gt; linked_transaction_id ──&gt; transactions
+users ──&lt; recurring_transactions &gt;── categories
+users ──&lt; audit_logs</pre>
+</div>
+
+<!-- SECTION 6 -->
+<div class="section page-break">
+  <div class="section-header">
+    <div class="section-num">6</div>
+    <div>
+      <div class="section-title">API Reference</div>
+      <div class="section-desc">55+ REST endpoints across all modules</div>
+    </div>
+  </div>
+
+  <h3>Authentication</h3>
+  <table>
+    <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>POST</td><td>/api/auth/register</td><td>Public</td><td>Create new user account</td></tr>
+      <tr><td>POST</td><td>/api/auth/login</td><td>Public</td><td>Login → JWT session token (7 days)</td></tr>
+      <tr><td>GET</td><td>/api/auth/me</td><td>Bearer</td><td>Get logged-in user profile</td></tr>
+      <tr><td>POST</td><td>/api/auth/forgot-password</td><td>Public</td><td>Send password reset email via Resend</td></tr>
+      <tr><td>POST</td><td>/api/auth/reset-password</td><td>Public</td><td>Set new password using reset token</td></tr>
+      <tr><td>GET</td><td>/api/auth/verify-email</td><td>Public</td><td>Confirm email address via token</td></tr>
+      <tr><td>POST</td><td>/api/auth/demo</td><td>Public</td><td>Instant demo login</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Transactions</h3>
+  <table>
+    <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>GET</td><td>/api/transactions</td><td>Bearer</td><td>List with search, filter, sort, pagination</td></tr>
+      <tr><td>POST</td><td>/api/transactions</td><td>Bearer</td><td>Create new transaction</td></tr>
+      <tr><td>PUT</td><td>/api/transactions/:id</td><td>Bearer</td><td>Update transaction</td></tr>
+      <tr><td>DELETE</td><td>/api/transactions/:id</td><td>Bearer</td><td>Delete transaction (soft delete)</td></tr>
+      <tr><td>POST</td><td>/api/transactions/bulk</td><td>Bearer</td><td>Bulk create from CSV import</td></tr>
+      <tr><td>PUT</td><td>/api/transactions/bulk</td><td>Bearer</td><td>Bulk update category</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Recurring Transactions</h3>
+  <table>
+    <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>GET</td><td>/api/recurring</td><td>Bearer</td><td>List recurring transaction schedules</td></tr>
+      <tr><td>POST</td><td>/api/recurring</td><td>Bearer</td><td>Create a recurring schedule</td></tr>
+      <tr><td>PATCH</td><td>/api/recurring/:id</td><td>Bearer</td><td>Update / pause / resume a schedule</td></tr>
+      <tr><td>DELETE</td><td>/api/recurring/:id</td><td>Bearer</td><td>Delete a schedule</td></tr>
+      <tr><td>GET</td><td>/api/cron/process-recurring</td><td>Cron secret</td><td>Generate due transactions from active schedules</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Bank Sync — Setu Account Aggregator (Pro & Premium)</h3>
+  <table>
+    <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>POST</td><td>/api/bank/create-consent</td><td>Bearer</td><td>Start AA consent flow with Setu</td></tr>
+      <tr><td>GET</td><td>/api/bank/consent-status</td><td>Bearer</td><td>Poll consent approval status</td></tr>
+      <tr><td>GET</td><td>/api/bank/connections</td><td>Bearer</td><td>List linked bank connections</td></tr>
+      <tr><td>DELETE</td><td>/api/bank/connections</td><td>Bearer</td><td>Revoke / remove a connection</td></tr>
+      <tr><td>POST</td><td>/api/bank/sync</td><td>Bearer</td><td>Fetch latest statement from the FIP</td></tr>
+      <tr><td>GET</td><td>/api/bank/sync-status</td><td>Bearer</td><td>Poll sync progress / result</td></tr>
+      <tr><td>GET</td><td>/api/bank/transactions</td><td>Bearer</td><td>List fetched bank transactions</td></tr>
+      <tr><td>POST</td><td>/api/bank/categorise</td><td>Bearer</td><td>AI-categorise uncategorised bank transactions</td></tr>
+      <tr><td>POST</td><td>/api/bank/setu-webhook</td><td>Signature</td><td>Setu AA notification webhook (consent/data events)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>User Profile</h3>
+  <table>
+    <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>GET</td><td>/api/user/profile</td><td>Bearer</td><td>Get name, email, account info</td></tr>
+      <tr><td>PUT</td><td>/api/user/profile</td><td>Bearer</td><td>Update name / email / password</td></tr>
+      <tr><td>POST</td><td>/api/user/delete-account</td><td>Bearer</td><td>Permanently delete account and all data</td></tr>
+      <tr><td>GET</td><td>/api/user/plan</td><td>Bearer</td><td>Current plan + expiry date</td></tr>
+      <tr><td>GET</td><td>/api/user/notifications</td><td>Bearer</td><td>In-app notifications</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Dashboard & Analytics</h3>
+  <table>
+    <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>GET</td><td>/api/dashboard</td><td>Total balance, monthly income, monthly expense, savings rate</td></tr>
+      <tr><td>GET</td><td>/api/charts</td><td>Daily cashflow bar data + category spending breakdown</td></tr>
+      <tr><td>GET</td><td>/api/overall</td><td>Cross-business combined totals</td></tr>
+      <tr><td>GET</td><td>/api/export</td><td>Download transactions as CSV or JSON</td></tr>
+      <tr><td>POST</td><td>/api/ai-recommendations</td><td>Claude AI investment advice</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Payments</h3>
+  <table>
+    <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>POST</td><td>/api/payments/create-order</td><td>Create Razorpay order for plan upgrade</td></tr>
+      <tr><td>POST</td><td>/api/payments/verify</td><td>Verify HMAC signature + activate plan + send email</td></tr>
+      <tr><td>POST</td><td>/api/payments/webhook</td><td>Handle: payment.captured, subscription.charged, subscription.cancelled</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SECTION 7 -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">7</div>
+    <div>
+      <div class="section-title">Features by Page</div>
+      <div class="section-desc">What each page does</div>
+    </div>
+  </div>
+
+  <h3>Dashboard — Main</h3>
+  <ul class="checklist">
+    <li>Welcome panel: business name, quick search, export button, add transaction</li>
+    <li>4 stat cards: Total Balance, Monthly Income, Monthly Expense, Savings Rate (equal height)</li>
+    <li>Cash flow bar chart (last 7 or 30 days toggle)</li>
+    <li>Spending split donut chart with category breakdown</li>
+    <li>Recent transactions as compact cards (mobile) or table (desktop)</li>
+  </ul>
+
+  <h3>Transactions</h3>
+  <ul class="checklist">
+    <li>Full list with search, filter (type, category, date range), sort, pagination (20 per page)</li>
+    <li>Add / Edit / Delete via slide-up modal</li>
+    <li>Bulk select → bulk delete or bulk category change</li>
+    <li>Export as CSV or JSON download</li>
+    <li>Import from CSV (bulk create)</li>
+    <li>OCR receipt scanner via Tesseract.js (Premium plan only)</li>
+    <li>Mobile: compact card list — date, note, category, method, amount, edit/delete</li>
+    <li>Desktop: full table with all columns</li>
+  </ul>
+
+  <h3>Bank Sync — Pro & Premium</h3>
+  <ul class="checklist">
+    <li>Connect bank accounts via Setu Account Aggregator (RBI-regulated consent flow)</li>
+    <li>BankSyncCard shows connection status, masked account number, last sync time</li>
+    <li>Manual "Sync now" trigger with sync progress polling</li>
+    <li>Fetched transactions list with AI-suggested categories and confidence scores</li>
+    <li>Confirm/edit category, link to existing manual transaction, or ignore/flag duplicate</li>
+    <li>/dashboard/bank/status handles the redirect back from Setu consent approval</li>
+    <li>All consent and data-fetch events written to the RBI compliance audit trail</li>
+  </ul>
+
+  <h3>Recurring Transactions</h3>
+  <ul class="checklist">
+    <li>Create scheduled transaction templates — daily, weekly, monthly, or yearly with custom interval</li>
+    <li>Set start date, optional end date, and day-of-week / day-of-month / month-of-year rules</li>
+    <li>Pause, resume, edit, or delete a schedule</li>
+    <li>Shows next run date and total transactions generated so far</li>
+    <li>Background cron (/api/cron/process-recurring) auto-creates due transactions</li>
+  </ul>
+
+  <h3>Profile</h3>
+  <ul class="checklist">
+    <li>View and edit display name and email</li>
+    <li>Change password</li>
+    <li>Permanently delete account and all associated data, with confirmation</li>
+  </ul>
+
+  <h3>AI Advisor</h3>
+  <ul class="checklist">
+    <li>Powered by Anthropic Claude API</li>
+    <li>Natural language financial questions</li>
+    <li>Investment recommendations: SIP, Digital Gold, PPF, FD</li>
+    <li>Personalized based on user income and savings</li>
+    <li>Premium plan required for full access</li>
+  </ul>
+
+  <h3>Admin Panel</h3>
+  <ul class="checklist">
+    <li>Platform KPIs: total users, revenue, transactions, pending features</li>
+    <li>Plan distribution: Free / Pro / Premium user counts</li>
+    <li>Renewal alerts: subscriptions expiring in next 7 days</li>
+    <li>Recent user registrations table</li>
+    <li>Change admin password widget (bcrypt)</li>
+    <li>User management: view, edit, deactivate</li>
+    <li>Broadcast messaging to all users</li>
+  </ul>
+</div>
+
+<!-- SECTION 8 -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">8</div>
+    <div>
+      <div class="section-title">Pricing Plans</div>
+      <div class="section-desc">Three tier plan system with Razorpay integration</div>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>Feature</th><th>Free — ₹0</th><th>Pro — ₹199/mo</th><th>Premium — ₹499/mo</th></tr></thead>
+    <tbody>
+      <tr><td>Businesses</td><td>1</td><td>3</td><td>Unlimited</td></tr>
+      <tr><td>Transactions</td><td>✓</td><td>✓</td><td>✓</td></tr>
+      <tr><td>Dashboard</td><td>Basic</td><td>Full</td><td>Full</td></tr>
+      <tr><td>Categories</td><td>View only</td><td>Edit</td><td>Edit</td></tr>
+      <tr><td>Reports & Analytics</td><td>✗</td><td>✓</td><td>✓</td></tr>
+      <tr><td>Receivables</td><td>✗</td><td>✓</td><td>✓</td></tr>
+      <tr><td>Bank Sync (Setu AA)</td><td>✗</td><td>✓</td><td>✓</td></tr>
+      <tr><td>Export CSV</td><td>✗</td><td>✓</td><td>✓</td></tr>
+      <tr><td>Export JSON</td><td>✗</td><td>✗</td><td>✓</td></tr>
+      <tr><td>AI Investment Advisor</td><td>✗</td><td>✗</td><td>✓</td></tr>
+      <tr><td>OCR Receipt Scanner</td><td>✗</td><td>✗</td><td>✓</td></tr>
+      <tr><td>Priority Support</td><td>✗</td><td>✗</td><td>✓</td></tr>
+    </tbody>
+  </table>
+
+  <div class="highlight-box">
+    <p><strong>Annual billing:</strong> Pro Annual = ₹1,788 (save ₹600) · Premium Annual = ₹3,588 (save ₹2,400)</p>
+  </div>
+</div>
+
+<!-- SECTION 9 -->
+<div class="section page-break">
+  <div class="section-header">
+    <div class="section-num">9</div>
+    <div>
+      <div class="section-title">Mobile App</div>
+      <div class="section-desc">iOS and Android via Capacitor WebView</div>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="info-card">
+      <div class="card-label">iOS</div>
+      <div class="card-value">App Store (In Review)</div>
+      <div class="card-desc">Bundle ID: in.moneylix.app · Built via Codemagic CI/CD · TestFlight Build #5 approved</div>
+    </div>
+    <div class="info-card">
+      <div class="card-label">Android</div>
+      <div class="card-value">Play Store (Pending)</div>
+      <div class="card-desc">APK signed with moneylix.jks · Password: MoneyLix@1152 · Ready to upload</div>
+    </div>
+  </div>
+
+  <h3>Native Detection Logic</h3>
+  <pre>const cap = (window as any).Capacitor
+const isNative = cap?.isNativePlatform?.()
+
+// Landing page: skip marketing, go to login
+if (isNative) {
+  const isLoggedIn = !!localStorage.getItem('moneylix_auth')
+  window.location.replace(isLoggedIn ? '/dashboard' : '/auth/login')
+}</pre>
+
+  <h3>Mobile-Only UI Features</h3>
+  <ul class="checklist">
+    <li>Bottom navigation bar — 5 tabs: Home, Transactions, Bank, AI, Settings</li>
+    <li>Center FAB (+) button routes to Add Transaction</li>
+    <li>App header: Logo + Business Switcher + Notification Bell + Avatar (AB)</li>
+    <li>Backdrop blur overlay when business switcher opens</li>
+    <li>Safe area handling for iPhone notch: <code>env(safe-area-inset-top, 50px)</code></li>
+    <li>Compact card layout for transactions — no horizontal scroll</li>
+    <li>App opens directly to login — skips marketing landing page</li>
+  </ul>
+
+  <h3>iOS Build Process (No Mac Required)</h3>
+  <ul class="checklist">
+    <li>Codemagic cloud CI/CD — free 500 min/month</li>
+    <li>Certificate: Apple Distribution (.p12) generated via OpenSSL on Windows</li>
+    <li>Provisioning Profile: App Store distribution linked to certificate</li>
+    <li>Private key stored as base64 in Codemagic environment group "moneylix"</li>
+    <li>Upload to TestFlight via <code>app-store-connect publish</code> CLI</li>
+  </ul>
+</div>
+
+<!-- SECTION 10 -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">10</div>
+    <div>
+      <div class="section-title">Server & Deployment</div>
+      <div class="section-desc">Infrastructure and deploy process</div>
+    </div>
+  </div>
+
+  <h3>Server Details</h3>
+  <table>
+    <thead><tr><th>Property</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>Proxmox Panel</td><td>https://192.168.86.110:8006</td></tr>
+      <tr><td>VM ID</td><td>104 — abishek-ubuntu1</td></tr>
+      <tr><td>OS</td><td>Ubuntu 22.04 LTS</td></tr>
+      <tr><td>CPU / RAM / Disk</td><td>4 vCPUs / 4 GB / 200 GB</td></tr>
+      <tr><td>Private IP</td><td>192.168.86.245</td></tr>
+      <tr><td>Public IP</td><td>172.91.220.192</td></tr>
+      <tr><td>SSH User</td><td>moneyflow</td></tr>
+      <tr><td>App Path</td><td>/home/moneyflow/moneylix</td></tr>
+      <tr><td>Database</td><td>/home/moneyflow/moneylix/moneylix.db</td></tr>
+      <tr><td>PM2 Process</td><td>moneylix (id: 0, port: 3006)</td></tr>
+      <tr><td>SSL Expiry</td><td>2026-08-06</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Deploy Command</h3>
+  <pre>cd /home/moneyflow/moneylix && git pull && npm run build && pm2 restart moneylix</pre>
+
+  <h3>Useful PM2 Commands</h3>
+  <pre>pm2 status              # view all running processes
+pm2 restart moneylix    # restart the app
+pm2 logs moneylix       # view live logs
+pm2 logs moneylix --lines 100   # view last 100 log lines
+pm2 save                # save current process list</pre>
+</div>
+
+<!-- SECTION 11 -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">11</div>
+    <div>
+      <div class="section-title">Email System</div>
+      <div class="section-desc">All transactional emails via Resend</div>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>Email</th><th>Trigger</th><th>Content</th></tr></thead>
+    <tbody>
+      <tr><td>Welcome</td><td>On register</td><td>Account created confirmation + getting started</td></tr>
+      <tr><td>Email Verification</td><td>On register</td><td>Verify email link (expires 24 hours)</td></tr>
+      <tr><td>Password Reset</td><td>Forgot password</td><td>Secure reset link (expires 1 hour)</td></tr>
+      <tr><td>Plan Upgrade</td><td>Payment verified</td><td>Plan name + next billing date</td></tr>
+      <tr><td>Weekly Recap</td><td>Cron (weekly)</td><td>Income, total spend, pending receivables summary</td></tr>
+    </tbody>
+  </table>
+
+  <div class="highlight-box">
+    <p><strong>From address:</strong> Moneylix &lt;noreply@moneylix.in&gt; — requires Resend API key in server <code>.env.local</code></p>
+  </div>
+</div>
+
+<!-- SECTION 12 -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">12</div>
+    <div>
+      <div class="section-title">Security</div>
+      <div class="section-desc">How the application is secured</div>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>Area</th><th>Implementation</th></tr></thead>
+    <tbody>
+      <tr><td>Passwords</td><td>bcrypt hashing with cost factor 12</td></tr>
+      <tr><td>Admin Passwords</td><td>bcrypt with auto-migration from legacy base64</td></tr>
+      <tr><td>Sessions</td><td>JWT tokens stored in localStorage, 7-day expiry</td></tr>
+      <tr><td>API Auth</td><td>Bearer token header required on all private routes</td></tr>
+      <tr><td>Payment Verification</td><td>HMAC-SHA256 signature verification on all Razorpay responses</td></tr>
+      <tr><td>Webhook Verification</td><td>Razorpay X-Razorpay-Signature header checked before processing</td></tr>
+      <tr><td>Rate Limiting</td><td>Upstash Redis per-IP limiting on auth routes</td></tr>
+      <tr><td>Input Validation</td><td>Zod schemas validate all API inputs</td></tr>
+      <tr><td>Data Isolation</td><td>All database queries scoped by user_id — users cannot access others' data</td></tr>
+      <tr><td>HTTPS</td><td>Let's Encrypt SSL on all traffic via Nginx</td></tr>
+      <tr><td>Secrets</td><td>.env.local never committed to Git</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SECTION 13 -->
+<div class="section page-break">
+  <div class="section-header">
+    <div class="section-num">13</div>
+    <div>
+      <div class="section-title">Project Statistics & Pending Work</div>
+      <div class="section-desc">Numbers and what's left to do</div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num">130</div>
+      <div class="stat-label">Source Files</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">55+</div>
+      <div class="stat-label">API Endpoints</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">110</div>
+      <div class="stat-label">Git Commits</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">16</div>
+      <div class="stat-label">DB Tables</div>
+    </div>
+  </div>
+
+  <h3>Immediate Actions Required (Config Only)</h3>
+  <ul class="checklist">
+    <li class="pending">Add Resend API key to server .env.local → email will work</li>
+    <li class="pending">Add Razorpay live keys to server .env.local → live payments</li>
+    <li class="pending">Add Razorpay webhook secret → webhook verification</li>
+    <li class="pending">Change admin default password via /admin panel</li>
+  </ul>
+
+  <h3>App Store Submissions</h3>
+  <ul class="checklist">
+    <li class="pending">Complete iOS App Store listing (description, keywords, screenshots) → submit</li>
+    <li class="pending">Upload Android APK to Google Play Store → fill listing → submit</li>
+  </ul>
+
+  <h3>Recently Completed (since June 1)</h3>
+  <ul class="checklist">
+    <li>User profile page — change name, email, password, delete account (/dashboard/profile)</li>
+    <li>Recurring/scheduled transactions with cron-based auto-generation (/dashboard/recurring)</li>
+    <li>Bank auto-import via Setu Account Aggregator — Pro+ feature (/dashboard/bank)</li>
+    <li>RBI compliance audit logging (audit_logs table + lib/audit.ts)</li>
+    <li>Cookie consent banner + cookie policy page</li>
+    <li>Async DB layer (db.async.ts) with PostgreSQL layer prepped (db.postgres.ts)</li>
+  </ul>
+
+  <h3>Future Development</h3>
+  <ul class="checklist">
+    <li class="pending">Push notifications — receivable due date reminders</li>
+    <li class="pending">PDF export for reports</li>
+    <li class="pending">Multi-currency conversion</li>
+    <li class="pending">Tax / GST calculation module</li>
+    <li class="pending">Cut over from db.async.ts (SQLite) to db.postgres.ts (PostgreSQL) when ready</li>
+  </ul>
+</div>
+
+</div>
+
+<!-- FOOTER -->
+<div style="background: #0f172a; color: #475569; text-align: center; padding: 40px; font-size: 12px; font-weight: 500; letter-spacing: 1px;">
+  MONEYLIX PROJECT DOCUMENTATION v1.1 &nbsp;·&nbsp; UPDATED 2026-06-08 &nbsp;·&nbsp; BUILT BY ABISHEK ELUMALAI &nbsp;·&nbsp; MONEYLIX.IN
+</div>
+
+<script>
+  // Print button — remove after use
+  const btn = document.createElement('button')
+  btn.textContent = '🖨️ Save as PDF (Ctrl+P)'
+  btn.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#10b981;color:white;border:none;padding:12px 20px;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;z-index:9999;box-shadow:0 4px 20px rgba(16,185,129,0.4);'
+  btn.onclick = () => window.print()
+  document.body.appendChild(btn)
+</script>
+
+</body>
+</html>

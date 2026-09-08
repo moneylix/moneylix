@@ -1,0 +1,53 @@
+workflows:
+  ios-workflow:
+    name: Moneylix iOS
+    max_build_duration: 60
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: in.moneylix.app
+      groups:
+        - moneylix
+      vars:
+        XCODE_PROJECT: "ios/App/App.xcodeproj"
+        XCODE_SCHEME: "App"
+        BUNDLE_ID: "in.moneylix.app"
+      node: latest
+    scripts:
+      - name: Install Capacitor dependencies
+        script: |
+          npm install --ignore-scripts
+          npm install @capacitor/ios @capacitor/core @capacitor/cli @capacitor/app @capacitor/splash-screen @capacitor/status-bar
+      - name: Capacitor sync
+        script: npx cap sync ios
+      - name: Set up code signing
+        script: |
+          keychain initialize
+          keychain add-certificates
+          xcode-project use-profiles
+      - name: Build iOS
+        script: |
+          xcode-project build-ipa \
+            --project "$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+      - name: Upload to TestFlight
+        script: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$APP_STORE_CONNECT_PRIVATE_KEY" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_2MD2Y9SU32.p8
+          app-store-connect publish \
+            --path "$(find build/ios/ipa -name '*.ipa')" \
+            --issuer-id "f2960eae-91ee-4282-b29c-0f795d8f1315" \
+            --key-id "2MD2Y9SU32" \
+            --private-key "@file:$HOME/.appstoreconnect/private_keys/AuthKey_2MD2Y9SU32.p8" \
+            --testflight \
+            --beta-build-localizations "[{\"locale\": \"en-US\", \"whats_new\": \"Initial beta release of Moneylix - Smart Finance Management for freelancers and small businesses.\"}]"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      email:
+        recipients:
+          - abi.tvm02@gmail.com
+        notify:
+          success: true
+          failure: true

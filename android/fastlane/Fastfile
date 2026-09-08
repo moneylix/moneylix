@@ -1,0 +1,413 @@
+# ============================================================================
+# Fastlane Configuration for Moneylix Android Build & Deployment
+# ============================================================================
+# This Fastfile automates Android build and Play Store deployment tasks.
+#
+# Installation:
+#   sudo gem install fastlane
+#   cd android
+#   fastlane init
+#
+# Usage:
+#   fastlane android build_release           # Build release AAB
+#   fastlane android upload_internal         # Upload to internal testing
+#   fastlane android upload_beta             # Upload to beta track
+#   fastlane android upload_production       # Upload to production
+#   fastlane android screenshots             # Capture screenshots
+# ============================================================================
+
+default_platform(:android)
+
+platform :android do
+
+  # ===========================================================================
+  # Lane: build_release
+  # Purpose: Build a signed Android App Bundle (AAB) for Play Store
+  # ===========================================================================
+  desc "Build a signed release Android App Bundle (AAB)"
+  lane :build_release do
+    puts("╔════════════════════════════════════════════════╗")
+    puts("║  Building Moneylix Release AAB                 ║")
+    puts("╚════════════════════════════════════════════════╝")
+
+    # Clean previous builds
+    sh("cd .. && ./gradlew clean")
+    puts("✓ Gradle clean completed")
+
+    # Build the release bundle
+    # Note: Signing configuration should be in app/build.gradle or gradle.properties
+    gradle(
+      task: "bundleRelease",
+      project_dir: "../",
+      flags: "-x test -Dorg.gradle.jvmargs='-Xmx4096m'"
+    )
+    puts("✓ Release bundle built successfully")
+
+    # Locate the built AAB
+    aab_path = lane_context[SharedValues::GRADLE_BUILD_PATH]
+    puts("✓ AAB location: #{aab_path}")
+
+    # Store path for later lanes
+    lane_context[:aab_path] = aab_path
+
+    build_summary(
+      platform: "Android",
+      build_type: "Release (AAB)",
+      output_path: aab_path
+    )
+  end
+
+  # ===========================================================================
+  # Lane: upload_internal
+  # Purpose: Upload AAB to Google Play internal testing track
+  # ===========================================================================
+  desc "Upload to Play Store Internal Testing track"
+  lane :upload_internal do
+    puts("╔════════════════════════════════════════════════╗")
+    puts("║  Uploading to Internal Testing Track           ║")
+    puts("╚════════════════════════════════════════════════╝")
+
+    # Build release if not already built
+    build_release unless lane_context[:aab_path]
+    aab_path = lane_context[:aab_path]
+
+    validate_credentials
+    puts("✓ Credentials validated")
+
+    # Upload to Play Store
+    upload_to_play_store(
+      track: "internal",
+      aab: aab_path,
+      skip_upload_metadata: false,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: false,
+      validate_only: false
+    )
+
+    puts("✓ Successfully uploaded to Internal Testing track")
+
+    # Send notification
+    deliver_summary(
+      track: "internal",
+      version: get_app_version
+    )
+  end
+
+  # ===========================================================================
+  # Lane: upload_beta
+  # Purpose: Upload AAB to Google Play beta (staging) track
+  # ===========================================================================
+  desc "Upload to Play Store Beta track"
+  lane :upload_beta do
+    puts("╔════════════════════════════════════════════════╗")
+    puts("║  Uploading to Beta Track                       ║")
+    puts("╚════════════════════════════════════════════════╝")
+
+    build_release unless lane_context[:aab_path]
+    aab_path = lane_context[:aab_path]
+
+    validate_credentials
+    puts("✓ Credentials validated")
+
+    upload_to_play_store(
+      track: "beta",
+      aab: aab_path,
+      skip_upload_metadata: false,
+      skip_upload_images: false,
+      skip_upload_screenshots: false,
+      skip_upload_changelogs: false,
+      validate_only: false
+    )
+
+    puts("✓ Successfully uploaded to Beta track")
+
+    deliver_summary(
+      track: "beta",
+      version: get_app_version
+    )
+  end
+
+  # ===========================================================================
+  # Lane: upload_production
+  # Purpose: Upload AAB to Google Play production (live) track
+  # ===========================================================================
+  desc "Upload to Play Store Production (Live)"
+  lane :upload_production do
+    puts("╔════════════════════════════════════════════════╗")
+    puts("║  ⚠️  UPLOADING TO PRODUCTION (LIVE)             ║")
+    puts("╚════════════════════════════════════════════════╝")
+
+    # Confirmation check
+    if is_ci == false
+      UI.important("About to upload to PRODUCTION!")
+      UI.important("Version: #{get_app_version}")
+
+      unless UI.confirm("Are you absolutely sure you want to deploy to PRODUCTION?")
+        UI.error("Production upload cancelled by user")
+        return
+      end
+    end
+
+    build_release unless lane_context[:aab_path]
+    aab_path = lane_context[:aab_path]
+
+    validate_credentials
+    puts("✓ Credentials validated")
+
+    upload_to_play_store(
+      track: "production",
+      aab: aab_path,
+      skip_upload_metadata: false,
+      skip_upload_images: false,
+      skip_upload_screenshots: false,
+      skip_upload_changelogs: false,
+      validate_only: false
+    )
+
+    puts("✓ Successfully uploaded to Production track")
+
+    deliver_summary(
+      track: "production",
+      version: get_app_version
+    )
+  end
+
+  # ===========================================================================
+  # Lane: validate_build
+  # Purpose: Validate the build without uploading
+  # ===========================================================================
+  desc "Validate build and credentials without uploading"
+  lane :validate_build do
+    puts("╔════════════════════════════════════════════════╗")
+    puts("║  Validating Build Configuration               ║")
+    puts("╚════════════════════════════════════════════════╝")
+
+    build_release unless lane_context[:aab_path]
+    aab_path = lane_context[:aab_path]
+
+    puts("✓ AAB file: #{aab_path}")
+    puts("✓ AAB exists: #{File.exist?(aab_path)}")
+    puts("✓ AAB size: #{File.size(aab_path) / 1024 / 1024}MB")
+
+    validate_credentials
+    puts("✓ All validations passed!")
+  end
+
+  # ===========================================================================
+  # Lane: screenshots
+  # Purpose: Capture screenshots for Play Store listing
+  # ===========================================================================
+  desc "Capture screenshots for Play Store listing"
+  lane :screenshots do
+    puts("╔════════════════════════════════════════════════╗")
+    puts("║  Capturing Screenshots                         ║")
+    puts("╚════════════════════════════════════════════════╝")
+
+    # This lane uses capture_screenshots from fastlane
+    # Configuration should be in fastlane/Fastfile or metadata/
+    capture_screenshots(
+      workspace: "./",
+      scheme: "moneylix",
+      output_directory: "fastlane/screenshots",
+      clear_previous_screenshots: false,
+      app_identifier: "com.moneylix.app"
+    )
+
+    puts("✓ Screenshots captured successfully")
+  end
+
+  # ===========================================================================
+  # Helper Lane: validate_credentials
+  # Purpose: Validate Play Store credentials and connection
+  # ===========================================================================
+  private_lane :validate_credentials do
+    puts("Validating Play Store credentials...")
+
+    # Check if supply (Play Store API key) is configured
+    unless File.exist?("../fastlane/metadata/")
+      UI.error("Fastlane metadata directory not found")
+      UI.error("Please run: fastlane supply init")
+      raise "Fastlane not properly configured"
+    end
+
+    # Validate key file exists
+    json_key_file = Dir.glob("../fastlane/metadata/**.json").first
+    unless json_key_file
+      UI.error("Google Play API key file not found")
+      UI.error("Please place your service account JSON key in fastlane/metadata/")
+      raise "Play Store credentials not configured"
+    end
+
+    puts("✓ Credentials file found: #{json_key_file}")
+  end
+
+  # ===========================================================================
+  # Helper Lane: build_summary
+  # Purpose: Print detailed build summary
+  # ===========================================================================
+  private_lane :build_summary do |options|
+    platform = options[:platform]
+    build_type = options[:build_type]
+    output_path = options[:output_path]
+
+    summary = "\n" + "═" * 50 + "\n"
+    summary += "BUILD SUMMARY\n"
+    summary += "═" * 50 + "\n"
+    summary += "Platform: #{platform}\n"
+    summary += "Build Type: #{build_type}\n"
+    summary += "Output: #{output_path}\n"
+    summary += "Size: #{File.size(output_path) / 1024 / 1024}MB\n"
+    summary += "Time: #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}\n"
+    summary += "═" * 50 + "\n"
+
+    puts(summary)
+  end
+
+  # ===========================================================================
+  # Helper Lane: deliver_summary
+  # Purpose: Print deployment summary
+  # ===========================================================================
+  private_lane :deliver_summary do |options|
+    track = options[:track]
+    version = options[:version]
+
+    summary = "\n" + "═" * 50 + "\n"
+    summary += "DEPLOYMENT SUMMARY\n"
+    summary += "═" * 50 + "\n"
+    summary += "App: Moneylix\n"
+    summary += "Version: #{version}\n"
+    summary += "Track: #{track.upcase}\n"
+    summary += "Status: ✓ DEPLOYED SUCCESSFULLY\n"
+    summary += "Time: #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}\n"
+    summary += "═" * 50 + "\n"
+
+    puts(summary)
+  end
+
+  # ===========================================================================
+  # Helper Lane: get_app_version
+  # Purpose: Extract version from build.gradle
+  # ===========================================================================
+  private_lane :get_app_version do
+    build_gradle_path = "../app/build.gradle"
+
+    unless File.exist?(build_gradle_path)
+      return "unknown"
+    end
+
+    content = File.read(build_gradle_path)
+    match = content.match(/versionName\s*=\s*['"]([\d.]+)['"]/)
+
+    match ? match[1] : "unknown"
+  end
+
+end
+
+# ===========================================================================
+# Error Handling
+# ===========================================================================
+
+error do |lane, exception|
+  puts("\n" + "✗" * 50)
+  puts("✗ FASTLANE ERROR")
+  puts("✗" * 50)
+  puts("Lane: #{lane}")
+  puts("Error: #{exception.message}")
+  puts("✗" * 50)
+end
+
+# ===========================================================================
+# Configuration Notes
+# ===========================================================================
+#
+# SETUP INSTRUCTIONS:
+#
+# 1. Initialize Fastlane:
+#    $ cd android
+#    $ fastlane init
+#
+# 2. Configure Google Play API:
+#    $ fastlane supply init
+#    This creates metadata directory and stores your credentials
+#
+# 3. Obtain Google Play Service Account Key:
+#    - Go to: https://play.google.com/console/
+#    - Settings > API access > Create Service Account
+#    - Download the JSON key
+#    - Place in: android/fastlane/metadata/
+#    - Keep this file SECURE and DO NOT commit to git
+#
+# 4. Configure signing in app/build.gradle:
+#    signingConfigs {
+#        release {
+#            storeFile file(KEYSTORE_PATH)
+#            storePassword KEYSTORE_PASSWORD
+#            keyAlias KEYSTORE_ALIAS
+#            keyPassword KEY_PASSWORD
+#        }
+#    }
+#
+# 5. Set environment variables:
+#    export KEYSTORE_PASSWORD="your_keystore_password"
+#    export KEY_PASSWORD="your_key_password"
+#    export GRADLE_OPTS="-Xmx2048m"
+#
+# 6. Alternative: Use gradle.properties:
+#    android/gradle.properties or ~/.gradle/gradle.properties
+#    android.useAndroidX=true
+#    org.gradle.jvmargs=-Xmx2048m
+#
+# LANE WORKFLOWS:
+#
+# Internal Testing (for QA):
+#    $ fastlane android upload_internal
+#
+# Beta/Staging:
+#    $ fastlane android upload_beta
+#
+# Production:
+#    $ fastlane android upload_production
+#
+# Full Workflow:
+#    $ fastlane android build_release upload_internal
+#
+# SECURITY BEST PRACTICES:
+#
+# 1. NEVER commit sensitive data:
+#    - moneylix.jks keystore file
+#    - Service account JSON keys
+#    - Passwords or environment variables
+#
+# 2. Add to .gitignore:
+#    fastlane/metadata/
+#    *.jks
+#    *.p12
+#    *.keystore
+#
+# 3. Store credentials in:
+#    - CI/CD environment variables
+#    - Secure secret management (e.g., Vault, Secrets Manager)
+#    - Local .env files (not committed)
+#
+# 4. Rotate credentials regularly
+#
+# TROUBLESHOOTING:
+#
+# Build failures:
+#   - Check Java version: java -version (should be 11+)
+#   - Verify Android SDK: $ANDROID_HOME/tools/bin/sdkmanager --list
+#   - Clear cache: ./gradlew clean
+#
+# Play Store upload failures:
+#   - Verify API key has correct permissions
+#   - Check app has been created in Play Console
+#   - Ensure AAB is properly signed
+#   - Check Play Console for validation errors
+#
+# Credential issues:
+#   - Regenerate service account key
+#   - Update environment variables
+#   - Test with: fastlane android validate_build
+#
+# ===========================================================================

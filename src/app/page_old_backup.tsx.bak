@@ -1,0 +1,1091 @@
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { motion, useReducedMotion } from 'framer-motion'
+import { useCountUp } from '@/lib/hooks/useCountUp'
+
+function RevealWords({ text, reducedMotion, startDelay = 0 }: { text: string; reducedMotion: boolean; startDelay?: number }) {
+  const words = text.split(' ')
+  return (
+    <>
+      {words.map((word, i) => (
+        <motion.span
+          key={i}
+          initial={reducedMotion ? undefined : { opacity: 0, filter: 'blur(16px)', y: 14 }}
+          animate={reducedMotion ? undefined : { opacity: 1, filter: 'blur(0px)', y: 0 }}
+          transition={{ duration: 0.65, delay: startDelay + i * 0.13, ease: [0.22, 1, 0.36, 1] }}
+          className="inline-block"
+        >
+          {word}{i < words.length - 1 ? ' ' : ''}
+        </motion.span>
+      ))}
+    </>
+  )
+}
+
+import {
+  Wallet, Receipt, BarChart3, Sparkles, TrendingUp, Brain,
+  Shield, Lock, CheckCircle, Globe, ArrowRight, Star, Zap,
+  Crown, Check, Menu, X, ChevronRight, Users, Building2,
+  PieChart, Banknote, Bell, FileText, Mail, MessageCircle,
+  MapPin, Instagram, Linkedin, Twitter, Phone
+} from 'lucide-react'
+
+const stats = [
+  { value: '25+', label: 'Built-in Features' },
+  { value: '3', label: 'Languages (EN/TA/HI)' },
+  { value: 'RBI', label: 'Regulated Bank Sync' },
+  { value: '₹0', label: 'To Get Started' },
+]
+
+const featureSections = [
+  {
+    tag: 'Dashboard',
+    title: 'Your finances at a glance',
+    desc: 'See your total balance, income vs expenses, and cash flow trends — all on one clean dashboard. Know exactly where you stand every day.',
+    bullets: ['Real-time balance overview', 'Income vs expense comparison', 'Monthly cash flow chart', 'Multi-business switcher'],
+    color: 'emerald',
+    visual: (
+      <div className="rounded-3xl bg-white border border-white/10 shadow-2xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+          <span className="text-xs font-black text-white">Dashboard</span>
+          <span className="text-[10px] text-slate-500">May 2026</span>
+        </div>
+        <div className="p-5 space-y-4">
+          <div className="rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border border-emerald-500/25 p-4">
+            <p className="text-[10px] text-slate-400">Total Balance</p>
+            <p className="text-2xl font-black text-white mt-1">₹1,45,230</p>
+            <p className="text-[10px] text-emerald-400 font-bold mt-1">↑ +12.5% vs last month</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3">
+              <p className="text-[9px] text-slate-400">Income</p>
+              <p className="text-base font-black text-emerald-400">₹2,35,000</p>
+            </div>
+            <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-3">
+              <p className="text-[9px] text-slate-400">Expenses</p>
+              <p className="text-base font-black text-rose-400">₹89,770</p>
+            </div>
+          </div>
+          <div className="rounded-xl bg-slate-800/50 border border-white/5 p-3">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-[10px] text-white font-bold">Cash Flow</span>
+              <span className="text-[8px] text-slate-500">This Month</span>
+            </div>
+            <div className="flex items-end gap-0.5 h-10">
+              {[30,45,35,60,45,70,55,80,65,75,90,85].map((h,i) => (
+                <div key={i} className="flex-1 rounded-t-sm"
+                  style={{height:`${h}%`, background: i >= 9 ? '#10b981' : 'rgba(16,185,129,0.2)'}} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    tag: 'Bank Sync',
+    title: 'UPI & bank transactions, auto-imported',
+    desc: 'Connect your bank via RBI-regulated Account Aggregator (Setu). Every UPI and bank transaction flows in automatically and AI sorts it into the right category — zero manual entry.',
+    bullets: ['RBI-regulated Account Aggregator (Setu)', 'Automatic UPI & bank import', 'AI auto-categorization', 'Bank reconciliation matching'],
+    color: 'cyan',
+    visual: (
+      <div className="rounded-3xl bg-white border border-white/10 shadow-2xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+          <span className="text-xs font-black text-white">Bank Sync</span>
+          <span className="text-[8px] text-cyan-400 font-bold bg-cyan-500/10 px-2 py-0.5 rounded-full">Setu AA · RBI</span>
+        </div>
+        <div className="p-5 space-y-2.5">
+          {[
+            { label: 'UPI/SWIGGY', ai: 'Food & Dining', amt: '-₹480', conf: '98%' },
+            { label: 'UPI/SALARY-ACME', ai: 'Income', amt: '+₹85,000', conf: '99%' },
+            { label: 'UPI/AMAZON', ai: 'Shopping', amt: '-₹2,340', conf: '95%' },
+            { label: 'NEFT/RENT', ai: 'Housing', amt: '-₹18,000', conf: '92%' },
+          ].map((t, i) => (
+            <div key={i} className="flex items-center gap-3 py-2 border-b border-white/5 last:border-0">
+              <div className="w-2 h-2 rounded-full bg-cyan-500 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-[11px] text-white font-semibold">{t.label}</p>
+                <p className="text-[9px] text-cyan-400">🤖 {t.ai} · {t.conf}</p>
+              </div>
+              <span className={`text-xs font-black ${t.amt.startsWith('+') ? 'text-emerald-400' : 'text-rose-400'}`}>{t.amt}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+  },
+  {
+    tag: 'Transactions',
+    title: 'Every rupee, tracked and categorized',
+    desc: 'Log income and expenses in seconds. Filter by date, category, or business. Export to CSV anytime. Never lose track of a payment again.',
+    bullets: ['Add transactions in one tap', 'Smart category tagging', 'Filter & search instantly', 'Bulk CSV import/export'],
+    color: 'cyan',
+    visual: (
+      <div className="rounded-3xl bg-white border border-white/10 shadow-2xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+          <span className="text-xs font-black text-white">Transactions</span>
+          <span className="text-[10px] text-emerald-400 font-bold">+ Add</span>
+        </div>
+        <div className="p-5 space-y-2.5">
+          {[
+            { label: 'Freelance Project', cat: 'Income', amt: '+₹45,000', color: 'text-emerald-400', dot: 'bg-emerald-500' },
+            { label: 'Office Supplies', cat: 'Expense', amt: '-₹3,200', color: 'text-rose-400', dot: 'bg-rose-500' },
+            { label: 'Client Retainer', cat: 'Income', amt: '+₹30,000', color: 'text-emerald-400', dot: 'bg-emerald-500' },
+            { label: 'Marketing Ads', cat: 'Expense', amt: '-₹8,500', color: 'text-rose-400', dot: 'bg-rose-500' },
+            { label: 'Consulting Fee', cat: 'Income', amt: '+₹20,000', color: 'text-emerald-400', dot: 'bg-emerald-500' },
+          ].map((t, i) => (
+            <div key={i} className="flex items-center gap-3 py-2 border-b border-white/5 last:border-0">
+              <div className={`w-2 h-2 rounded-full ${t.dot} flex-shrink-0`} />
+              <div className="flex-1">
+                <p className="text-[11px] text-white font-semibold">{t.label}</p>
+                <p className="text-[9px] text-slate-500">{t.cat}</p>
+              </div>
+              <span className={`text-xs font-black ${t.color}`}>{t.amt}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+  },
+  {
+    tag: 'Receivables',
+    title: 'Never forget a pending payment',
+    desc: 'Track what clients owe you. Get reminded automatically. Mark as paid when collected. Keep your cash flow healthy without chasing invoices.',
+    bullets: ['Track pending client payments', 'Auto reminders by due date', 'Mark paid with one tap', 'Amount visible in app header'],
+    color: 'amber',
+    visual: (
+      <div className="rounded-3xl bg-white border border-white/10 shadow-2xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+          <span className="text-xs font-black text-white">Receivables</span>
+          <span className="text-[10px] text-amber-400 font-bold">₹75,000 pending</span>
+        </div>
+        <div className="p-5 space-y-3">
+          {[
+            { name: 'Rahul Sharma', due: 'Due Jun 1', amt: '₹25,000', status: 'overdue', statusColor: 'text-rose-400 bg-rose-500/10' },
+            { name: 'Priya Designs', due: 'Due Jun 8', amt: '₹30,000', status: 'pending', statusColor: 'text-amber-400 bg-amber-500/10' },
+            { name: 'StartupXYZ', due: 'Due Jun 15', amt: '₹20,000', status: 'upcoming', statusColor: 'text-slate-400 bg-slate-500/10' },
+          ].map((r, i) => (
+            <div key={i} className="rounded-xl bg-white/5 border border-white/5 p-3 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                <span className="text-[11px] font-black text-amber-400">{r.name[0]}</span>
+              </div>
+              <div className="flex-1">
+                <p className="text-[11px] font-bold text-white">{r.name}</p>
+                <p className="text-[9px] text-slate-500">{r.due}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs font-black text-white">{r.amt}</p>
+                <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full ${r.statusColor}`}>{r.status}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+  },
+  {
+    tag: 'GST & Invoicing',
+    title: 'GST-ready invoices with payment links',
+    desc: 'Create professional invoices with GST breakdown, share a payment link, and get paid via Razorpay. Payments auto-confirm and reconcile — plus CGST/SGST/IGST calculation and tax-ready exports for your CA.',
+    bullets: ['GST-compliant invoices (CGST/SGST/IGST)', 'Razorpay payment links + auto-confirm', 'Client portal share links', 'CA / Tally-ready exports'],
+    color: 'emerald',
+    visual: (
+      <div className="rounded-3xl bg-white border border-white/10 shadow-2xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+          <span className="text-xs font-black text-white">Invoice #INV-0042</span>
+          <span className="text-[8px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full">GST Ready</span>
+        </div>
+        <div className="p-5 space-y-3">
+          <div className="flex justify-between text-[11px]">
+            <span className="text-slate-400">Design Services</span>
+            <span className="text-white font-bold">₹50,000</span>
+          </div>
+          <div className="space-y-1.5 border-t border-white/5 pt-2">
+            {[
+              { label: 'Subtotal', val: '₹50,000' },
+              { label: 'CGST @ 9%', val: '₹4,500' },
+              { label: 'SGST @ 9%', val: '₹4,500' },
+            ].map(r => (
+              <div key={r.label} className="flex justify-between text-[10px]">
+                <span className="text-slate-500">{r.label}</span>
+                <span className="text-slate-300">{r.val}</span>
+              </div>
+            ))}
+            <div className="flex justify-between text-xs font-black border-t border-white/5 pt-2">
+              <span className="text-white">Total</span>
+              <span className="text-emerald-400">₹59,000</span>
+            </div>
+          </div>
+          <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-2.5 text-center">
+            <p className="text-[10px] text-emerald-400 font-bold">💳 Pay via Razorpay link</p>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    tag: 'AI Advisor',
+    title: 'Smart investment advice, powered by AI',
+    desc: 'Get personalized investment recommendations based on your income and savings. Gold, SIP, Fixed Deposits — Gemini AI helps you decide what is right for you.',
+    bullets: ['Powered by Google Gemini AI', 'Personalized to your income', 'SIP, Gold, FD recommendations', 'Natural language finance chat'],
+    color: 'violet',
+    visual: (
+      <div className="rounded-3xl bg-white border border-white/10 shadow-2xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-white/5 flex items-center gap-2">
+          <div className="w-6 h-6 rounded-lg bg-violet-500/20 flex items-center justify-center">
+            <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+          </div>
+          <span className="text-xs font-black text-white">AI Finance Advisor</span>
+          <span className="text-[8px] text-violet-400 font-bold ml-auto bg-violet-500/10 px-2 py-0.5 rounded-full">Gemini AI</span>
+        </div>
+        <div className="p-5 space-y-3">
+          <div className="rounded-xl bg-white/5 border border-white/5 p-3">
+            <p className="text-[10px] text-slate-400">You asked</p>
+            <p className="text-xs text-white mt-1">"I save ₹20,000/month. Where should I invest it?"</p>
+          </div>
+          <div className="rounded-xl bg-violet-500/10 border border-violet-500/20 p-3 space-y-2">
+            <p className="text-[9px] text-violet-400 font-bold">AI Recommendation</p>
+            {[
+              { label: 'Nifty Index SIP', pct: '50%', color: 'bg-violet-500' },
+              { label: 'Digital Gold', pct: '25%', color: 'bg-amber-500' },
+              { label: 'PPF / FD', pct: '25%', color: 'bg-cyan-500' },
+            ].map(r => (
+              <div key={r.label}>
+                <div className="flex justify-between mb-1">
+                  <span className="text-[9px] text-slate-300">{r.label}</span>
+                  <span className="text-[9px] font-bold text-white">{r.pct}</span>
+                </div>
+                <div className="h-1 bg-slate-800 rounded-full">
+                  <div className={`h-full ${r.color} rounded-full`} style={{width: r.pct}} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    ),
+  },
+]
+
+export default function LandingPage() {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const [spotlight, setSpotlight] = useState({ x: 0, y: 0, active: false })
+  const [billingYearly, setBillingYearly] = useState(false)
+  const [openFaq, setOpenFaq] = useState<number | null>(0)
+  const heroRef = useRef<HTMLElement>(null)
+  const reducedMotion = !!useReducedMotion()
+  const balanceCount = useCountUp(145230, reducedMotion, 0.5)
+
+  const handleHeroMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    if (reducedMotion || !heroRef.current) return
+    const rect = heroRef.current.getBoundingClientRect()
+    setSpotlight({ x: e.clientX - rect.left, y: e.clientY - rect.top, active: true })
+  }
+
+  useEffect(() => {
+    // Native Capacitor app: skip marketing page, go straight to login or dashboard
+    const cap = (window as any).Capacitor
+    if (cap?.isNativePlatform?.()) {
+      const isLoggedIn = !!localStorage.getItem('moneylix_auth')
+      window.location.replace(isLoggedIn ? '/dashboard' : '/auth/login')
+      return
+    }
+    const onScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  return (
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden font-sans">
+
+      {/* ── Navbar ── */}
+      <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? 'bg-background/95 backdrop-blur-2xl border-b border-white/8 shadow-2xl' : 'bg-transparent'}`}>
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3">
+            <Image src="/logos/moneylix-mark.svg" alt="Moneylix" width={34} height={34} className="rounded-xl" />
+            <span className="text-lg font-black tracking-tight text-white">moneylix</span>
+          </Link>
+
+          <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-400">
+            <a href="#features" className="hover-underline hover:text-white transition-colors">Features</a>
+            <a href="#pricing" className="hover-underline hover:text-white transition-colors">Pricing</a>
+            <a href="#faq" className="hover-underline hover:text-white transition-colors">FAQ</a>
+            <a href="#security" className="hover-underline hover:text-white transition-colors">Security</a>
+          </div>
+
+          <div className="hidden md:flex items-center gap-3">
+            <Link href="/auth/login" className="text-sm font-bold text-slate-300 hover:text-white px-4 py-2 rounded-xl transition-all">
+              Sign In
+            </Link>
+            <Link href="/auth/register" className="text-sm font-black bg-gradient-to-r from-emerald-400 to-cyan-500 text-slate-950 px-5 py-2.5 rounded-xl hover:opacity-90 transition shadow-lg shadow-emerald-500/25">
+              Get Started Free
+            </Link>
+          </div>
+
+          <button className="md:hidden p-2" onClick={() => setMenuOpen(v => !v)}>
+            {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+
+        {menuOpen && (
+          <div className="md:hidden bg-white border-t border-white/5 px-6 py-4 space-y-3">
+            {[['#features','Features'],['#pricing','Pricing'],['#security','Security']].map(([href, label]) => (
+              <a key={href} href={href} onClick={() => setMenuOpen(false)}
+                className="block text-sm font-semibold text-slate-300 hover:text-white py-2">
+                {label}
+              </a>
+            ))}
+            <Link href="/auth/login" onClick={() => setMenuOpen(false)} className="block text-sm font-bold text-slate-300 py-2">Sign In</Link>
+            <Link href="/auth/register" onClick={() => setMenuOpen(false)}
+              className="block text-sm font-black bg-gradient-to-r from-emerald-400 to-cyan-500 text-slate-950 px-6 py-3 rounded-xl text-center">
+              Get Started Free
+            </Link>
+          </div>
+        )}
+      </nav>
+
+      {/* ── HERO ── */}
+      <section
+        ref={heroRef}
+        onMouseMove={handleHeroMouseMove}
+        onMouseLeave={() => setSpotlight(s => ({ ...s, active: false }))}
+        className="relative min-h-screen flex items-center overflow-hidden"
+      >
+        {/* Background glows */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/4 -left-40 w-[900px] h-[900px] bg-emerald-500/6 rounded-full blur-[180px]" />
+          <div className="absolute bottom-0 right-0 w-[700px] h-[700px] bg-cyan-500/5 rounded-full blur-[160px]" />
+        </div>
+
+        {/* Cursor-reactive spotlight */}
+        {!reducedMotion && (
+          <div
+            className="absolute inset-0 pointer-events-none transition-opacity duration-500"
+            style={{
+              opacity: spotlight.active ? 1 : 0,
+              background: `radial-gradient(560px circle at ${spotlight.x}px ${spotlight.y}px, rgba(16,185,129,0.16), rgba(6,182,212,0.08) 45%, transparent 70%)`,
+              mixBlendMode: 'screen',
+            }}
+          />
+        )}
+
+        <div className="w-full max-w-7xl mx-auto px-6 lg:px-10 pt-20 pb-10 lg:py-16 grid grid-cols-1 lg:grid-cols-[1fr_1.15fr] gap-10 lg:gap-16 items-center">
+
+          {/* Left — text */}
+          <div className="flex flex-col justify-center space-y-8 relative z-10">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold w-fit">
+              <Star className="w-3.5 h-3.5" />
+              Made for Indian Freelancers &amp; SMBs
+            </div>
+
+            <h1 className="text-5xl md:text-6xl lg:text-[4.5rem] xl:text-[5.5rem] font-black leading-[0.9] tracking-tight">
+              <span className="text-white"><RevealWords text="Manage your" reducedMotion={reducedMotion} /></span>
+              <br />
+              <motion.span
+                initial={reducedMotion ? undefined : { opacity: 0, filter: 'blur(16px)', y: 14 }}
+                animate={reducedMotion ? undefined : { opacity: 1, filter: 'blur(0px)', y: 0 }}
+                transition={{ duration: 0.65, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                className="animate-gradient-text bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent inline-block"
+              >
+                money smarter.
+              </motion.span>
+            </h1>
+
+            <p className="text-lg lg:text-xl text-slate-400 leading-relaxed max-w-lg">
+              UPI-native bank sync, AI auto-categorization, GST-ready invoicing, multi-business tracking, and an AI investment advisor — the only India-first finance platform that does it all in one app.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link href="/auth/register"
+                className="ripple relative overflow-hidden flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-500 text-slate-950 font-black text-base shadow-2xl shadow-emerald-500/25 hover:opacity-90 transition-all active:scale-95">
+                Start for Free <ArrowRight className="w-5 h-5" />
+              </Link>
+              <Link href="/auth/login"
+                className="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl border border-white/15 bg-white/5 text-white font-bold text-base hover:bg-white/10 transition-all">
+                Sign In
+              </Link>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-5 text-xs text-slate-500 font-medium">
+              <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> Free forever plan</span>
+              <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> No credit card needed</span>
+              <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-emerald-500" /> SSL secured</span>
+            </div>
+          </div>
+
+          {/* Right — Phone fills the column */}
+          <div className="relative flex items-center justify-center lg:justify-end lg:pr-0">
+            {/* Glow behind phone */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-[420px] h-[420px] bg-emerald-500/8 rounded-full blur-[100px]" />
+            </div>
+
+            {/* Phone frame */}
+            <motion.div
+              initial={reducedMotion ? undefined : { opacity: 0, y: 30, scale: 0.96 }}
+              animate={reducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              className="relative z-10 w-[300px] lg:w-[340px] xl:w-[380px]">
+              <div className="card-3d relative w-full" style={{paddingBottom: '210%'}}>
+                <div className="absolute inset-0 bg-[#0d1321] rounded-[52px] border-[5px] border-slate-600/70 shadow-[0_80px_160px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.06)] overflow-hidden">
+                  {/* Notch */}
+                  <div className="absolute top-0 inset-x-0 h-9 bg-[#0d1321] flex items-center justify-center z-10">
+                    <div className="w-32 h-7 bg-slate-800 rounded-full" />
+                  </div>
+                  {/* Status bar */}
+                  <div className="absolute top-2 inset-x-0 px-6 flex items-center justify-between z-10">
+                    <span className="text-[11px] text-neutral-50 font-bold">9:41</span>
+                    <div className="flex items-center gap-1">
+                      <div className="flex gap-0.5 items-end">
+                        {[3,5,7,9].map(h => <div key={h} className="w-1 bg-white rounded-sm" style={{height:`${h}px`}} />)}
+                      </div>
+                      <div className="w-6 h-3 rounded border border-white/40 p-0.5 ml-1">
+                        <div className="w-full h-full bg-white rounded-sm" />
+                      </div>
+                    </div>
+                  </div>
+                  {/* Screen content */}
+                  <div className="absolute top-9 inset-x-0 bottom-16 bg-background px-5 py-4 space-y-4 overflow-hidden">
+                    <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.15em]">Dashboard</p>
+                    <div className="rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border border-emerald-500/25 p-5">
+                      <p className="text-[10px] text-slate-400">Total Balance</p>
+                      <p className="text-3xl font-black text-white mt-1 tracking-tight tabular-nums">₹{balanceCount.toLocaleString('en-IN')}</p>
+                      <p className="text-[10px] text-emerald-400 font-bold mt-1">↑ +12.5% vs last month</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3">
+                        <p className="text-[9px] text-slate-400">Income</p>
+                        <p className="text-base font-black text-emerald-400">₹2,35,000</p>
+                      </div>
+                      <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-3">
+                        <p className="text-[9px] text-slate-400">Expenses</p>
+                        <p className="text-base font-black text-rose-400">₹89,770</p>
+                      </div>
+                    </div>
+                    <div className="rounded-xl bg-slate-800/50 border border-white/5 p-4">
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="text-[11px] text-white font-bold">Cash Flow</span>
+                        <span className="text-[9px] text-slate-500">May 2026</span>
+                      </div>
+                      <div className="flex items-end gap-0.5 h-16">
+                        {[30,45,35,60,45,70,55,80,65,75,90,85].map((h,i) => (
+                          <motion.div key={i} className="flex-1 rounded-t-sm origin-bottom"
+                            initial={reducedMotion ? undefined : { scaleY: 0 }}
+                            animate={reducedMotion ? undefined : { scaleY: 1 }}
+                            transition={{ duration: 0.5, delay: 0.9 + i * 0.04, ease: [0.22, 1, 0.36, 1] }}
+                            style={{height:`${h}%`, background: i >= 9 ? '#10b981' : 'rgba(16,185,129,0.2)'}} />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="rounded-xl bg-slate-800/50 border border-white/5 p-4">
+                      <p className="text-[10px] text-white font-bold mb-3">By Category</p>
+                      <div className="space-y-2.5">
+                        {[
+                          {name:'Office Supplies', pct:40, color:'bg-cyan-500'},
+                          {name:'Marketing', pct:27, color:'bg-violet-500'},
+                          {name:'Travel', pct:20, color:'bg-amber-500'},
+                        ].map((c, i) => (
+                          <div key={c.name} className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${c.color} flex-shrink-0`} />
+                            <span className="text-[9px] text-slate-400 flex-1">{c.name}</span>
+                            <div className="w-20 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                              <motion.div className={`h-full ${c.color} rounded-full origin-left`}
+                                initial={reducedMotion ? undefined : { scaleX: 0 }}
+                                animate={reducedMotion ? undefined : { scaleX: 1 }}
+                                transition={{ duration: 0.6, delay: 1.3 + i * 0.15, ease: [0.22, 1, 0.36, 1] }}
+                                style={{width:`${c.pct}%`}} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  {/* Bottom nav */}
+                  <div className="absolute bottom-0 inset-x-0 h-16 bg-white border-t border-white/5 flex items-center justify-around px-4">
+                    {['Home','Txns','Overall','AI','More'].map((l, i) => (
+                      <div key={l} className="flex flex-col items-center gap-1">
+                        <div className={`w-6 h-6 rounded-lg ${i===0 ? 'bg-emerald-500/30' : 'bg-slate-800'}`} />
+                        <span className={`text-[8px] font-bold ${i===0 ? 'text-emerald-400' : 'text-slate-600'}`}>{l}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating stat badges — tucked inside the phone width */}
+              <motion.div
+                animate={reducedMotion ? undefined : { y: [0, -10, 0] }}
+                transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute right-0 top-16 translate-x-1/3 bg-[#131c2e]/95 backdrop-blur border border-white/10 rounded-2xl p-4 shadow-2xl w-40 z-20">
+                <p className="text-[9px] text-neutral-400 font-bold uppercase tracking-wider">Monthly Growth</p>
+                <p className="text-emerald-400 font-black text-2xl mt-1">+12.5%</p>
+                <div className="flex items-end gap-0.5 h-6 mt-2">
+                  {[3,5,4,7,6,8,10].map((h,i) => (
+                    <div key={i} className="flex-1 bg-emerald-500 rounded-sm opacity-70" style={{height:`${h*2}px`}} />
+                  ))}
+                </div>
+              </motion.div>
+
+              <motion.div
+                animate={reducedMotion ? undefined : { y: [0, 10, 0] }}
+                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0.6 }}
+                className="absolute left-0 bottom-36 -translate-x-1/3 bg-[#131c2e]/95 backdrop-blur border border-white/10 rounded-2xl p-4 shadow-2xl w-44 z-20">
+                <p className="text-[9px] text-neutral-400 font-bold uppercase tracking-wider">Net Profit</p>
+                <p className="text-cyan-400 font-black text-xl mt-1">₹1,45,230</p>
+                <p className="text-[9px] text-emerald-400 font-semibold mt-1">↑ Positive cash flow</p>
+              </motion.div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── STATS BAR ── */}
+      <section className="border-y border-white/5 bg-white/[0.02] py-14 px-6 lg:px-10">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-10">
+          {stats.map(({ value, label }) => (
+            <div key={label} className="text-center">
+              <p className="text-4xl font-black text-white">{value}</p>
+              <p className="text-sm text-slate-500 font-semibold mt-2">{label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ── */}
+      <section className="py-28 px-6 lg:px-10 border-t border-white/5">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-emerald-400 font-black text-xs uppercase tracking-[0.4em] mb-4">How it works</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Set up in <span className="wow-underline">3 simple steps</span></h2>
+            <p className="text-slate-400 mt-4 text-lg max-w-2xl mx-auto">No manual data entry. Connect once and let Moneylix do the heavy lifting.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6 relative">
+            {[
+              { step: '01', icon: Wallet, title: 'Connect your bank', desc: 'Link your account via RBI-regulated Setu Account Aggregator. You control consent — revoke anytime.', color: 'emerald' },
+              { step: '02', icon: Brain, title: 'AI sorts everything', desc: 'Every UPI and bank transaction flows in automatically and Gemini AI categorizes it for you.', color: 'cyan' },
+              { step: '03', icon: TrendingUp, title: 'You decide & grow', desc: 'See clear dashboards, forecasts, and AI investment advice. Make smarter money decisions.', color: 'violet' },
+            ].map(({ step, icon: Icon, title, desc, color }) => {
+              const cmap: Record<string, string> = {
+                emerald: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+                cyan: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
+                violet: 'text-violet-400 bg-violet-500/10 border-violet-500/20',
+              }
+              return (
+                <div key={step} className="relative rounded-3xl border border-white/10 bg-white/[0.03] p-7 hover:bg-white/[0.06] hover:-translate-y-1 transition-all duration-300">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center ${cmap[color]}`}>
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <span className="text-4xl font-black text-white/5">{step}</span>
+                  </div>
+                  <p className="text-lg font-black text-white">{title}</p>
+                  <p className="text-sm text-slate-400 mt-2 leading-relaxed">{desc}</p>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FEATURE SECTIONS (alternating) ── */}
+      <section id="features" className="py-4">
+        {featureSections.map((feat, i) => {
+          const colorMap: Record<string, { tag: string; bullet: string; border: string; bg: string }> = {
+            emerald: { tag: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', bullet: 'text-emerald-400', border: 'border-emerald-500/20', bg: 'bg-emerald-500/5' },
+            cyan:    { tag: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',           bullet: 'text-cyan-400',    border: 'border-cyan-500/20',    bg: 'bg-cyan-500/5' },
+            amber:   { tag: 'text-amber-400 bg-amber-500/10 border-amber-500/20',        bullet: 'text-amber-400',   border: 'border-amber-500/20',   bg: 'bg-amber-500/5' },
+            violet:  { tag: 'text-violet-400 bg-violet-500/10 border-violet-500/20',     bullet: 'text-violet-400',  border: 'border-violet-500/20',  bg: 'bg-violet-500/5' },
+          }
+          const c = colorMap[feat.color]
+          const isEven = i % 2 === 1
+
+          return (
+            <motion.div
+              key={i}
+              initial={reducedMotion ? undefined : { opacity: 0, y: 24 }}
+              whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-80px' }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className={`py-28 px-6 lg:px-10 ${i % 2 === 1 ? 'bg-white/[0.015]' : ''} border-b border-white/5`}
+            >
+              <div className={`max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center ${isEven ? 'lg:flex-row-reverse' : ''}`}
+                style={isEven ? {direction: 'rtl'} : {}}>
+
+                {/* Text */}
+                <div className="space-y-7" style={{direction:'ltr'}}>
+                  <span className={`inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full border ${c.tag}`}>
+                    {feat.tag}
+                  </span>
+                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight text-white">
+                    {feat.title}
+                  </h2>
+                  <p className="text-lg text-slate-400 leading-relaxed max-w-md">
+                    {feat.desc}
+                  </p>
+                  <ul className="space-y-3">
+                    {feat.bullets.map(b => (
+                      <li key={b} className="flex items-center gap-3 text-sm text-slate-300">
+                        <ChevronRight className={`w-4 h-4 flex-shrink-0 ${c.bullet}`} />
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href="/auth/register"
+                    className={`hover-underline inline-flex items-center gap-2 text-sm font-bold ${c.bullet} hover:opacity-80 transition w-fit`}>
+                    Try it free <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+
+                {/* Visual */}
+                <div style={{direction:'ltr'}}>
+                  {feat.visual}
+                </div>
+              </div>
+            </motion.div>
+          )
+        })}
+      </section>
+
+      {/* ── ALL FEATURES GRID ── */}
+      <section className="py-28 px-6 lg:px-10 border-t border-white/5">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-emerald-400 font-black text-xs uppercase tracking-[0.4em] mb-4">Everything included</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight">One app. <span className="wow-underline">Every finance need.</span></h2>
+            <p className="text-slate-400 mt-4 text-lg max-w-2xl mx-auto">Most tools do one thing. Moneylix bundles them all — built for Indian freelancers and multi-business owners.</p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {[
+              { icon: Building2, label: 'Multi-Business', desc: 'Switch between ventures, isolated data' },
+              { icon: Wallet, label: 'Bank Sync', desc: 'RBI Account Aggregator (Setu)' },
+              { icon: Brain, label: 'AI Categorization', desc: 'Auto-sort every transaction' },
+              { icon: Receipt, label: 'GST Invoicing', desc: 'CGST/SGST/IGST ready' },
+              { icon: FileText, label: 'Payment Links', desc: 'Razorpay auto-confirm' },
+              { icon: BarChart3, label: 'Reconciliation', desc: 'Auto-match bank lines' },
+              { icon: PieChart, label: 'Budgeting', desc: 'Per-business goals & alerts' },
+              { icon: TrendingUp, label: 'Forecasting', desc: '30/60/90-day cash flow' },
+              { icon: Banknote, label: 'Loan / EMI', desc: 'Amortization tracking' },
+              { icon: Users, label: 'Payroll', desc: 'Staff cost tracking' },
+              { icon: Sparkles, label: 'AI Advisor', desc: 'Gemini-powered advice' },
+              { icon: Bell, label: 'Smart Alerts', desc: 'Low balance, dues, overspend' },
+            ].map(({ icon: Icon, label, desc }) => (
+              <div key={label} className="group rounded-2xl border border-white/10 bg-white/[0.03] p-5 hover:bg-white/[0.06] hover:-translate-y-1 transition-all duration-300">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                  <Icon className="w-5 h-5 text-emerald-400" />
+                </div>
+                <p className="text-sm font-black text-white">{label}</p>
+                <p className="text-[11px] text-slate-500 mt-1 leading-snug">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── WHY MONEYLIX VS OTHERS ── */}
+      <section className="py-28 px-6 lg:px-10 border-t border-white/5 bg-white/[0.015]">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-emerald-400 font-black text-xs uppercase tracking-[0.4em] mb-4">The difference</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Why <span className="wow-underline">Moneylix</span></h2>
+            <p className="text-slate-400 mt-4 text-lg max-w-2xl mx-auto">Others do one thing well. Moneylix is the only India-first app combining UPI-native sync, multi-business, and an AI advisor.</p>
+          </div>
+          <div className="overflow-x-auto rounded-3xl border border-white/10">
+            <table className="w-full text-sm min-w-[640px]">
+              <thead>
+                <tr className="bg-white/[0.04] border-b border-white/10">
+                  <th className="text-left px-5 py-4 text-slate-400 font-bold text-xs uppercase tracking-wider">Capability</th>
+                  <th className="px-4 py-4 text-emerald-400 font-black">Moneylix</th>
+                  <th className="px-4 py-4 text-slate-500 font-semibold text-xs">Zoho Books</th>
+                  <th className="px-4 py-4 text-slate-500 font-semibold text-xs">Vyapar</th>
+                  <th className="px-4 py-4 text-slate-500 font-semibold text-xs">Refrens</th>
+                  <th className="px-4 py-4 text-slate-500 font-semibold text-xs">INDmoney</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { cap: 'UPI-native bank sync (RBI AA)', m: true, zoho: false, vyapar: false, refrens: false, ind: 'partial' },
+                  { cap: 'AI auto-categorization', m: true, zoho: 'partial', vyapar: false, refrens: false, ind: false },
+                  { cap: 'Multi-business isolation', m: true, zoho: true, vyapar: 'partial', refrens: 'partial', ind: false },
+                  { cap: 'GST invoicing', m: true, zoho: true, vyapar: true, refrens: true, ind: false },
+                  { cap: 'AI investment advisor', m: true, zoho: false, vyapar: false, refrens: false, ind: false },
+                  { cap: 'Loan / EMI tracking', m: true, zoho: false, vyapar: false, refrens: false, ind: 'partial' },
+                  { cap: 'Freelancer-first + affordable', m: true, zoho: false, vyapar: 'partial', refrens: true, ind: true },
+                ].map((row) => {
+                  const cell = (v: boolean | string) =>
+                    v === true ? <Check className="w-4 h-4 text-emerald-400 mx-auto" />
+                    : v === 'partial' ? <span className="text-amber-400 text-xs font-bold">◐</span>
+                    : <X className="w-4 h-4 text-slate-700 mx-auto" />
+                  return (
+                    <tr key={row.cap} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
+                      <td className="px-5 py-3.5 text-slate-300 text-xs font-medium">{row.cap}</td>
+                      <td className="px-4 py-3.5 text-center bg-emerald-500/5">{cell(row.m)}</td>
+                      <td className="px-4 py-3.5 text-center">{cell(row.zoho)}</td>
+                      <td className="px-4 py-3.5 text-center">{cell(row.vyapar)}</td>
+                      <td className="px-4 py-3.5 text-center">{cell(row.refrens)}</td>
+                      <td className="px-4 py-3.5 text-center">{cell(row.ind)}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-center text-xs text-slate-600 mt-4">✓ Full support · ◐ Partial / limited · ✗ Not offered</p>
+        </div>
+      </section>
+
+      {/* ── TESTIMONIALS ── */}
+      <section className="py-28 px-6 lg:px-10 border-t border-white/5">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-emerald-400 font-black text-xs uppercase tracking-[0.4em] mb-4">Built for people like you</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Made for every <span className="wow-underline">kind of hustle</span></h2>
+            <p className="text-slate-400 mt-4 text-lg max-w-2xl mx-auto">Whether you juggle clients, run a shop, or manage a team — Moneylix adapts to how you work.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { quote: 'I stopped chasing payments in spreadsheets. UPI transactions sort themselves and I invoice clients in seconds.', name: 'Freelancers & Consultants', role: 'Designers, developers, writers', icon: Sparkles, color: 'emerald' },
+              { quote: 'Two businesses, one app. I switch between my cafe and my side venture without mixing up the books.', name: 'Multi-Business Owners', role: 'Cafe, retail & side ventures', icon: Building2, color: 'cyan' },
+              { quote: 'Payroll, inventory, GST invoicing and team roles — everything my small team needs in one place.', name: 'Small Teams & Agencies', role: 'Studios, shops & agencies', icon: Users, color: 'violet' },
+            ].map(({ quote, name, role, icon: Icon, color }) => {
+              const cmap: Record<string, string> = {
+                emerald: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+                cyan: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
+                violet: 'text-violet-400 bg-violet-500/10 border-violet-500/20',
+              }
+              return (
+                <div key={name} className="rounded-3xl border border-white/10 bg-white/[0.03] p-7 hover:bg-white/[0.06] hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 text-amber-400 fill-amber-400" />)}
+                  </div>
+                  <p className="text-sm text-slate-300 leading-relaxed flex-1">&ldquo;{quote}&rdquo;</p>
+                  <div className="flex items-center gap-3 mt-6 pt-6 border-t border-white/5">
+                    <div className={`w-11 h-11 rounded-2xl border flex items-center justify-center ${cmap[color]}`}>
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-white">{name}</p>
+                      <p className="text-[11px] text-slate-500">{role}</p>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SWITCH / MIGRATION ── */}
+      <section className="py-20 px-6 lg:px-10">
+        <div className="max-w-4xl mx-auto rounded-[2rem] border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 via-cyan-500/5 to-transparent p-10 md:p-12 text-center">
+          <p className="text-emerald-400 font-black text-xs uppercase tracking-[0.4em] mb-4">Switching over?</p>
+          <h2 className="text-3xl md:text-4xl font-black tracking-tight">Coming from Zoho, Tally, or Vyapar?</h2>
+          <p className="text-slate-400 mt-4 text-base max-w-2xl mx-auto">
+            Moneylix is up to <span className="text-white font-bold">5&times; cheaper</span> than Zoho Books, with UPI-native bank sync they don&apos;t offer. Already on Tally? Export from Moneylix in Tally-compatible format anytime — no lock-in.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3 mt-8">
+            <Link href="/auth/register" className="px-7 py-3.5 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-500 text-slate-950 font-black text-sm hover:opacity-90 transition-all active:scale-95">
+              Start Free — No Card Needed
+            </Link>
+            <a href="#pricing" className="px-7 py-3.5 rounded-xl border border-white/15 text-white font-bold text-sm hover:bg-white/5 transition-all">
+              Compare Pricing
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ── PRICING ── */}
+      <section id="pricing" className="py-28 px-6 lg:px-10">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-emerald-400 font-black text-xs uppercase tracking-[0.4em] mb-4">Pricing</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Start free. <span className="wow-underline">Upgrade when ready.</span></h2>
+            <p className="text-slate-400 mt-4 text-lg">No hidden fees. Cancel anytime. Up to 5&times; cheaper than Zoho Books.</p>
+            {/* Monthly / Yearly toggle */}
+            <div className="inline-flex items-center gap-1 mt-8 p-1 rounded-full border border-white/10 bg-white/[0.03]">
+              <button onClick={() => setBillingYearly(false)}
+                className={`px-5 py-2 rounded-full text-xs font-black transition-all ${!billingYearly ? 'bg-white text-slate-950' : 'text-slate-400 hover:text-white'}`}>
+                Monthly
+              </button>
+              <button onClick={() => setBillingYearly(true)}
+                className={`px-5 py-2 rounded-full text-xs font-black transition-all flex items-center gap-2 ${billingYearly ? 'bg-white text-slate-950' : 'text-slate-400 hover:text-white'}`}>
+                Yearly
+                <span className="text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full">Save 25%</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                name: 'Free', priceMonthly: '₹0', priceYearly: '₹0', period: 'forever', periodYearly: 'forever',
+                icon: Zap, color: 'text-slate-300', border: 'border-white/10', bg: 'bg-white/3',
+                features: ['1 Business', 'Dashboard & Transactions', 'Budgets & Goals', 'Notifications & Alerts', 'Calculator'],
+                locked: ['Bank Sync', 'Invoicing', 'AI Advisor'],
+                cta: 'Get Started Free', ctaStyle: 'bg-neutral-900 text-neutral-50 hover:bg-neutral-800',
+                glow: 'hover:shadow-xl hover:shadow-white/5',
+              },
+              {
+                name: 'Pro', priceMonthly: '₹199', priceYearly: '₹149', period: '/month', periodYearly: '/mo billed yearly',
+                icon: Crown, color: 'text-cyan-400', border: 'border-cyan-500/30', bg: 'bg-cyan-500/5',
+                badge: 'POPULAR', badgeBg: 'bg-cyan-500',
+                features: ['3 Businesses', 'Bank Sync (Setu AA)', 'GST Invoicing + Payment Links', 'Reconciliation', 'Cash Flow Forecast', 'Loan / EMI Tracking', 'Time Tracking', 'Export CSV'],
+                locked: ['AI Advisor', 'Payroll & Inventory'],
+                cta: 'Get Pro', ctaStyle: 'bg-cyan-500 text-slate-950 hover:bg-cyan-400 shadow-lg shadow-cyan-500/30',
+                noteMonthly: 'or ₹1,788/year — save ₹600', noteYearly: '₹1,788 billed annually — save ₹600',
+                glow: 'hover:shadow-xl hover:shadow-cyan-500/20',
+              },
+              {
+                name: 'Premium', priceMonthly: '₹499', priceYearly: '₹299', period: '/month', periodYearly: '/mo billed yearly',
+                icon: Sparkles, color: 'text-amber-400', border: 'border-amber-500/30', bg: 'bg-amber-500/5',
+                badge: 'BEST VALUE', badgeBg: 'bg-gradient-to-r from-amber-500 to-rose-500',
+                features: ['Unlimited Businesses', 'All Pro Features', 'AI Investment Advisor', 'Payroll & Staff Tracking', 'Inventory Management', 'Team Roles & Permissions', 'OCR Receipts', 'Export CSV & JSON'],
+                locked: [],
+                cta: 'Get Premium', ctaStyle: 'bg-gradient-to-r from-amber-500 to-rose-500 text-white hover:opacity-90 shadow-lg shadow-amber-500/30',
+                noteMonthly: 'or ₹3,588/year — save ₹2,400', noteYearly: '₹3,588 billed annually — save ₹2,400',
+                glow: 'hover:shadow-xl hover:shadow-amber-500/20',
+              },
+            ].map((plan: any) => (
+              <div key={plan.name}
+                className={`group card-shine relative rounded-3xl border ${plan.border} ${plan.bg} p-8 flex flex-col gap-6 transition-all duration-300 hover:-translate-y-1 ${plan.glow}`}>
+                {plan.badge && (
+                  <div className={`absolute -top-3.5 left-1/2 -translate-x-1/2 px-5 py-1.5 rounded-full text-[10px] font-black text-white uppercase tracking-wider ${plan.badgeBg}`}>
+                    {plan.badge}
+                  </div>
+                )}
+                <div className="flex items-center gap-3 mt-2">
+                  <div className={`w-11 h-11 rounded-2xl ${plan.bg} border ${plan.border} flex items-center justify-center transition-transform duration-300 group-hover:scale-110`}>
+                    <plan.icon className={`w-5 h-5 ${plan.color}`} />
+                  </div>
+                  <p className={`text-sm font-black uppercase tracking-widest ${plan.color}`}>{plan.name}</p>
+                </div>
+                <div>
+                  <div className="flex items-end gap-1.5">
+                    <span className="text-5xl font-black text-white">{billingYearly ? plan.priceYearly : plan.priceMonthly}</span>
+                    <span className="text-slate-500 text-base mb-2">{billingYearly ? plan.periodYearly : plan.period}</span>
+                  </div>
+                  {(billingYearly ? plan.noteYearly : plan.noteMonthly) && (
+                    <p className="text-xs text-emerald-400 font-semibold mt-1.5">{billingYearly ? plan.noteYearly : plan.noteMonthly}</p>
+                  )}
+                </div>
+                <div className="flex-1 space-y-3">
+                  {plan.features.map((f: string) => (
+                    <div key={f} className="flex items-center gap-3 text-sm text-slate-200">
+                      <Check className={`w-4 h-4 flex-shrink-0 ${plan.color}`} />{f}
+                    </div>
+                  ))}
+                  {plan.locked.map((f: string) => (
+                    <div key={f} className="flex items-center gap-3 text-sm text-slate-600 line-through">
+                      <div className="w-4 h-4 rounded-full border border-slate-700 flex-shrink-0" />{f}
+                    </div>
+                  ))}
+                </div>
+                <Link href="/auth/register"
+                  className={`w-full py-3.5 rounded-xl text-sm font-black text-center transition-all ${plan.ctaStyle}`}>
+                  {plan.cta}
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECURITY ── */}
+      <section id="security" className="py-20 px-6 lg:px-10 border-t border-white/5 bg-white/[0.015]">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-emerald-400 font-black text-xs uppercase tracking-[0.4em] mb-4">Trust & Security</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Your data is <span className="wow-underline">safe with us</span></h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { icon: Shield,       title: 'RBI-Regulated Bank Sync', desc: 'Bank data flows through Setu, an RBI-licensed Account Aggregator. You control consent — revoke anytime.',   color: 'text-emerald-400', bg: 'bg-emerald-500/8', border: 'border-emerald-500/20', glow: 'hover:shadow-emerald-500/20' },
+              { icon: Lock,         title: 'Your Data, Private',   desc: 'SSL encryption, secure password hashing, and we never sell or share your financial information. Your data is yours.',  color: 'text-cyan-400',    bg: 'bg-cyan-500/8',    border: 'border-cyan-500/20', glow: 'hover:shadow-cyan-500/20' },
+              { icon: CheckCircle,  title: '99.9% Uptime',         desc: 'Built for reliability on enterprise infrastructure. Your data is always available when you need it.', color: 'text-amber-400',   bg: 'bg-amber-500/8',   border: 'border-amber-500/20', glow: 'hover:shadow-amber-500/20' },
+            ].map(({ icon: Icon, title, desc, color, bg, border, glow }) => (
+              <div key={title} className={`group card-shine rounded-3xl border ${border} ${bg} p-8 space-y-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${glow}`}>
+                <div className={`w-14 h-14 rounded-2xl ${bg} border ${border} flex items-center justify-center transition-transform duration-300 group-hover:scale-110`}>
+                  <Icon className={`w-7 h-7 ${color}`} />
+                </div>
+                <p className={`text-base font-black ${color}`}>{title}</p>
+                <p className="text-sm text-slate-400 leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ── */}
+      <section id="faq" className="py-28 px-6 lg:px-10 border-t border-white/5">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-14">
+            <p className="text-emerald-400 font-black text-xs uppercase tracking-[0.4em] mb-4">FAQ</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Questions? <span className="wow-underline">Answered.</span></h2>
+          </div>
+          <div className="space-y-3">
+            {[
+              { q: 'Is my bank data safe with Moneylix?', a: 'Yes. Bank data flows through Setu, an RBI-licensed Account Aggregator. You explicitly grant consent for each account and can revoke it anytime. We never store your bank login credentials, and all data is SSL-encrypted.' },
+              { q: 'Do I have to enter transactions manually?', a: 'No. Once you connect your bank via Account Aggregator, your UPI and bank transactions flow in automatically. Gemini AI categorizes each one for you — you just review and confirm.' },
+              { q: 'Can I manage multiple businesses in one account?', a: 'Absolutely. Switch between businesses with isolated data on Free (1), Pro (3), or Premium (unlimited). Each business keeps its own transactions, invoices, and reports, plus a cross-business overview.' },
+              { q: 'Does Moneylix handle GST?', a: 'Yes. Create GST-compliant invoices with automatic CGST/SGST/IGST calculation based on place of supply, and export tax-ready reports (including Tally-compatible format) for your CA.' },
+              { q: 'Is there a free plan?', a: 'Yes — the Free plan is free forever. It includes 1 business, transactions, budgets, notifications, and the calculator. Upgrade to Pro or Premium anytime for bank sync, invoicing, and AI features.' },
+              { q: 'Is there a mobile app?', a: 'Yes. Moneylix works on web, iOS, and Android. Your data syncs across all devices in real time, and it installs as a PWA too.' },
+              { q: 'Can I cancel anytime?', a: 'Yes. There are no lock-in contracts. Cancel or downgrade whenever you want — your data stays exportable in CSV, JSON, and Tally format.' },
+            ].map((item, i) => (
+              <div key={i} className="rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden">
+                <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left hover:bg-white/[0.02] transition">
+                  <span className="text-sm md:text-base font-bold text-white">{item.q}</span>
+                  <ChevronRight className={`w-5 h-5 text-emerald-400 flex-shrink-0 transition-transform ${openFaq === i ? 'rotate-90' : ''}`} />
+                </button>
+                {openFaq === i && (
+                  <div className="px-6 pb-5 -mt-1">
+                    <p className="text-sm text-slate-400 leading-relaxed">{item.a}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FINAL CTA ── */}
+      <section className="py-32 px-6 lg:px-10 text-center relative overflow-hidden">
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-gradient-to-br from-emerald-500/10 via-cyan-500/6 to-transparent rounded-full blur-[120px] pointer-events-none ${reducedMotion ? '' : 'animate-mesh'}`} />
+        <div className="relative max-w-3xl mx-auto space-y-8">
+          <Image src="/logos/moneylix-mark.svg" alt="Moneylix" width={64} height={64} className="mx-auto rounded-3xl" />
+          <h2 className="text-4xl md:text-6xl font-black tracking-tight leading-tight">
+            Take control of your<br />
+            <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">financial future.</span>
+          </h2>
+          <p className="text-xl text-slate-400 max-w-xl mx-auto">
+            Join freelancers and business owners who use Moneylix to track, save, and grow.
+          </p>
+
+          <div className="relative inline-flex">
+            {!reducedMotion && (
+              <motion.span
+                className="absolute inset-0 rounded-2xl bg-emerald-400 blur-xl"
+                animate={{ scale: [1, 1.18, 1], opacity: [0.35, 0.55, 0.35] }}
+                transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+              />
+            )}
+            <div className="conic-border rounded-2xl p-[2px] relative">
+              <Link href="/auth/register"
+                className="ripple relative overflow-hidden inline-flex items-center gap-3 px-10 py-5 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-500 text-slate-950 font-black text-lg shadow-2xl shadow-emerald-500/25 hover:opacity-90 transition-all active:scale-95">
+                {!reducedMotion && (
+                  <span className="absolute inset-0 -translate-x-full animate-[shineSweep_2.8s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+                )}
+                <span className="relative">Create Free Account</span>
+                <ArrowRight className="w-5 h-5 relative" />
+              </Link>
+            </div>
+          </div>
+
+          <p className="text-xs text-slate-600">No credit card required · Free plan forever available · 🇮🇳 Made for India</p>
+        </div>
+      </section>
+
+      {/* ── CONTACT & SUPPORT ── */}
+      <section id="contact" className="py-28 px-6 lg:px-10 border-t border-white/5 bg-white/[0.015]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-emerald-400 font-black text-xs uppercase tracking-[0.4em] mb-4">We&apos;re here to help</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Get in <span className="wow-underline">touch</span></h2>
+            <p className="text-slate-400 mt-4 text-lg max-w-2xl mx-auto">Questions about features, pricing, or your account? Our team responds fast — pick whatever&apos;s easiest for you.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5">
+            {/* Email */}
+            <a href="mailto:support@moneylix.in"
+              className="group rounded-3xl border border-white/10 bg-white/[0.03] p-7 hover:bg-white/[0.06] hover:-translate-y-1 transition-all duration-300 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Mail className="w-6 h-6 text-emerald-400" />
+              </div>
+              <p className="text-base font-black text-white">Email Us</p>
+              <p className="text-sm text-emerald-400 font-semibold mt-1">support@moneylix.in</p>
+              <p className="text-[11px] text-slate-500 mt-2">Replies within 24 hours</p>
+            </a>
+            {/* WhatsApp */}
+            <a href="https://wa.me/919999999999" target="_blank" rel="noopener noreferrer"
+              className="group rounded-3xl border border-white/10 bg-white/[0.03] p-7 hover:bg-white/[0.06] hover:-translate-y-1 transition-all duration-300 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-lime-500/10 border border-lime-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <MessageCircle className="w-6 h-6 text-lime-400" />
+              </div>
+              <p className="text-base font-black text-white">WhatsApp</p>
+              <p className="text-sm text-lime-400 font-semibold mt-1">Chat with support</p>
+              <p className="text-[11px] text-slate-500 mt-2">Mon–Sat, 9 AM – 7 PM IST</p>
+            </a>
+            {/* Phone */}
+            <a href="tel:+919999999999"
+              className="group rounded-3xl border border-white/10 bg-white/[0.03] p-7 hover:bg-white/[0.06] hover:-translate-y-1 transition-all duration-300 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Phone className="w-6 h-6 text-cyan-400" />
+              </div>
+              <p className="text-base font-black text-white">Call Us</p>
+              <p className="text-sm text-cyan-400 font-semibold mt-1">+91 99999 99999</p>
+              <p className="text-[11px] text-slate-500 mt-2">Mon–Sat, 9 AM – 7 PM IST</p>
+            </a>
+          </div>
+          {/* Address + Socials strip */}
+          <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-7 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-3 text-center md:text-left">
+              <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+                <MapPin className="w-5 h-5 text-slate-400" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white">Moneylix</p>
+                <p className="text-xs text-slate-500">Chennai, Tamil Nadu, India 🇮🇳</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-slate-500 mr-1">Follow us</span>
+              {[
+                { icon: Instagram, href: 'https://instagram.com/moneylix', label: 'Instagram' },
+                { icon: Linkedin, href: 'https://linkedin.com/company/moneylix', label: 'LinkedIn' },
+                { icon: Twitter, href: 'https://twitter.com/moneylix', label: 'Twitter' },
+              ].map(({ icon: Icon, href, label }) => (
+                <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}
+                  className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 hover:-translate-y-0.5 transition-all">
+                  <Icon className="w-4 h-4" />
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer className="border-t border-white/5 py-12 px-6 lg:px-10">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+          <Link href="/" className="flex items-center gap-3">
+            <Image src="/logos/moneylix-mark.svg" alt="Moneylix" width={32} height={32} className="rounded-xl" />
+            <span className="text-base font-black text-white">moneylix</span>
+          </Link>
+          <p className="text-sm text-slate-500 flex items-center gap-2">
+            <Globe className="w-4 h-4" /> www.moneylix.in &nbsp;·&nbsp; 🇮🇳 Made for India
+          </p>
+          <div className="flex items-center gap-8 text-sm text-slate-500">
+            <a href="#features" className="hover-underline hover:text-white transition">Features</a>
+            <a href="#pricing" className="hover-underline hover:text-white transition">Pricing</a>
+            <a href="#contact" className="hover-underline hover:text-white transition">Contact</a>
+            <Link href="/auth/login" className="hover-underline hover:text-white transition">Login</Link>
+            <Link href="/auth/register" className="hover-underline hover:text-white transition">Register</Link>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto mt-8 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+          <p>© 2026 Moneylix. All rights reserved.</p>
+          <div className="flex items-center gap-4">
+            <Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-white transition">Terms of Service</Link>
+            <Link href="/cookie-policy" className="hover:text-white transition">Cookies</Link>
+          </div>
+          <p className="flex items-center gap-1.5"><Shield className="w-3 h-3 text-emerald-500" /> Secured by Razorpay · SSL Encrypted</p>
+        </div>
+      </footer>
+
+    </div>
+  )
+}

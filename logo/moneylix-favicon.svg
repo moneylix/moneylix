@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <title>MoneyLix favicon</title>
+  <defs>
+    <linearGradient id="brand" x1="0.1" y1="1" x2="0.9" y2="0">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="7" ry="7" fill="#0f172a"/>
+  <g fill="none" stroke="url(#brand)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 7 24 C 7 11, 14 9, 16 19"/>
+    <path d="M 16 19 C 18 9, 25 11, 25 24"/>
+  </g>
+</svg>

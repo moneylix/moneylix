@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 200" width="960" height="200">
+  <title>MoneyLix horizontal lockup (dark)</title>
+  <defs>
+    <linearGradient id="brand" x1="0.1" y1="1" x2="0.9" y2="0">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="200" rx="32" ry="32" fill="#0f172a"/>
+  <g transform="translate(40, 36) scale(0.25)">
+    <g fill="none" stroke="url(#brand)" stroke-width="42" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M 112 388 C 112 168, 226 132, 256 296"/>
+      <path d="M 256 296 C 286 132, 400 168, 400 388"/>
+    </g>
+    <circle cx="256" cy="356" r="9" fill="#06b6d4"/>
+  </g>
+  <text x="195" y="128" font-family="Inter, Poppins, 'SF Pro Display', -apple-system, 'Segoe UI', system-ui, sans-serif" font-size="92" font-weight="600" letter-spacing="-2" fill="#f8fafc">moneylix</text>
+</svg>

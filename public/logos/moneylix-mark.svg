@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <!-- M mark: two upward flowing arcs forming stylised M -->
+  <path d="M 96 380
+    L 96 200
+    Q 96 140 156 140
+    Q 196 140 216 180
+    L 256 270
+    L 296 180
+    Q 316 140 356 140
+    Q 416 140 416 200
+    L 416 380"
+    stroke="url(#g1)" stroke-width="52" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- Bottom connector bar -->
+  <line x1="96" y1="380" x2="416" y2="380" stroke="url(#g1)" stroke-width="52" stroke-linecap="round"/>
+</svg>
