@@ -15,7 +15,10 @@ import { checkLowBalance, checkUpcomingDues, checkUnusualSpend } from '@/lib/not
  */
 export async function GET(request: NextRequest) {
   try {
-    const cronSecret = request.headers.get('x-cron-secret')
+    // Accept the secret via header (external cron services) or query param
+    // (the internal scheduler in src/lib/scheduler.ts only ever sends it as
+    // ?secret=, so header-only checks silently reject every internal run).
+    const cronSecret = request.headers.get('x-cron-secret') || request.nextUrl.searchParams.get('secret')
     const envSecret = process.env.CRON_SECRET
     if (envSecret && cronSecret !== envSecret) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

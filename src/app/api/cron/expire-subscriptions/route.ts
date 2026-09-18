@@ -5,7 +5,10 @@ import { sendPlanUpgradeEmail } from '@/lib/email/resend'
 // Called by cron: GET /api/cron/expire-subscriptions
 // Secure with CRON_SECRET env variable
 export async function GET(request: NextRequest) {
-  const secret = request.headers.get('x-cron-secret')
+  // Accept the secret via header (external cron services) or query param
+  // (the internal scheduler in src/lib/scheduler.ts only ever sends it as
+  // ?secret=, so header-only checks silently reject every internal run).
+  const secret = request.headers.get('x-cron-secret') || request.nextUrl.searchParams.get('secret')
   if (process.env.CRON_SECRET && secret !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

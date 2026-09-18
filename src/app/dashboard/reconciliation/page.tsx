@@ -11,6 +11,7 @@ import {
 import { useBusiness } from '@/lib/contexts/BusinessContext'
 import { useCurrency } from '@/lib/contexts/CurrencyContext'
 import { usePlan } from '@/lib/contexts/PlanContext'
+import { useTranslation } from '@/lib/i18n'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -83,6 +84,7 @@ interface ManualTxnOption {
 /* ------------------------------------------------------------------ */
 
 export default function ReconciliationPage() {
+  const { t } = useTranslation()
   const { activeBusiness } = useBusiness()
   const { currentCurrency, currencies } = useCurrency()
   const { can } = usePlan()
@@ -165,7 +167,7 @@ export default function ReconciliationPage() {
       setMatches(data.matches ?? [])
       setUnmatchedManual(data.unmatchedManual ?? [])
     } catch {
-      showToast('Failed to load session details')
+      showToast(t('reconciliation.failedToLoadDetails'))
     } finally {
       setDetailLoading(false)
     }
@@ -195,11 +197,11 @@ export default function ReconciliationPage() {
       })
       if (!res.ok) {
         const d = await res.json()
-        showToast(d.error || 'Failed')
+        showToast(d.error || t('payroll.failed'))
         return
       }
       const data = await res.json()
-      showToast(`Reconciliation complete — ${data.summary?.autoMatched ?? 0} auto-matched`)
+      showToast(`${t('reconciliation.reconciliationComplete')} ${data.summary?.autoMatched ?? 0} ${t('reconciliation.autoMatched')}`)
       setShowNewModal(false)
       setNewForm({ bankConnectionId: '', periodStart: '', periodEnd: '' })
       fetchSessions()
@@ -207,7 +209,7 @@ export default function ReconciliationPage() {
         setActiveSessionId(data.session.id)
       }
     } catch {
-      showToast('Error starting reconciliation')
+      showToast(t('reconciliation.errorStarting'))
     } finally {
       setCreating(false)
     }
@@ -221,12 +223,12 @@ export default function ReconciliationPage() {
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({ sessionId: activeSessionId, bankTransactionId, manualTransactionId }),
       })
-      if (!res.ok) { showToast('Match failed'); return }
-      showToast('Matched!')
+      if (!res.ok) { showToast(t('reconciliation.matchFailed')); return }
+      showToast(t('reconciliation.matchedToast'))
       fetchSessionDetail(activeSessionId)
       fetchSessions()
     } catch {
-      showToast('Error')
+      showToast(t('common.error'))
     }
   }
 
@@ -238,12 +240,12 @@ export default function ReconciliationPage() {
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({ sessionId: activeSessionId, bankTransactionId }),
       })
-      if (!res.ok) { showToast('Unmatch failed'); return }
-      showToast('Unmatched')
+      if (!res.ok) { showToast(t('reconciliation.unmatchFailed')); return }
+      showToast(t('reconciliation.unmatched'))
       fetchSessionDetail(activeSessionId)
       fetchSessions()
     } catch {
-      showToast('Error')
+      showToast(t('common.error'))
     }
   }
 
@@ -255,12 +257,12 @@ export default function ReconciliationPage() {
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({ sessionId: activeSessionId, bankTransactionId }),
       })
-      if (!res.ok) { showToast('Ignore failed'); return }
-      showToast('Ignored')
+      if (!res.ok) { showToast(t('reconciliation.ignoreFailed')); return }
+      showToast(t('reconciliation.ignored'))
       fetchSessionDetail(activeSessionId)
       fetchSessions()
     } catch {
-      showToast('Error')
+      showToast(t('common.error'))
     }
   }
 
@@ -272,12 +274,12 @@ export default function ReconciliationPage() {
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({ status: 'completed' }),
       })
-      if (!res.ok) { showToast('Failed'); return }
-      showToast('Session completed')
+      if (!res.ok) { showToast(t('payroll.failed')); return }
+      showToast(t('reconciliation.sessionCompleted'))
       setActiveSessionId(null)
       fetchSessions()
     } catch {
-      showToast('Error')
+      showToast(t('common.error'))
     }
   }
 
@@ -300,13 +302,13 @@ export default function ReconciliationPage() {
     })
 
   const statusCfg: Record<string, { label: string; cls: string }> = {
-    matched: { label: 'Matched', cls: 'bg-lime-100 text-lime-700' },
-    unmatched: { label: 'Unmatched', cls: 'bg-rose-100 text-rose-700' },
-    ignored: { label: 'Ignored', cls: 'bg-neutral-100 text-neutral-500' },
-    disputed: { label: 'Disputed', cls: 'bg-amber-100 text-amber-700' },
-    in_progress: { label: 'In Progress', cls: 'bg-blue-100 text-blue-700' },
-    completed: { label: 'Completed', cls: 'bg-lime-100 text-lime-700' },
-    cancelled: { label: 'Cancelled', cls: 'bg-neutral-100 text-neutral-500' },
+    matched: { label: t('reconciliation.matched'), cls: 'bg-lime-100 text-lime-700' },
+    unmatched: { label: t('reconciliation.unmatched'), cls: 'bg-rose-100 text-rose-700' },
+    ignored: { label: t('reconciliation.ignored'), cls: 'bg-neutral-100 text-neutral-500' },
+    disputed: { label: t('reconciliation.disputed'), cls: 'bg-amber-100 text-amber-700' },
+    in_progress: { label: t('reconciliation.inProgress'), cls: 'bg-blue-100 text-blue-700' },
+    completed: { label: t('time.completed'), cls: 'bg-lime-100 text-lime-700' },
+    cancelled: { label: t('invoices.cancelled'), cls: 'bg-neutral-100 text-neutral-500' },
   }
 
   /* ---------------------------------------------------------------- */
@@ -324,11 +326,11 @@ export default function ReconciliationPage() {
         {/* Header */}
         <div className="flex items-center gap-3">
           <button onClick={() => setActiveSessionId(null)} className="text-xs text-neutral-400 hover:text-neutral-900 transition">
-            ← Back
+            ← {t('common.back')}
           </button>
           <div className="flex-1">
             <h1 className="text-base font-bold text-neutral-900">
-              Reconciliation — {activeSession.bank_name ?? 'Bank'} ({activeSession.masked_account_number ?? '****'})
+              {t('reconciliation.detailTitlePrefix')} — {activeSession.bank_name ?? t('reconciliation.bankFallback')} ({activeSession.masked_account_number ?? '****'})
             </h1>
             <p className="text-[10px] text-neutral-400">
               {fmtDate(activeSession.period_start)} — {fmtDate(activeSession.period_end)}
@@ -337,7 +339,7 @@ export default function ReconciliationPage() {
           </div>
           {activeSession.status === 'in_progress' && (
             <button onClick={handleCompleteSession} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg bg-lime-400 text-neutral-900 hover:bg-lime-300 transition font-bold">
-              <CheckCircle2 className="w-3 h-3" /> Complete
+              <CheckCircle2 className="w-3 h-3" /> {t('reconciliation.complete')}
             </button>
           )}
         </div>
@@ -345,11 +347,11 @@ export default function ReconciliationPage() {
         {/* Summary cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
           {[
-            { label: 'Total Bank Txns', value: matches.length, cls: 'text-neutral-700' },
-            { label: 'Matched', value: matchedCount, cls: 'text-lime-700' },
-            { label: 'Unmatched', value: unmatchedCount, cls: 'text-rose-700' },
-            { label: 'Ignored', value: ignoredCount, cls: 'text-neutral-500' },
-            { label: 'Match Rate', value: `${matchRate}%`, cls: matchRate >= 80 ? 'text-lime-700' : matchRate >= 50 ? 'text-amber-700' : 'text-rose-700' },
+            { label: t('reconciliation.totalBankTxns'), value: matches.length, cls: 'text-neutral-700' },
+            { label: t('reconciliation.matched'), value: matchedCount, cls: 'text-lime-700' },
+            { label: t('reconciliation.unmatched'), value: unmatchedCount, cls: 'text-rose-700' },
+            { label: t('reconciliation.ignored'), value: ignoredCount, cls: 'text-neutral-500' },
+            { label: t('reconciliation.matchRate'), value: `${matchRate}%`, cls: matchRate >= 80 ? 'text-lime-700' : matchRate >= 50 ? 'text-amber-700' : 'text-rose-700' },
           ].map(c => (
             <div key={c.label} className="bg-white rounded-xl shadow-sm px-3 py-2">
               <p className="text-[10px] text-neutral-400">{c.label}</p>
@@ -361,7 +363,7 @@ export default function ReconciliationPage() {
         {activeSession.discrepancy_amount > 0 && (
           <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs">
             <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-            <span>Discrepancy amount: <strong className="font-mono">{fmt(activeSession.discrepancy_amount)}</strong></span>
+            <span>{t('reconciliation.discrepancyAmount')} <strong className="font-mono">{fmt(activeSession.discrepancy_amount)}</strong></span>
           </div>
         )}
 
@@ -372,7 +374,7 @@ export default function ReconciliationPage() {
             <input
               value={matchSearch}
               onChange={e => setMatchSearch(e.target.value)}
-              placeholder="Search narration, note, category…"
+              placeholder={t('reconciliation.searchPlaceholder')}
               className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-neutral-200 text-xs focus:outline-none focus:ring-2 focus:ring-lime-400"
             />
           </div>
@@ -385,7 +387,7 @@ export default function ReconciliationPage() {
                   matchFilter === f ? 'bg-lime-100 text-lime-700' : 'bg-white text-neutral-400 hover:text-neutral-900 border border-neutral-200'
                 }`}
               >
-                {f}
+                {f === 'all' ? t('common.all') : t(`reconciliation.${f}`)}
               </button>
             ))}
           </div>
@@ -398,7 +400,7 @@ export default function ReconciliationPage() {
           </div>
         ) : filteredMatches.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-sm p-8 text-center text-xs text-neutral-400">
-            No matches found for this filter.
+            {t('reconciliation.noMatchesForFilter')}
           </div>
         ) : (
           <div className="space-y-2">
@@ -438,14 +440,14 @@ export default function ReconciliationPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-base font-bold text-neutral-900">Bank Reconciliation</h1>
-          <p className="text-[10px] text-neutral-400">Match bank statements to your recorded transactions</p>
+          <h1 className="text-base font-bold text-neutral-900">{t('reconciliation.title')}</h1>
+          <p className="text-[10px] text-neutral-400">{t('reconciliation.subtitle')}</p>
         </div>
         <button
           onClick={() => setShowNewModal(true)}
           className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-lime-400 text-neutral-900 hover:bg-lime-300 transition font-bold"
         >
-          <Plus className="w-3 h-3" /> New Session
+          <Plus className="w-3 h-3" /> {t('reconciliation.newSession')}
         </button>
       </div>
 
@@ -457,13 +459,13 @@ export default function ReconciliationPage() {
       ) : sessions.length === 0 ? (
         <div className="bg-white rounded-2xl shadow-sm p-8 text-center">
           <GitCompareArrows className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
-          <p className="text-sm text-neutral-500 font-semibold">No reconciliation sessions yet</p>
-          <p className="text-[10px] text-neutral-400 mt-1 mb-4">Start a session to auto-match bank transactions with your records</p>
+          <p className="text-sm text-neutral-500 font-semibold">{t('reconciliation.noSessionsYet')}</p>
+          <p className="text-[10px] text-neutral-400 mt-1 mb-4">{t('reconciliation.noSessionsDesc')}</p>
           <button
             onClick={() => setShowNewModal(true)}
             className="text-xs px-3 py-1.5 rounded-lg bg-lime-400 text-neutral-900 hover:bg-lime-300 transition font-bold"
           >
-            Start Reconciliation
+            {t('reconciliation.startReconciliation')}
           </button>
         </div>
       ) : (
@@ -482,7 +484,7 @@ export default function ReconciliationPage() {
                     <div className="flex items-center gap-2 mb-1">
                       <Building2 className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" />
                       <span className="text-xs font-bold text-neutral-900 truncate">
-                        {s.bank_name ?? 'Bank'} — {s.masked_account_number ?? '****'}
+                        {s.bank_name ?? t('reconciliation.bankFallback')} — {s.masked_account_number ?? '****'}
                       </span>
                       <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${cfg.cls}`}>
                         {cfg.label}
@@ -495,7 +497,7 @@ export default function ReconciliationPage() {
                   </div>
                   <div className="text-right flex-shrink-0">
                     <p className="text-xs font-mono font-bold text-neutral-900">{rate}%</p>
-                    <p className="text-[10px] text-neutral-400">matched</p>
+                    <p className="text-[10px] text-neutral-400">{t('reconciliation.matched').toLowerCase()}</p>
                   </div>
                 </div>
 
@@ -508,11 +510,11 @@ export default function ReconciliationPage() {
                 </div>
 
                 <div className="flex items-center gap-3 mt-2 text-[10px] text-neutral-400">
-                  <span>{s.total_bank_txns} bank txns</span>
-                  <span className="text-lime-600">{s.matched_count} matched</span>
-                  <span className="text-rose-500">{s.unmatched_count} unmatched</span>
+                  <span>{s.total_bank_txns} {t('reconciliation.bankTxns')}</span>
+                  <span className="text-lime-600">{s.matched_count} {t('reconciliation.matched').toLowerCase()}</span>
+                  <span className="text-rose-500">{s.unmatched_count} {t('reconciliation.unmatched').toLowerCase()}</span>
                   {s.discrepancy_amount > 0 && (
-                    <span className="text-amber-600">discrepancy {fmt(s.discrepancy_amount)}</span>
+                    <span className="text-amber-600">{t('reconciliation.discrepancyWord')} {fmt(s.discrepancy_amount)}</span>
                   )}
                 </div>
               </button>
@@ -527,7 +529,7 @@ export default function ReconciliationPage() {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowNewModal(false)} />
           <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-sm font-bold text-neutral-900">New Reconciliation Session</h2>
+              <h2 className="text-sm font-bold text-neutral-900">{t('reconciliation.newReconciliationSession')}</h2>
               <button onClick={() => setShowNewModal(false)} className="p-1 text-neutral-400 hover:text-neutral-900 transition">
                 <X className="w-4 h-4" />
               </button>
@@ -535,9 +537,9 @@ export default function ReconciliationPage() {
             <form onSubmit={handleCreateSession} className="space-y-4">
               {/* Bank connection */}
               <div>
-                <label className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">Bank Account</label>
+                <label className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">{t('reconciliation.bankAccount')}</label>
                 {connections.length === 0 ? (
-                  <p className="text-xs text-neutral-400 mt-1">No active bank connections. <a href="/dashboard/bank" className="text-lime-600 underline">Connect one</a></p>
+                  <p className="text-xs text-neutral-400 mt-1">{t('reconciliation.noActiveBankConnections')} <a href="/dashboard/bank" className="text-lime-600 underline">{t('reconciliation.connectOne')}</a></p>
                 ) : (
                   <select
                     value={newForm.bankConnectionId}
@@ -545,10 +547,10 @@ export default function ReconciliationPage() {
                     required
                     className="mt-1 w-full px-3 py-2 rounded-lg border border-neutral-200 text-xs focus:outline-none focus:ring-2 focus:ring-lime-400"
                   >
-                    <option value="">Select bank account…</option>
+                    <option value="">{t('reconciliation.selectBankAccount')}</option>
                     {connections.map(c => (
                       <option key={c.id} value={c.id}>
-                        {c.bank_name ?? 'Bank'} — {c.masked_account_number ?? '****'}
+                        {c.bank_name ?? t('reconciliation.bankFallback')} — {c.masked_account_number ?? '****'}
                       </option>
                     ))}
                   </select>
@@ -558,7 +560,7 @@ export default function ReconciliationPage() {
               {/* Period */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">From</label>
+                  <label className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">{t('reconciliation.from')}</label>
                   <input
                     type="date"
                     value={newForm.periodStart}
@@ -568,7 +570,7 @@ export default function ReconciliationPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">To</label>
+                  <label className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">{t('reconciliation.to')}</label>
                   <input
                     type="date"
                     value={newForm.periodEnd}
@@ -585,7 +587,7 @@ export default function ReconciliationPage() {
                 className="w-full flex items-center justify-center gap-2 text-xs px-3 py-2.5 rounded-lg bg-lime-400 text-neutral-900 hover:bg-lime-300 transition font-bold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <GitCompareArrows className="w-3.5 h-3.5" />}
-                {creating ? 'Running…' : 'Start Reconciliation'}
+                {creating ? t('reconciliation.running') : t('reconciliation.startReconciliation')}
               </button>
             </form>
           </div>
@@ -620,6 +622,7 @@ interface MatchCardProps {
 }
 
 function MatchCard({ match, fmt, fmtDate, statusCfg, unmatchedManual, onMatch, onUnmatch, onIgnore, sessionStatus }: MatchCardProps) {
+  const { t } = useTranslation()
   const [showDropdown, setShowDropdown] = useState(false)
   const m = match
   const cfg = statusCfg[m.status] ?? statusCfg.unmatched
@@ -650,9 +653,9 @@ function MatchCard({ match, fmt, fmtDate, statusCfg, unmatchedManual, onMatch, o
             }
             <div className="min-w-0">
               <p className="text-xs font-semibold text-neutral-900 truncate">
-                {m.bank_narration || 'No narration'}
+                {m.bank_narration || t('reconciliation.noNarration')}
               </p>
-              <p className="text-[10px] text-neutral-400">{fmtDate(m.bank_date)} · {m.bank_reference || 'No ref'}</p>
+              <p className="text-[10px] text-neutral-400">{fmtDate(m.bank_date)} · {m.bank_reference || t('reconciliation.noRef')}</p>
             </div>
           </div>
           <div className="text-right flex-shrink-0">
@@ -672,7 +675,7 @@ function MatchCard({ match, fmt, fmtDate, statusCfg, unmatchedManual, onMatch, o
             <Link2 className="w-3 h-3 text-lime-600 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-semibold text-lime-800 truncate">
-                {m.manual_category_name ?? 'Uncategorised'} — {m.manual_note || 'No note'}
+                {m.manual_category_name ?? t('reconciliation.uncategorised')} — {m.manual_note || t('reconciliation.noNote')}
               </p>
               <p className="text-[10px] text-lime-600">
                 {fmtDate(m.manual_date ?? '')} · {m.manual_method ?? ''} · {fmt(m.manual_amount ?? 0)}
@@ -685,7 +688,7 @@ function MatchCard({ match, fmt, fmtDate, statusCfg, unmatchedManual, onMatch, o
               <button
                 onClick={() => onUnmatch(m.bank_transaction_id)}
                 className="text-[10px] text-rose-500 hover:text-rose-700 font-bold ml-1"
-                title="Unmatch"
+                title={t('reconciliation.unmatchTitle')}
               >
                 <Unlink className="w-3 h-3" />
               </button>
@@ -699,10 +702,10 @@ function MatchCard({ match, fmt, fmtDate, statusCfg, unmatchedManual, onMatch, o
             <HelpCircle className="w-3 h-3 text-amber-600 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-semibold text-amber-800 truncate">
-                Suggested: {m.manual_category_name ?? 'Uncategorised'} — {m.manual_note || 'No note'}
+                {t('reconciliation.suggestedPrefix')} {m.manual_category_name ?? t('reconciliation.uncategorised')} — {m.manual_note || t('reconciliation.noNote')}
               </p>
               <p className="text-[10px] text-amber-600">
-                {fmtDate(m.manual_date ?? '')} · {fmt(m.manual_amount ?? 0)} · {Math.round(m.confidence)}% confidence
+                {fmtDate(m.manual_date ?? '')} · {fmt(m.manual_amount ?? 0)} · {Math.round(m.confidence)}% {t('reconciliation.confidenceWord')}
               </p>
             </div>
             {isEditable && (
@@ -711,13 +714,13 @@ function MatchCard({ match, fmt, fmtDate, statusCfg, unmatchedManual, onMatch, o
                   onClick={() => onMatch(m.bank_transaction_id, m.manual_transaction_id!)}
                   className="text-[10px] px-2 py-1 rounded bg-lime-400 text-neutral-900 font-bold hover:bg-lime-300"
                 >
-                  Accept
+                  {t('reconciliation.accept')}
                 </button>
                 <button
                   onClick={() => onIgnore(m.bank_transaction_id)}
                   className="text-[10px] px-2 py-1 rounded bg-neutral-200 text-neutral-600 font-bold hover:bg-neutral-300"
                 >
-                  Ignore
+                  {t('reconciliation.ignoreBtn')}
                 </button>
               </div>
             )}
@@ -732,13 +735,13 @@ function MatchCard({ match, fmt, fmtDate, statusCfg, unmatchedManual, onMatch, o
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg border border-neutral-200 text-xs text-neutral-500 hover:border-lime-400 transition"
               >
-                <span>Match manually…</span>
+                <span>{t('reconciliation.matchManually')}</span>
                 <ChevronDown className="w-3 h-3" />
               </button>
               {showDropdown && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg border border-neutral-200 shadow-lg z-20 max-h-48 overflow-y-auto">
                   {relevantManual.length === 0 ? (
-                    <p className="px-3 py-2 text-[10px] text-neutral-400">No matching transactions found</p>
+                    <p className="px-3 py-2 text-[10px] text-neutral-400">{t('reconciliation.noMatchingFound')}</p>
                   ) : (
                     relevantManual.map(mt => (
                       <button
@@ -748,7 +751,7 @@ function MatchCard({ match, fmt, fmtDate, statusCfg, unmatchedManual, onMatch, o
                       >
                         <div className="min-w-0">
                           <p className="text-[10px] font-semibold text-neutral-900 truncate">
-                            {mt.category_name ?? 'Uncategorised'} — {mt.note || 'No note'}
+                            {mt.category_name ?? t('reconciliation.uncategorised')} — {mt.note || t('reconciliation.noNote')}
                           </p>
                           <p className="text-[10px] text-neutral-400">{fmtDate(mt.date)} · {mt.method ?? ''}</p>
                         </div>
@@ -764,7 +767,7 @@ function MatchCard({ match, fmt, fmtDate, statusCfg, unmatchedManual, onMatch, o
             <button
               onClick={() => onIgnore(m.bank_transaction_id)}
               className="text-[10px] px-2 py-1.5 rounded-lg bg-neutral-100 text-neutral-500 font-bold hover:bg-neutral-200 transition flex-shrink-0"
-              title="Ignore this transaction"
+              title={t('reconciliation.ignoreThisTxn')}
             >
               <EyeOff className="w-3 h-3" />
             </button>
@@ -773,7 +776,7 @@ function MatchCard({ match, fmt, fmtDate, statusCfg, unmatchedManual, onMatch, o
 
         {/* Ignored note */}
         {m.status === 'ignored' && (
-          <p className="text-[10px] text-neutral-400 mt-1 italic">{m.notes || 'Ignored by user'}</p>
+          <p className="text-[10px] text-neutral-400 mt-1 italic">{m.notes || t('reconciliation.ignoredByUser')}</p>
         )}
       </div>
     </div>

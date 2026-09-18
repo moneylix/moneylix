@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '../../../admin/_auth'
 import dbQuery from '@/lib/db.async'
+import { toPgQuery } from '@/lib/db.postgres'
 import { audit, AUDIT_ACTIONS } from '@/lib/audit'
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
@@ -75,21 +76,21 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     return NextResponse.json({ error: 'Admin accounts cannot be deleted via this endpoint' }, { status: 403 })
   }
 
-  await dbQuery.transaction((db) => {
-    const businesses = db.prepare('SELECT id FROM businesses WHERE user_id = ?').all(userId) as { id: number }[]
-    const bizIds = businesses.map(b => b.id)
+  await dbQuery.transaction(async (client) => {
+    const businessesResult = await client.query(toPgQuery('SELECT id FROM businesses WHERE user_id = ?'), [userId])
+    const bizIds = (businessesResult.rows as { id: number }[]).map(b => b.id)
 
     if (bizIds.length > 0) {
       const placeholders = bizIds.map(() => '?').join(',')
-      db.prepare(`DELETE FROM transactions WHERE business_id IN (${placeholders})`).run(...bizIds)
+      await client.query(toPgQuery(`DELETE FROM transactions WHERE business_id IN (${placeholders})`), bizIds)
     }
 
-    db.prepare('DELETE FROM bank_transactions WHERE user_id = ?').run(userId)
-    db.prepare('DELETE FROM bank_connections WHERE user_id = ?').run(userId)
-    db.prepare('DELETE FROM businesses WHERE user_id = ?').run(userId)
-    db.prepare('DELETE FROM user_settings WHERE user_id = ?').run(userId)
-    db.prepare('DELETE FROM sessions WHERE user_id = ?').run(userId)
-    db.prepare('DELETE FROM users WHERE id = ?').run(userId)
+    await client.query(toPgQuery('DELETE FROM bank_transactions WHERE user_id = ?'), [userId])
+    await client.query(toPgQuery('DELETE FROM bank_connections WHERE user_id = ?'), [userId])
+    await client.query(toPgQuery('DELETE FROM businesses WHERE user_id = ?'), [userId])
+    await client.query(toPgQuery('DELETE FROM user_settings WHERE user_id = ?'), [userId])
+    await client.query(toPgQuery('DELETE FROM sessions WHERE user_id = ?'), [userId])
+    await client.query(toPgQuery('DELETE FROM users WHERE id = ?'), [userId])
   })
 
   await audit({

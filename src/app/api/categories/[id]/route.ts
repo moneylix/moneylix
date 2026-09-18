@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import db from '@/lib/db.async'
+import { toPgQuery } from '@/lib/db.postgres'
 import { categorySchema } from '@/lib/schemas'
 
 export async function GET(
@@ -32,9 +33,10 @@ export async function PUT(
     
     const { name, icon, color, type } = validation.data
 
-    const category = await db.transaction((tx) => {
-      tx.prepare('UPDATE categories SET name = ?, icon = ?, color = ?, type = ? WHERE id = ?').run(name, icon, color, type, params.id)
-      return tx.prepare('SELECT * FROM categories WHERE id = ?').get(params.id)
+    const category = await db.transaction(async (tx) => {
+      await tx.query(toPgQuery('UPDATE categories SET name = ?, icon = ?, color = ?, type = ? WHERE id = ?'), [name, icon, color, type, params.id])
+      const result = await tx.query(toPgQuery('SELECT * FROM categories WHERE id = ?'), [params.id])
+      return result.rows[0]
     })
     return NextResponse.json(category)
   } catch (error) {
@@ -48,12 +50,13 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await db.transaction((tx) => {
-      const count = tx.prepare('SELECT COUNT(*) as count FROM transactions WHERE category_id = ?').get(params.id) as any
-      if (count && count.count > 0) {
+    await db.transaction(async (tx) => {
+      const countResult = await tx.query(toPgQuery('SELECT COUNT(*) as count FROM transactions WHERE category_id = ?'), [params.id])
+      const count = countResult.rows[0] as any
+      if (count && Number(count.count) > 0) {
         throw new Error('Cannot delete category with transactions')
       }
-      tx.prepare('DELETE FROM categories WHERE id = ?').run(params.id)
+      await tx.query(toPgQuery('DELETE FROM categories WHERE id = ?'), [params.id])
     })
     return NextResponse.json({ success: true })
   } catch (error: any) {

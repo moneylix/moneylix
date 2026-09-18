@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Upsert
-    const result = await db.run(
+    const result = await db.insert(
       `INSERT INTO budgets (user_id, business_id, category_id, month, amount, updated_at)
        VALUES (?, ?, ?, ?, ?, datetime('now'))
        ON CONFLICT(user_id, business_id, category_id, month) DO UPDATE SET

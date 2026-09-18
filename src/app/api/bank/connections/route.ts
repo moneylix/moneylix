@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import dbQuery from '@/lib/db.async'
+import { toPgQuery } from '@/lib/db.postgres'
 import { revokeConsent } from '@/lib/setu/client'
 import { audit, AUDIT_ACTIONS } from '@/lib/audit'
 
@@ -104,9 +105,9 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Delete associated bank transactions first, then the connection
-    await dbQuery.transaction((db) => {
-      db.prepare('DELETE FROM bank_transactions WHERE bank_connection_id = ?').run(connectionId)
-      db.prepare('DELETE FROM bank_connections WHERE id = ?').run(connectionId)
+    await dbQuery.transaction(async (client) => {
+      await client.query(toPgQuery('DELETE FROM bank_transactions WHERE bank_connection_id = ?'), [connectionId])
+      await client.query(toPgQuery('DELETE FROM bank_connections WHERE id = ?'), [connectionId])
     })
 
     audit({

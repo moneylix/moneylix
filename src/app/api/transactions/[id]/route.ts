@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import db from '@/lib/db.async'
+import { toPgQuery } from '@/lib/db.postgres'
 import { transactionSchema } from '@/lib/schemas'
 
 async function getUserId(request: NextRequest): Promise<number | null> {
@@ -51,15 +52,17 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     const { type, amount, category_id, business_id, currency, date, due_date, reminder_days, note, method, tags, status, client_name } = validation.data
 
-    const { transaction, cat } = await db.transaction((tx) => {
-      tx.prepare(`
+    const { transaction, cat } = await db.transaction(async (tx) => {
+      await tx.query(toPgQuery(`
         UPDATE transactions
         SET type = ?, amount = ?, category_id = ?, business_id = ?, currency = ?, date = ?, due_date = ?, reminder_days = ?, note = ?, method = ?, tags = ?, status = ?, client_name = ?, updated_at = datetime('now')
         WHERE id = ?
-      `).run(type, amount, category_id, business_id || null, currency, date, due_date || null, reminder_days || 3, note || null, method || null, tags || null, status || 'completed', client_name || null, params.id)
+      `), [type, amount, category_id, business_id || null, currency, date, due_date || null, reminder_days || 3, note || null, method || null, tags || null, status || 'completed', client_name || null, params.id])
 
-      const tr = tx.prepare('SELECT * FROM transactions WHERE id = ?').get(params.id) as any
-      const categories = tx.prepare('SELECT * FROM categories').all() as any[]
+      const trResult = await tx.query(toPgQuery('SELECT * FROM transactions WHERE id = ?'), [params.id])
+      const tr = trResult.rows[0] as any
+      const categoriesResult = await tx.query(toPgQuery('SELECT * FROM categories'), [])
+      const categories = categoriesResult.rows as any[]
       const category = categories.find(c => c.id === tr?.category_id)
       return { transaction: tr, cat: category }
     })
@@ -81,7 +84,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     if (!await ownsTransaction(userId, params.id)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-    await db.transaction((tx) => { tx.prepare('DELETE FROM transactions WHERE id = ?').run(params.id) })
+    await db.transaction(async (tx) => { await tx.query(toPgQuery('DELETE FROM transactions WHERE id = ?'), [params.id]) })
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Transaction delete error:', error)

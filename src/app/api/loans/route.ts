@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     const endDate = schedule.length > 0 ? schedule[schedule.length - 1].date : null
     const nextEmiDate = schedule.length > 0 ? schedule[0].date : null
 
-    const result = await db.run(
+    const result = await db.insert(
       `INSERT INTO loans (user_id, business_id, lender_name, loan_type, principal_amount, interest_rate, tenure_months, emi_amount, start_date, end_date, disbursement_date, outstanding_balance, next_emi_date, notes)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [

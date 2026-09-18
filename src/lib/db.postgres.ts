@@ -135,24 +135,142 @@ async function runMigrations(client: PoolClient): Promise<void> {
 }
 
 /**
+ * Explicit conflict targets for every `INSERT OR IGNORE` in the migration
+ * files, keyed by table name. `null` means the table has no unique
+ * constraint on the columns being inserted (e.g. `categories.name` isn't
+ * unique) — SQLite's OR IGNORE was a no-op there too in that case, since
+ * migrations only ever run once (tracked in schema_migrations), so a plain
+ * INSERT preserves identical behavior. A blind "ON CONFLICT (name)" would
+ * be WRONG here — Postgres errors if the target isn't a real unique/PK
+ * constraint, and adding one would just be guessing.
+ */
+const INSERT_IGNORE_CONFLICT_TARGETS: Record<string, string | null> = {
+  businesses: 'id',
+  currencies: 'code',
+  settings: 'key',
+  categories: null,
+  user_settings: 'user_id, key',
+  app_settings: 'key',
+}
+
+/**
+ * Rewrite every `INSERT OR IGNORE INTO <table> ...;` statement to either
+ * `... ON CONFLICT (<real target>) DO NOTHING;` or a plain INSERT, per the
+ * table-specific map above. Handles both VALUES(...) and INSERT...SELECT
+ * forms (e.g. 009_user_settings.sql) since it matches up to the statement's
+ * terminating semicolon rather than assuming a VALUES clause.
+ */
+function convertInsertOrIgnore(sql: string): string {
+  return sql.replace(
+    /INSERT\s+OR\s+IGNORE\s+INTO\s+(\w+)([\s\S]*?);/gi,
+    (full: string, table: string, rest: string) => {
+      const target = INSERT_IGNORE_CONFLICT_TARGETS[table.toLowerCase()]
+      const conflictClause = target ? ` ON CONFLICT (${target}) DO NOTHING` : ''
+      return `INSERT INTO ${table}${rest}${conflictClause};`
+    }
+  )
+}
+
+/**
  * Convert common SQLite SQL syntax to PostgreSQL.
  * Used when applying .sql migration files that were written for SQLite.
+ *
+ * NOTE: deliberately does NOT convert `INTEGER ... DEFAULT 0/1` columns to
+ * BOOLEAN. That pattern is shared by genuine boolean flags (is_read,
+ * gst_registered) AND real counters (recipient_count, total_generated,
+ * matched_count) across the migrations — a regex can't tell them apart, and
+ * converting a counter to BOOLEAN breaks every SUM()/increment against it.
+ * Postgres has no issue with 0/1 INTEGER flags, so we just keep them as-is
+ * — this is a deliberate decision, not an oversight.
+ *
+ * DOES convert TEXT timestamp columns to TIMESTAMPTZ (unlike the boolean
+ * case, this pattern is unambiguous — a column declared
+ * `TEXT DEFAULT (datetime('now'))`, or literally named `expires_at`, is
+ * always a timestamp, never something else). This matters because
+ * toPgQuery() turns `datetime('now')` into `NOW()`, which returns a real
+ * TIMESTAMPTZ — assigning or comparing that against a TEXT column fails
+ * with "operator does not exist: text > timestamp with time zone" at
+ * runtime. Must run before the plain datetime('now') → NOW() replace below,
+ * or this DEFAULT-clause-specific pattern would no longer match.
  */
 function convertSqliteToPostgres(sql: string): string {
-  return sql
+  let out = sql
     // AUTOINCREMENT → use SERIAL (applied to CREATE TABLE)
     .replace(/INTEGER\s+PRIMARY\s+KEY\s+AUTOINCREMENT/gi, 'SERIAL PRIMARY KEY')
+    // TEXT ... DEFAULT (datetime('now')) → TIMESTAMPTZ ... DEFAULT NOW()
+    .replace(/TEXT(\s+NOT\s+NULL)?\s+DEFAULT\s*\(datetime\('now'\)\)/gi,
+      (_m, notNull: string | undefined) => `TIMESTAMPTZ${notNull ?? ''} DEFAULT NOW()`)
+    // expires_at TEXT [NOT NULL] → expires_at TIMESTAMPTZ [NOT NULL]
+    .replace(/\bexpires_at\s+TEXT(\s+NOT\s+NULL)?/gi,
+      (_m, notNull: string | undefined) => `expires_at TIMESTAMPTZ${notNull ?? ''}`)
     // datetime('now') → NOW()
     .replace(/datetime\('now'\)/gi, 'NOW()')
-    // BOOLEAN as INTEGER → BOOLEAN
-    .replace(/INTEGER\s+NOT\s+NULL\s+DEFAULT\s+([01])\b/gi, (_, val) =>
-      `BOOLEAN NOT NULL DEFAULT ${val === '1' ? 'TRUE' : 'FALSE'}`
-    )
-    // INSERT OR IGNORE → INSERT ... ON CONFLICT DO NOTHING
-    .replace(/INSERT\s+OR\s+IGNORE/gi, 'INSERT')
-    // TEXT fields stay TEXT (compatible)
-    // REAL → DOUBLE PRECISION (if needed)
+    // REAL → DOUBLE PRECISION
     .replace(/\bREAL\b/gi, 'DOUBLE PRECISION')
+
+  out = convertInsertOrIgnore(out)
+  return out
+}
+
+/**
+ * Convert a SQLite-style query (using `?` placeholders) to Postgres style
+ * (`$1, $2, ...`), and swap SQLite-only date/time functions for their
+ * Postgres equivalents. Applied to every runtime query so the ~105 route
+ * files that call dbQuery.get/all/run with `?` and datetime('now')/
+ * strftime()/date() need zero changes.
+ *
+ * Scans left-to-right, tracking whether we're inside a single-quoted string
+ * literal (handling SQLite's '' escaped-quote convention) so a literal `?`
+ * inside quoted text is never mistaken for a placeholder — none of the
+ * sampled queries in this codebase do that, but it costs nothing to guard.
+ *
+ * Date/time conversions, applied in this order (each must run before the
+ * more generic rule below it, or it would swallow the specific case first):
+ *   datetime('now')                 → NOW()
+ *   strftime('%Y-%m', 'now')        → TO_CHAR(NOW(), 'YYYY-MM')
+ *   strftime('%Y-%m', <col>)        → TO_CHAR(<col>, 'YYYY-MM')
+ *   date('now', '+N unit')          → CURRENT_DATE + INTERVAL 'N unit'
+ *   date('now', '-N unit')          → CURRENT_DATE - INTERVAL 'N unit'
+ *   date('now')                     → CURRENT_DATE
+ *   date(<col>)                     → (<col>)::date
+ */
+export function toPgQuery(sql: string): string {
+  let out = ''
+  let paramIndex = 0
+  let inString = false
+
+  for (let i = 0; i < sql.length; i++) {
+    const ch = sql[i]
+
+    if (ch === "'") {
+      // '' inside a string is an escaped quote, not the string's end
+      if (inString && sql[i + 1] === "'") {
+        out += "''"
+        i++
+        continue
+      }
+      inString = !inString
+      out += ch
+      continue
+    }
+
+    if (ch === '?' && !inString) {
+      paramIndex++
+      out += `$${paramIndex}`
+      continue
+    }
+
+    out += ch
+  }
+
+  return out
+    .replace(/datetime\('now'\)/gi, 'NOW()')
+    .replace(/strftime\('%Y-%m',\s*'now'\)/gi, "TO_CHAR(NOW(), 'YYYY-MM')")
+    .replace(/strftime\('%Y-%m',\s*([^,)]+)\)/gi, "TO_CHAR($1, 'YYYY-MM')")
+    .replace(/date\('now',\s*'([+-])(\d+)\s+(day|days|month|months|year|years)'\)/gi,
+      (_m, sign: string, num: string, unit: string) => `CURRENT_DATE ${sign} INTERVAL '${num} ${unit}'`)
+    .replace(/date\('now'\)/gi, 'CURRENT_DATE')
+    .replace(/date\(([^()]+)\)/gi, '($1)::date')
 }
 
 // ---------------------------------------------------------------------------
@@ -202,9 +320,22 @@ async function patchLegacyColumns(client: PoolClient): Promise<void> {
       await client.query('ALTER TABLE users ADD COLUMN email_verified BOOLEAN NOT NULL DEFAULT TRUE')
     } catch { /* already exists */ }
   }
+  // Added for the admin suspend/unsuspend feature — kept as INTEGER (not
+  // BOOLEAN) per the deliberate flag-column decision above.
+  if (!userCols.includes('suspended')) {
+    try {
+      await client.query('ALTER TABLE users ADD COLUMN suspended INTEGER NOT NULL DEFAULT 0')
+    } catch { /* already exists */ }
+  }
+  if (!userCols.includes('suspended_at')) {
+    try {
+      await client.query('ALTER TABLE users ADD COLUMN suspended_at TIMESTAMPTZ')
+    } catch { /* already exists */ }
+  }
 
   await seedAdminUser(client)
   await seedDemoUser(client)
+  await ensureDemoPremium(client)
 }
 
 // ---------------------------------------------------------------------------
@@ -254,42 +385,78 @@ async function seedDemoUser(client: PoolClient): Promise<void> {
   }
 }
 
+/**
+ * Gives the demo account an active premium subscription, so demo logins
+ * show the full feature set rather than the free tier. Mirrors db.ts's
+ * ensureDemoPremium — without this, a fresh Postgres install's demo user
+ * would silently be stuck on free (seedDemoUser only creates the user row,
+ * not a subscription).
+ */
+async function ensureDemoPremium(client: PoolClient): Promise<void> {
+  try {
+    const demoUser = await client.query<{ id: number }>("SELECT id FROM users WHERE username = 'demo'")
+    if (demoUser.rows.length === 0) return
+    const demoId = demoUser.rows[0].id
+
+    const existingSub = await client.query(
+      "SELECT id FROM subscriptions WHERE user_id = $1 AND plan = 'premium' AND status = 'active'",
+      [demoId]
+    )
+    if (existingSub.rows.length > 0) return
+
+    await client.query(
+      "UPDATE subscriptions SET status = 'cancelled' WHERE user_id = $1 AND status = 'active'",
+      [demoId]
+    )
+    const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+    await client.query(
+      `INSERT INTO subscriptions (user_id, plan, status, started_at, expires_at, amount_paid, payment_method, notes)
+       VALUES ($1, 'premium', 'active', NOW(), $2, 0, 'demo', 'Auto-created premium for demo account')`,
+      [demoId, expiresAt]
+    )
+    console.log('[db.postgres] Demo user upgraded to premium plan')
+  } catch (err) {
+    console.error('[db.postgres] Failed to ensure demo premium:', err)
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Public query helpers
 // Changed from: synchronous methods returning values directly
 // Changed to:   async methods returning Promises
 //
-// INTERFACE COMPARISON:
-//   SQLite:     dbQuery.all<T>(sql, params): T[]
-//   PostgreSQL: dbQuery.all<T>(sql, params): Promise<T[]>
-//
-//   SQLite:     dbQuery.get<T>(sql, params): T | null
-//   PostgreSQL: dbQuery.get<T>(sql, params): Promise<T | null>
-//
-//   SQLite:     dbQuery.run(sql, params): { changes, lastInsertRowid }
-//   PostgreSQL: dbQuery.run(sql, params): Promise<{ rowCount: number }>
-//
-//   SQLite:     dbQuery.transaction(fn): T
-//   PostgreSQL: dbQuery.transaction(fn): Promise<T>
+// All of get/all/run/insert accept the same SQLite-style `?` placeholders
+// and `datetime('now')` the app already writes — toPgQuery() converts them
+// automatically, so existing call sites don't need editing. run()'s return
+// shape includes both `rowCount` (Postgres-native) and `changes`/
+// `lastInsertRowid` (SQLite-compatibility aliases). transaction()'s
+// callback is async and receives a pg PoolClient rather than a sync db
+// handle — the ~12 call sites using sync `db.prepare().run()` chains inside
+// a transaction still need hand-rewriting to `await client.query(...)`.
 // ---------------------------------------------------------------------------
 
 type Params = unknown[]
 
 export interface RunResult {
   rowCount: number
+  /** Compatibility alias for rowCount, matching better-sqlite3's RunResult shape. */
+  changes: number
+  /**
+   * Only populated when the query already has (or run() adds) a RETURNING
+   * clause — Postgres has no automatic last-inserted-id like SQLite's
+   * ROWID. Prefer dbQuery.insert() for the common single-row-insert case.
+   */
+  lastInsertRowid?: number
 }
 
 export const dbQuery = {
   /**
    * Execute a SELECT query, return all rows.
-   * Changed from: getDatabase().prepare(sql).all(...params) as T[]
-   * Changed to:   pool.query(sql, params) → result.rows
-   *
-   * NOTE: Callers must use $1, $2, $3 instead of ? placeholders!
+   * Accepts SQLite-style `?` placeholders — converted to $1,$2,... automatically.
    */
   async all<T extends QueryResultRow = Record<string, unknown>>(sql: string, params: Params = []): Promise<T[]> {
     try {
-      const result = await getPool().query<T>(sql, params)
+      const result = await getPool().query<T>(toPgQuery(sql), params)
       return result.rows
     } catch (err) {
       console.error('[db.postgres] query error:', err, '\nSQL:', sql)
@@ -299,12 +466,11 @@ export const dbQuery = {
 
   /**
    * Execute a SELECT query, return first row or null.
-   * Changed from: getDatabase().prepare(sql).get(...params) ?? null
-   * Changed to:   pool.query(sql + LIMIT 1 if missing) → rows[0] ?? null
+   * Accepts SQLite-style `?` placeholders — converted to $1,$2,... automatically.
    */
   async get<T extends QueryResultRow = Record<string, unknown>>(sql: string, params: Params = []): Promise<T | null> {
     try {
-      const result = await getPool().query<T>(sql, params)
+      const result = await getPool().query<T>(toPgQuery(sql), params)
       return result.rows[0] ?? null
     } catch (err) {
       console.error('[db.postgres] query error:', err, '\nSQL:', sql)
@@ -314,19 +480,37 @@ export const dbQuery = {
 
   /**
    * Execute an INSERT/UPDATE/DELETE statement.
-   * Changed from: returns { changes: number, lastInsertRowid: number }
-   * Changed to:   returns { rowCount: number }
+   * Accepts SQLite-style `?` placeholders — converted to $1,$2,... automatically.
    *
-   * For RETURNING id, use dbQuery.get() with RETURNING clause instead.
+   * If the query text already contains a RETURNING clause, its first
+   * column is also surfaced as `lastInsertRowid` for drop-in compatibility
+   * with call sites written against the SQLite shape.
    */
   async run(sql: string, params: Params = []): Promise<RunResult> {
     try {
-      const result = await getPool().query(sql, params)
-      return { rowCount: result.rowCount ?? 0 }
+      const result = await getPool().query(toPgQuery(sql), params)
+      const rowCount = result.rowCount ?? 0
+      const firstReturned = result.rows?.[0]
+      const lastInsertRowid = firstReturned ? Object.values(firstReturned)[0] as number : undefined
+      return { rowCount, changes: rowCount, lastInsertRowid }
     } catch (err) {
       console.error('[db.postgres] run error:', err, '\nSQL:', sql)
-      return { rowCount: 0 }
+      return { rowCount: 0, changes: 0 }
     }
+  },
+
+  /**
+   * Convenience for the common "INSERT a row, get its new id back" pattern
+   * that SQLite's `.run().lastInsertRowid` handled implicitly. Appends
+   * `RETURNING id` if the query doesn't already have a RETURNING clause.
+   *
+   * Usage: const { lastInsertRowid } = await dbQuery.insert(
+   *   'INSERT INTO categories (name, icon) VALUES (?, ?)', [name, icon]
+   * )
+   */
+  async insert(sql: string, params: Params = []): Promise<RunResult> {
+    const withReturning = /\bRETURNING\b/i.test(sql) ? sql : `${sql.replace(/;\s*$/, '')} RETURNING id`
+    return dbQuery.run(withReturning, params)
   },
 
   /**

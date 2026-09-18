@@ -10,13 +10,13 @@ import { useRouter } from 'next/navigation'
 import { useTranslation, LANGUAGES } from '@/lib/i18n'
 
 const quickLinks = [
-  { href: '/dashboard/profile',     icon: User,          label: 'Profile',     desc: 'Edit name, email & password',       color: 'text-sky-400',    bg: 'bg-sky-500/10'    },
-  { href: '/dashboard/recurring',   icon: RefreshCw,     label: 'Recurring',   desc: 'Schedule repeat transactions',      color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
-  { href: '/dashboard/categories',  icon: Tags,          label: 'Categories',  desc: 'Manage expense & income categories', color: 'text-violet-400', bg: 'bg-violet-500/10' },
-  { href: '/dashboard/receivables', icon: ClipboardList, label: 'Receivables', desc: 'Track pending client payments',        color: 'text-amber-400',  bg: 'bg-amber-500/10'  },
-  { href: '/dashboard/calculator',  icon: Calculator,    label: 'Calculator',  desc: 'Financial calculator with history',   color: 'text-cyan-400',   bg: 'bg-cyan-500/10'   },
-  { href: '/dashboard/pricing',     icon: CreditCard,    label: 'Plans',       desc: 'Upgrade your Moneylix plan',          color: 'text-emerald-400',bg: 'bg-emerald-500/10'},
-  { href: '/dashboard/help',        icon: HelpCircle,    label: 'Help',        desc: 'FAQs and support center',             color: 'text-blue-400',   bg: 'bg-blue-500/10'   },
+  { href: '/dashboard/profile',     icon: User,          label: 'Profile',     desc: 'Edit name, email & password',       color: 'text-sky-600',    bg: 'bg-sky-100'    },
+  { href: '/dashboard/recurring',   icon: RefreshCw,     label: 'Recurring',   desc: 'Schedule repeat transactions',      color: 'text-indigo-600', bg: 'bg-indigo-100' },
+  { href: '/dashboard/categories',  icon: Tags,          label: 'Categories',  desc: 'Manage expense & income categories', color: 'text-violet-600', bg: 'bg-violet-100' },
+  { href: '/dashboard/receivables', icon: ClipboardList, label: 'Receivables', desc: 'Track pending client payments',        color: 'text-amber-600',  bg: 'bg-amber-100'  },
+  { href: '/dashboard/calculator',  icon: Calculator,    label: 'Calculator',  desc: 'Financial calculator with history',   color: 'text-cyan-600',   bg: 'bg-cyan-100'   },
+  { href: '/dashboard/pricing',     icon: CreditCard,    label: 'Plans',       desc: 'Upgrade your Moneylix plan',          color: 'text-emerald-600',bg: 'bg-emerald-100'},
+  { href: '/dashboard/help',        icon: HelpCircle,    label: 'Help',        desc: 'FAQs and support center',             color: 'text-blue-600',   bg: 'bg-blue-100'   },
 ]
 
 export default function SettingsPage() {
@@ -145,11 +145,11 @@ export default function SettingsPage() {
 
   const sections = [
     {
-      icon: <Download className="w-3.5 h-3.5 text-emerald-400" />, title: 'Export Data', desc: 'Download your data',
+      icon: <Download className="w-3.5 h-3.5 text-emerald-600" />, title: 'Export Data', desc: 'Download your data',
       content: (
         <div className="flex gap-2 mt-2">
           {(['csv', 'json'] as const).map(fmt => (
-            <button key={fmt} onClick={() => handleExport(fmt)} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10 transition">
+            <button key={fmt} onClick={() => handleExport(fmt)} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg border border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50 transition">
               <Download className="w-3 h-3" /> {fmt.toUpperCase()}
             </button>
           ))}
@@ -157,23 +157,23 @@ export default function SettingsPage() {
       )
     },
     {
-      icon: <Upload className="w-3.5 h-3.5 text-blue-400" />, title: 'Import CSV', desc: 'Import transactions from file',
+      icon: <Upload className="w-3.5 h-3.5 text-blue-600" />, title: 'Import CSV', desc: 'Import transactions from file',
       content: (
         <div className="mt-2">
-          <div className="rounded-xl border border-dashed border-white/10 bg-slate-800/30 p-3">
-            <input type="file" accept=".csv" onChange={handleImport} disabled={importing} className="block w-full text-xs text-slate-400 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-emerald-500/20 file:text-emerald-300 file:cursor-pointer" />
-            {importing && <div className="mt-2 flex items-center gap-2 text-slate-400 text-xs"><div className="w-3 h-3 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />Importing...</div>}
+          <div className="rounded-xl border border-dashed border-neutral-200 bg-neutral-50 p-3">
+            <input type="file" accept=".csv" onChange={handleImport} disabled={importing} className="block w-full text-xs text-neutral-500 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-emerald-100 file:text-emerald-700 file:cursor-pointer" />
+            {importing && <div className="mt-2 flex items-center gap-2 text-neutral-400 text-xs"><div className="w-3 h-3 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />Importing...</div>}
           </div>
-          <p className="text-[10px] text-slate-500 mt-1">Format: Date, Type, Amount, Category, Note, Method, Tags</p>
+          <p className="text-[10px] text-neutral-400 mt-1">Format: Date, Type, Amount, Category, Note, Method, Tags</p>
         </div>
       )
     },
     {
-      icon: <Info className="w-3.5 h-3.5 text-violet-400" />, title: 'About Moneylix', desc: 'v1.0.0 — Next.js + SQLite + Tailwind',
+      icon: <Info className="w-3.5 h-3.5 text-violet-600" />, title: 'About Moneylix', desc: 'v1.0.0 — Next.js + SQLite + Tailwind',
       content: (
-        <p className="mt-2 text-[10px] text-slate-500">
-          Keyboard shortcuts: <span className="text-slate-300 bg-slate-800 px-1.5 py-0.5 rounded font-mono">A</span> add transaction,{' '}
-          <span className="text-slate-300 bg-slate-800 px-1.5 py-0.5 rounded font-mono">/</span> search
+        <p className="mt-2 text-[10px] text-neutral-400">
+          Keyboard shortcuts: <span className="text-neutral-600 bg-neutral-100 px-1.5 py-0.5 rounded font-mono">A</span> add transaction,{' '}
+          <span className="text-neutral-600 bg-neutral-100 px-1.5 py-0.5 rounded font-mono">/</span> search
         </p>
       )
     },
@@ -182,8 +182,8 @@ export default function SettingsPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-base font-bold text-white">Settings</h1>
-        <p className="text-[10px] text-slate-400">Manage preferences & data</p>
+        <h1 className="text-base font-bold text-neutral-900">Settings</h1>
+        <p className="text-[10px] text-neutral-400">Manage preferences & data</p>
       </div>
 
       {/* Quick Links */}
@@ -194,8 +194,8 @@ export default function SettingsPage() {
               <Icon className={`w-5 h-5 ${color}`} />
             </div>
             <div>
-              <p className="text-xs font-bold text-white">{label}</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">{desc}</p>
+              <p className="text-xs font-bold text-neutral-900">{label}</p>
+              <p className="text-[10px] text-neutral-400 mt-0.5">{desc}</p>
             </div>
           </Link>
         ))}
@@ -206,14 +206,14 @@ export default function SettingsPage() {
 
       {/* Currency */}
       <div className="rounded-2xl bg-white shadow-sm p-3">
-        <p className="text-xs font-semibold text-white mb-2">Currency</p>
+        <p className="text-xs font-semibold text-neutral-900 mb-2">Currency</p>
         <CurrencySelector />
       </div>
 
 
       {/* Language */}
       <div className="rounded-2xl bg-white shadow-sm p-3">
-        <p className="text-xs font-semibold text-white mb-2">{t('settings.language')}</p>
+        <p className="text-xs font-semibold text-neutral-900 mb-2">{t('settings.language')}</p>
         <div className="flex gap-2 flex-wrap">
           {LANGUAGES.map(lang => (
             <button
@@ -238,36 +238,36 @@ export default function SettingsPage() {
           <div key={title} className="rounded-2xl bg-white shadow-sm p-3">
             <div className="flex items-center gap-2 mb-0.5">
               <div className="w-6 h-6 rounded-lg bg-neutral-100 flex items-center justify-center">{icon}</div>
-              <p className="text-xs font-semibold text-white">{title}</p>
+              <p className="text-xs font-semibold text-neutral-900">{title}</p>
             </div>
-            <p className="text-[10px] text-slate-400 ml-8">{desc}</p>
+            <p className="text-[10px] text-neutral-400 ml-8">{desc}</p>
             {content}
           </div>
         ))}
       </div>
 
       {/* Logout — mobile only */}
-      <button onClick={handleLogout} className="lg:hidden w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-rose-500/20 bg-rose-500/10 text-rose-400 text-sm font-bold active:scale-95 transition-all">
+      <button onClick={handleLogout} className="lg:hidden w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold active:scale-95 transition-all">
         <LogOut className="w-4 h-4" /> Logout
       </button>
 
       {/* Delete Account — Danger Zone */}
-      <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-4">
+      <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
         <div className="flex items-center gap-2 mb-2">
-          <div className="w-7 h-7 rounded-lg bg-rose-500/20 flex items-center justify-center">
-            <Trash2 className="w-4 h-4 text-rose-400" />
+          <div className="w-7 h-7 rounded-lg bg-rose-100 flex items-center justify-center">
+            <Trash2 className="w-4 h-4 text-rose-600" />
           </div>
           <div>
-            <p className="text-xs font-bold text-rose-300">Delete Account</p>
-            <p className="text-[10px] text-slate-400">Permanently delete your account and all data</p>
+            <p className="text-xs font-bold text-rose-700">Delete Account</p>
+            <p className="text-[10px] text-neutral-500">Permanently delete your account and all data</p>
           </div>
         </div>
-        <p className="text-[10px] text-slate-500 mb-3 leading-relaxed">
+        <p className="text-[10px] text-neutral-400 mb-3 leading-relaxed">
           This will permanently delete your account, all businesses, transactions, categories, and subscription data. This action cannot be undone.
         </p>
         <button
           onClick={() => setShowDeleteModal(true)}
-          className="flex items-center gap-1.5 text-xs px-4 py-2 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-400 font-semibold hover:bg-rose-500/20 active:scale-95 transition-all"
+          className="flex items-center gap-1.5 text-xs px-4 py-2 rounded-xl border border-rose-200 bg-rose-100 text-rose-700 font-semibold hover:bg-rose-200 active:scale-95 transition-all"
         >
           <Trash2 className="w-3 h-3" /> Delete My Account
         </button>
@@ -276,17 +276,17 @@ export default function SettingsPage() {
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="w-full max-w-sm rounded-3xl border border-white/10 bg-[#0d1321] p-6 shadow-2xl space-y-4">
+          <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-rose-500/20 flex items-center justify-center">
-                <AlertTriangle className="w-5 h-5 text-rose-400" />
+              <div className="w-10 h-10 rounded-2xl bg-rose-100 flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-rose-600" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">Delete Account?</h3>
-                <p className="text-[10px] text-slate-400">This cannot be undone</p>
+                <h3 className="text-sm font-bold text-neutral-900">Delete Account?</h3>
+                <p className="text-[10px] text-neutral-400">This cannot be undone</p>
               </div>
             </div>
-            <p className="text-xs text-slate-300 leading-relaxed">
+            <p className="text-xs text-neutral-600 leading-relaxed">
               All your data including businesses, transactions, receivables, and subscription will be permanently erased. Enter your password to confirm.
             </p>
             <input
@@ -294,20 +294,20 @@ export default function SettingsPage() {
               placeholder="Enter your password"
               value={deletePassword}
               onChange={e => setDeletePassword(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500/50"
+              className="w-full px-4 py-2.5 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-rose-400"
               autoFocus
             />
             <div className="flex gap-3">
               <button
                 onClick={() => { setShowDeleteModal(false); setDeletePassword('') }}
-                className="flex-1 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm font-semibold text-slate-300 hover:bg-white/10 transition"
+                className="flex-1 py-2.5 rounded-xl border border-neutral-200 bg-white text-sm font-semibold text-neutral-600 hover:bg-neutral-50 transition"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleting || !deletePassword}
-                className="flex-1 py-2.5 rounded-xl border border-rose-500/30 bg-rose-500/20 text-sm font-bold text-rose-300 hover:bg-rose-500/30 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex-1 py-2.5 rounded-xl bg-rose-600 text-sm font-bold text-white hover:bg-rose-500 transition disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {deleting ? 'Deleting...' : 'Delete Forever'}
               </button>

@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     // Calculate next_run_date
     const nextRunDate = calculateNextRunDate(start_date, frequency, interval_value || 1, day_of_week, day_of_month, month_of_year)
 
-    const result = await db.run(
+    const result = await db.insert(
       `INSERT INTO recurring_transactions (
         user_id, business_id, type, amount, category_id, currency, note, method, tags,
         frequency, interval_value, day_of_week, day_of_month, month_of_year,

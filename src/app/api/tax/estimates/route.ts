@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import db from '@/lib/db.async'
 import { getFinancialYear, getFinancialYearDates, getQuarter, getQuarterDates } from '@/lib/gst'
+import { getPlanForUserId, planAtLeast } from '@/lib/plan'
 
 async function getUserId(request: NextRequest): Promise<number | null> {
   const token = (request.headers.get('authorization') ?? '').replace('Bearer ', '')
@@ -52,6 +53,14 @@ export async function GET(request: NextRequest) {
   try {
     const userId = await getUserId(request)
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const plan = await getPlanForUserId(userId)
+    if (!planAtLeast(plan, 'enterprise')) {
+      return NextResponse.json(
+        { error: 'Income tax estimates and the advance tax schedule are an Enterprise plan feature.' },
+        { status: 403 }
+      )
+    }
 
     const { searchParams } = new URL(request.url)
     const businessId = searchParams.get('businessId')

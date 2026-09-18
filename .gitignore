@@ -61,6 +61,9 @@ android/app/release
 # IDE
 .idea/
 
+# Claude Code agent worktrees
+.claude/worktrees/
+
 # next-pwa generated service worker
 public/sw.js
 public/workbox-*.js

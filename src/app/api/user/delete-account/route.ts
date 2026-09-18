@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import dbQuery from '@/lib/db.async'
+import { toPgQuery } from '@/lib/db.postgres'
 import { verifyPassword } from '@/lib/auth/password'
 import { audit, AUDIT_ACTIONS } from '@/lib/audit'
 
@@ -69,36 +70,14 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // Delete user — CASCADE will handle:
-    // - sessions
-    // - businesses (which cascades to transactions)
-    // - subscriptions
-    // - email_verifications
-    // - password_resets
-    // Also clean up user_settings and any orphaned categories
-    await dbQuery.transaction((db) => {
-      // Explicitly delete all user data in dependency order
-      // (CASCADE should handle most of this, but explicit is safer for SQLite)
-      const businesses = db.prepare('SELECT id FROM businesses WHERE user_id = ?').all(userId) as { id: number }[]
-      const bizIds = businesses.map(b => b.id)
-      
-      if (bizIds.length > 0) {
-        const placeholders = bizIds.map(() => '?').join(',')
-        db.prepare(`DELETE FROM transactions WHERE business_id IN (${placeholders})`).run(...bizIds)
-      }
-
-      // Delete bank sync data
-      db.prepare('DELETE FROM bank_transactions WHERE user_id = ?').run(userId)
-      db.prepare('DELETE FROM bank_connections WHERE user_id = ?').run(userId)
-
-      db.prepare('DELETE FROM businesses WHERE user_id = ?').run(userId)
-      db.prepare('DELETE FROM user_settings WHERE user_id = ?').run(userId)
-
-      // Delete the user (CASCADE handles the rest)
-      db.prepare('DELETE FROM users WHERE id = ?').run(userId)
-    })
-
-    audit({
+    // Log the audit entry BEFORE deleting the user, not after — audit_logs.user_id
+    // has a foreign key to users(id). Once the user row is gone, an insert
+    // referencing their id fails the FK check (ON DELETE SET NULL only rewrites
+    // *existing* rows at delete time; it doesn't relax the constraint for a new
+    // insert against an id that's already gone). This previously failed silently
+    // since audit() swallows its own errors, so deletion events were never
+    // actually being recorded.
+    await audit({
       userId,
       action: AUDIT_ACTIONS.ACCOUNT_DELETED,
       category: 'auth',
@@ -106,6 +85,35 @@ export async function DELETE(request: NextRequest) {
       resourceId: userId,
       description: 'User permanently deleted their account and all data',
       request,
+    })
+
+    // Delete user — CASCADE will handle:
+    // - sessions
+    // - businesses (which cascades to transactions)
+    // - subscriptions
+    // - email_verifications
+    // - password_resets
+    // Also clean up user_settings and any orphaned categories
+    await dbQuery.transaction(async (client) => {
+      // Explicitly delete all user data in dependency order
+      // (CASCADE should handle most of this, but explicit is safer)
+      const businessesResult = await client.query(toPgQuery('SELECT id FROM businesses WHERE user_id = ?'), [userId])
+      const bizIds = (businessesResult.rows as { id: number }[]).map(b => b.id)
+
+      if (bizIds.length > 0) {
+        const placeholders = bizIds.map(() => '?').join(',')
+        await client.query(toPgQuery(`DELETE FROM transactions WHERE business_id IN (${placeholders})`), bizIds)
+      }
+
+      // Delete bank sync data
+      await client.query(toPgQuery('DELETE FROM bank_transactions WHERE user_id = ?'), [userId])
+      await client.query(toPgQuery('DELETE FROM bank_connections WHERE user_id = ?'), [userId])
+
+      await client.query(toPgQuery('DELETE FROM businesses WHERE user_id = ?'), [userId])
+      await client.query(toPgQuery('DELETE FROM user_settings WHERE user_id = ?'), [userId])
+
+      // Delete the user (CASCADE handles the rest)
+      await client.query(toPgQuery('DELETE FROM users WHERE id = ?'), [userId])
     })
 
     return NextResponse.json({

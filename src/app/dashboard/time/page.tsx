@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { useBusiness } from '@/lib/contexts/BusinessContext'
 import { useCurrency } from '@/lib/contexts/CurrencyContext'
+import { useTranslation } from '@/lib/i18n'
 
 interface TimeEntry {
   id: number
@@ -59,6 +60,7 @@ function formatRunningTime(startTime: string): string {
 }
 
 export default function TimePage() {
+  const { t } = useTranslation()
   const { activeBusiness } = useBusiness()
   const { currentCurrency, currencies } = useCurrency()
   const [entries, setEntries] = useState<TimeEntry[]>([])
@@ -212,7 +214,7 @@ export default function TimePage() {
   }
 
   const handleDeleteEntry = async (id: number) => {
-    if (!confirm('Delete this time entry?')) return
+    if (!confirm(t('time.deleteConfirm'))) return
     const token = localStorage.getItem('moneylix_session_token') ?? ''
     await fetch(`/api/time/entries?id=${id}`, {
       method: 'DELETE', headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -234,15 +236,15 @@ export default function TimePage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-base font-bold text-neutral-900">Time Tracking</h1>
-          <p className="text-[10px] text-neutral-400">Track hours for freelance and service billing</p>
+          <h1 className="text-base font-bold text-neutral-900">{t('time.title')}</h1>
+          <p className="text-[10px] text-neutral-400">{t('time.subtitle')}</p>
         </div>
         <div className="flex gap-2">
           <button onClick={() => setShowProjectModal(true)} className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-50 transition font-bold">
-            <Briefcase className="w-3 h-3" /> Projects
+            <Briefcase className="w-3 h-3" /> {t('time.projects')}
           </button>
           <button onClick={() => setShowEntryModal(true)} className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-lime-400 text-neutral-900 hover:bg-lime-300 transition font-bold">
-            <Plus className="w-3 h-3" /> Manual Entry
+            <Plus className="w-3 h-3" /> {t('time.manualEntry')}
           </button>
         </div>
       </div>
@@ -258,7 +260,7 @@ export default function TimePage() {
               <p className="text-2xl font-bold font-mono text-neutral-900">{runningDisplay}</p>
               {runningTimer && (
                 <p className="text-[10px] text-neutral-400">
-                  {runningTimer.project_name || 'No project'} {runningTimer.client_name ? `· ${runningTimer.client_name}` : ''}
+                  {runningTimer.project_name || t('time.noProject')} {runningTimer.client_name ? `· ${runningTimer.client_name}` : ''}
                 </p>
               )}
             </div>
@@ -267,17 +269,17 @@ export default function TimePage() {
             {!runningTimer ? (
               <>
                 <select value={entryForm.project_name} onChange={e => setEntryForm(f => ({ ...f, project_name: e.target.value }))} className="px-2 py-1.5 rounded-lg border border-neutral-200 text-xs min-w-[120px]">
-                  <option value="">No project</option>
+                  <option value="">{t('time.noProject')}</option>
                   {projects.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
                 </select>
-                <input value={entryForm.description} onChange={e => setEntryForm(f => ({ ...f, description: e.target.value }))} placeholder="What are you working on?" className="px-3 py-1.5 rounded-lg border border-neutral-200 text-xs min-w-[200px]" />
+                <input value={entryForm.description} onChange={e => setEntryForm(f => ({ ...f, description: e.target.value }))} placeholder={t('time.workingOnPlaceholder')} className="px-3 py-1.5 rounded-lg border border-neutral-200 text-xs min-w-[200px]" />
                 <button onClick={handleStartTimer} className="flex items-center gap-1 px-4 py-2 rounded-xl bg-lime-400 text-neutral-900 text-xs font-bold hover:bg-lime-300 transition">
-                  <Play className="w-3.5 h-3.5" /> Start
+                  <Play className="w-3.5 h-3.5" /> {t('time.start')}
                 </button>
               </>
             ) : (
               <button onClick={handleStopTimer} className="flex items-center gap-1 px-4 py-2 rounded-xl bg-rose-500 text-white text-xs font-bold hover:bg-rose-600 transition">
-                <Square className="w-3.5 h-3.5" /> Stop
+                <Square className="w-3.5 h-3.5" /> {t('time.stop')}
               </button>
             )}
           </div>
@@ -290,28 +292,28 @@ export default function TimePage() {
           <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-blue-50 text-blue-700">
             <Clock className="w-4 h-4 flex-shrink-0" />
             <div>
-              <p className="text-[10px] text-neutral-400">Today</p>
+              <p className="text-[10px] text-neutral-400">{t('time.today')}</p>
               <p className="text-sm font-bold">{summary.today_hours}h</p>
             </div>
           </div>
           <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-purple-50 text-purple-700">
             <Calendar className="w-4 h-4 flex-shrink-0" />
             <div>
-              <p className="text-[10px] text-neutral-400">This Week</p>
+              <p className="text-[10px] text-neutral-400">{t('time.thisWeek')}</p>
               <p className="text-sm font-bold">{summary.week_hours}h</p>
             </div>
           </div>
           <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-lime-50 text-lime-700">
             <Timer className="w-4 h-4 flex-shrink-0" />
             <div>
-              <p className="text-[10px] text-neutral-400">Billable Hours</p>
+              <p className="text-[10px] text-neutral-400">{t('time.billableHours')}</p>
               <p className="text-sm font-bold">{summary.billable_hours}h</p>
             </div>
           </div>
           <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-amber-50 text-amber-700">
             <DollarSign className="w-4 h-4 flex-shrink-0" />
             <div>
-              <p className="text-[10px] text-neutral-400">Billable Amount</p>
+              <p className="text-[10px] text-neutral-400">{t('time.billableAmount')}</p>
               <p className="text-sm font-bold font-mono">{fmt(summary.total_billable_amount)}</p>
             </div>
           </div>
@@ -327,7 +329,7 @@ export default function TimePage() {
         <div className="rounded-2xl bg-white shadow-sm p-8 text-center">
           <Clock className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
           <p className="text-xs text-neutral-400">
-            {runningTimer ? 'No completed entries yet — stop the timer above to log it.' : 'No time entries yet. Start a timer or add a manual entry.'}
+            {runningTimer ? t('time.noCompletedEntries') : t('time.noEntriesYet')}
           </p>
         </div>
       ) : (
@@ -347,11 +349,11 @@ export default function TimePage() {
                       <div className="flex items-center gap-3 min-w-0">
                         <div className={`w-1 h-8 rounded-full ${entry.is_billable ? 'bg-lime-400' : 'bg-neutral-200'}`} />
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-neutral-900 truncate">{entry.description || entry.project_name || 'Untitled'}</p>
+                          <p className="text-xs font-bold text-neutral-900 truncate">{entry.description || entry.project_name || t('time.untitled')}</p>
                           <p className="text-[10px] text-neutral-400 truncate">
                             {entry.project_name && <span className="text-purple-500">{entry.project_name}</span>}
                             {entry.client_name && <span> · {entry.client_name}</span>}
-                            {entry.is_billable ? <span className="text-lime-600"> · Billable</span> : <span> · Non-billable</span>}
+                            {entry.is_billable ? <span className="text-lime-600"> · {t('time.billable')}</span> : <span> · {t('time.nonBillable')}</span>}
                           </p>
                         </div>
                       </div>
@@ -379,47 +381,47 @@ export default function TimePage() {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowEntryModal(false)} />
           <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold text-neutral-900">Add Time Entry</h2>
+              <h2 className="text-base font-bold text-neutral-900">{t('time.addTimeEntry')}</h2>
               <button onClick={() => setShowEntryModal(false)} className="p-1 text-neutral-400 hover:text-neutral-900"><X className="w-4 h-4" /></button>
             </div>
             <form onSubmit={handleManualEntry} className="space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] font-medium text-neutral-500">Project</label>
+                  <label className="text-[10px] font-medium text-neutral-500">{t('time.project')}</label>
                   <select value={entryForm.project_name} onChange={e => setEntryForm(f => ({ ...f, project_name: e.target.value }))} className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:ring-2 focus:ring-lime-400 outline-none">
-                    <option value="">No project</option>
+                    <option value="">{t('time.noProject')}</option>
                     {projects.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="text-[10px] font-medium text-neutral-500">Client</label>
+                  <label className="text-[10px] font-medium text-neutral-500">{t('time.client')}</label>
                   <input value={entryForm.client_name} onChange={e => setEntryForm(f => ({ ...f, client_name: e.target.value }))} className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:ring-2 focus:ring-lime-400 outline-none" />
                 </div>
               </div>
               <div>
-                <label className="text-[10px] font-medium text-neutral-500">Description</label>
+                <label className="text-[10px] font-medium text-neutral-500">{t('invoices.description')}</label>
                 <input value={entryForm.description} onChange={e => setEntryForm(f => ({ ...f, description: e.target.value }))} className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:ring-2 focus:ring-lime-400 outline-none" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] font-medium text-neutral-500">Start Time *</label>
+                  <label className="text-[10px] font-medium text-neutral-500">{t('time.startTime')} *</label>
                   <input type="datetime-local" value={entryForm.start_time} onChange={e => setEntryForm(f => ({ ...f, start_time: e.target.value }))} required className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:ring-2 focus:ring-lime-400 outline-none" />
                 </div>
                 <div>
-                  <label className="text-[10px] font-medium text-neutral-500">End Time</label>
+                  <label className="text-[10px] font-medium text-neutral-500">{t('time.endTime')}</label>
                   <input type="datetime-local" value={entryForm.end_time} onChange={e => setEntryForm(f => ({ ...f, end_time: e.target.value }))} className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:ring-2 focus:ring-lime-400 outline-none" />
                 </div>
               </div>
               <div>
-                <label className="text-[10px] font-medium text-neutral-500">Hourly Rate</label>
+                <label className="text-[10px] font-medium text-neutral-500">{t('time.hourlyRate')}</label>
                 <input type="number" step="0.01" value={entryForm.hourly_rate} onChange={e => setEntryForm(f => ({ ...f, hourly_rate: e.target.value }))} className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:ring-2 focus:ring-lime-400 outline-none" placeholder="500" />
               </div>
               <label className="flex items-center gap-2 text-xs text-neutral-600 cursor-pointer">
                 <input type="checkbox" checked={entryForm.is_billable} onChange={e => setEntryForm(f => ({ ...f, is_billable: e.target.checked }))} className="rounded border-neutral-300 text-lime-500 focus:ring-lime-400" />
-                Billable
+                {t('time.billable')}
               </label>
               <button type="submit" disabled={submitting} className="w-full py-2.5 rounded-xl bg-lime-400 text-neutral-900 text-xs font-bold hover:bg-lime-300 transition disabled:opacity-50">
-                {submitting ? 'Saving...' : 'Add Entry'}
+                {submitting ? t('budgets.saving') : t('time.addEntry')}
               </button>
             </form>
           </div>
@@ -433,14 +435,14 @@ export default function TimePage() {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowProjectModal(false)} />
           <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold text-neutral-900">Add Project</h2>
+              <h2 className="text-base font-bold text-neutral-900">{t('time.addProject')}</h2>
               <button onClick={() => setShowProjectModal(false)} className="p-1 text-neutral-400 hover:text-neutral-900"><X className="w-4 h-4" /></button>
             </div>
 
             {/* Existing projects list */}
             {projects.length > 0 && (
               <div className="mb-4 space-y-1">
-                <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Existing Projects</p>
+                <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">{t('time.existingProjects')}</p>
                 {projects.map(p => (
                   <div key={p.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-neutral-50 text-xs">
                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
@@ -454,25 +456,25 @@ export default function TimePage() {
 
             <form onSubmit={handleAddProject} className="space-y-3">
               <div>
-                <label className="text-[10px] font-medium text-neutral-500">Project Name *</label>
+                <label className="text-[10px] font-medium text-neutral-500">{t('time.projectName')} *</label>
                 <input value={projectForm.name} onChange={e => setProjectForm(f => ({ ...f, name: e.target.value }))} required className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:ring-2 focus:ring-lime-400 outline-none" />
               </div>
               <div>
-                <label className="text-[10px] font-medium text-neutral-500">Client</label>
+                <label className="text-[10px] font-medium text-neutral-500">{t('time.client')}</label>
                 <input value={projectForm.client_name} onChange={e => setProjectForm(f => ({ ...f, client_name: e.target.value }))} className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:ring-2 focus:ring-lime-400 outline-none" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] font-medium text-neutral-500">Hourly Rate</label>
+                  <label className="text-[10px] font-medium text-neutral-500">{t('time.hourlyRate')}</label>
                   <input type="number" step="0.01" value={projectForm.hourly_rate} onChange={e => setProjectForm(f => ({ ...f, hourly_rate: e.target.value }))} className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:ring-2 focus:ring-lime-400 outline-none" />
                 </div>
                 <div>
-                  <label className="text-[10px] font-medium text-neutral-500">Color</label>
+                  <label className="text-[10px] font-medium text-neutral-500">{t('time.color')}</label>
                   <input type="color" value={projectForm.color} onChange={e => setProjectForm(f => ({ ...f, color: e.target.value }))} className="w-full mt-1 h-9 rounded-xl border border-neutral-200 cursor-pointer" />
                 </div>
               </div>
               <button type="submit" disabled={submitting} className="w-full py-2.5 rounded-xl bg-lime-400 text-neutral-900 text-xs font-bold hover:bg-lime-300 transition disabled:opacity-50">
-                {submitting ? 'Creating...' : 'Add Project'}
+                {submitting ? t('loans.creating') : t('time.addProject')}
               </button>
             </form>
           </div>

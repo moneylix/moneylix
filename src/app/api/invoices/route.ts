@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
     const invoiceNumber = `${settings.invoice_prefix}-${paddedNum}`
     const shareToken = crypto.randomBytes(24).toString('hex')
 
-    const result = await db.run(
+    const result = await db.insert(
       `INSERT INTO invoices (
         user_id, business_id, invoice_number, client_name, client_email, client_address,
         items, subtotal, tax_rate, tax_amount, discount_amount, total, currency,

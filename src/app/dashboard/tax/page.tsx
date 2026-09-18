@@ -6,11 +6,12 @@ import Link from 'next/link'
 import {
   Receipt, TrendingUp, TrendingDown, IndianRupee, Settings2, Plus,
   X, FileText, Calendar, AlertTriangle, Check, Download,
-  ChevronDown, Pencil, Trash2, ArrowRight,
+  ChevronDown, Pencil, Trash2, ArrowRight, Lock,
 } from 'lucide-react'
 import { useBusiness } from '@/lib/contexts/BusinessContext'
 import { useCurrency } from '@/lib/contexts/CurrencyContext'
 import { usePlan } from '@/lib/contexts/PlanContext'
+import { useTranslation } from '@/lib/i18n'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
 } from 'recharts'
@@ -71,17 +72,21 @@ interface GSTSettings {
   hsn_sac_code: string | null
 }
 
-const TAX_TYPE_LABELS: Record<string, { label: string; color: string }> = {
-  gst_payable: { label: 'GST Payable', color: 'bg-blue-100 text-blue-700' },
-  tds_deducted: { label: 'TDS Deducted', color: 'bg-purple-100 text-purple-700' },
-  advance_tax: { label: 'Advance Tax', color: 'bg-amber-100 text-amber-700' },
-  tds_receivable: { label: 'TDS Receivable', color: 'bg-lime-100 text-lime-700' },
+function getTaxTypeLabels(t: (key: string) => string): Record<string, { label: string; color: string }> {
+  return {
+    gst_payable: { label: t('tax.gstPayable'), color: 'bg-blue-100 text-blue-700' },
+    tds_deducted: { label: t('tax.tdsDeducted'), color: 'bg-purple-100 text-purple-700' },
+    advance_tax: { label: t('tax.advanceTax'), color: 'bg-amber-100 text-amber-700' },
+    tds_receivable: { label: t('tax.tdsReceivable'), color: 'bg-lime-100 text-lime-700' },
+  }
 }
 
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  pending: { label: 'Pending', color: 'bg-amber-100 text-amber-700' },
-  paid: { label: 'Paid', color: 'bg-lime-100 text-lime-700' },
-  filed: { label: 'Filed', color: 'bg-blue-100 text-blue-700' },
+function getStatusLabels(t: (key: string) => string): Record<string, { label: string; color: string }> {
+  return {
+    pending: { label: t('receivables.pending'), color: 'bg-amber-100 text-amber-700' },
+    paid: { label: t('invoices.paid'), color: 'bg-lime-100 text-lime-700' },
+    filed: { label: t('tax.filed'), color: 'bg-blue-100 text-blue-700' },
+  }
 }
 
 function getFinancialYearOptions(): string[] {
@@ -97,6 +102,9 @@ function getFinancialYearOptions(): string[] {
 }
 
 export default function TaxDashboardPage() {
+  const { t } = useTranslation()
+  const TAX_TYPE_LABELS = getTaxTypeLabels(t)
+  const STATUS_LABELS = getStatusLabels(t)
   const { activeBusiness } = useBusiness()
   const { currentCurrency, currencies } = useCurrency()
   const { can } = usePlan()
@@ -147,11 +155,15 @@ export default function TaxDashboardPage() {
 
       const [gstRes, estRes, settRes] = await Promise.all([
         fetch(`/api/gst/summary?${params}`, { headers }),
-        fetch(`/api/tax/estimates?businessId=${bId}`, { headers }),
+        can('advancedTax') ? fetch(`/api/tax/estimates?businessId=${bId}`, { headers }) : Promise.resolve(null),
         fetch(`/api/gst/settings?businessId=${bId}`, { headers }),
       ])
 
-      const [gstData, estData, settData] = await Promise.all([gstRes.json(), estRes.json(), settRes.json()])
+      const [gstData, estData, settData] = await Promise.all([
+        gstRes.json(),
+        estRes && estRes.ok ? estRes.json() : Promise.resolve(null),
+        settRes.json(),
+      ])
 
       setGstSummary(gstData)
       setEstimates(estData)
@@ -269,7 +281,7 @@ export default function TaxDashboardPage() {
   }
 
   const deleteEntry = async (id: number) => {
-    if (!confirm('Delete this tax entry?')) return
+    if (!confirm(t('tax.deleteConfirm'))) return
     try {
       const token = localStorage.getItem('moneylix_session_token') ?? ''
       await fetch(`/api/tax/entries?id=${id}`, {
@@ -298,9 +310,9 @@ export default function TaxDashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h1 className="text-base font-bold text-neutral-900">Tax & GST Dashboard</h1>
+          <h1 className="text-base font-bold text-neutral-900">{t('tax.title')}</h1>
           <p className="text-[10px] text-neutral-400">
-            {gstSettings?.gstin ? `GSTIN: ${gstSettings.gstin}` : 'GST not configured'} · FY {fy}
+            {gstSettings?.gstin ? `${t('tax.gstin')}: ${gstSettings.gstin}` : t('tax.notConfigured')} · FY {fy}
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -318,7 +330,7 @@ export default function TaxDashboardPage() {
             onChange={(e) => setQuarter(e.target.value)}
             className="text-xs border border-neutral-200 rounded-lg px-2 py-1.5 bg-white text-neutral-700"
           >
-            <option value="">Full Year</option>
+            <option value="">{t('tax.fullYear')}</option>
             <option value="Q1">Q1 (Apr–Jun)</option>
             <option value="Q2">Q2 (Jul–Sep)</option>
             <option value="Q3">Q3 (Oct–Dec)</option>
@@ -328,7 +340,7 @@ export default function TaxDashboardPage() {
             <Settings2 className="w-4 h-4" />
           </button>
           <Link href="/dashboard/tax/exports" className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition font-medium">
-            <Download className="w-3 h-3" /> Exports
+            <Download className="w-3 h-3" /> {t('tax.exports')}
           </Link>
         </div>
       </div>
@@ -336,16 +348,16 @@ export default function TaxDashboardPage() {
       {/* GST Summary Cards */}
       {sum && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-          <SummaryCard icon={TrendingUp} label="GST Collected" value={fmt(sum.gstCollected)} color="text-blue-600" bg="bg-blue-50" />
-          <SummaryCard icon={TrendingDown} label="GST Paid (Input)" value={fmt(sum.gstPaid)} color="text-rose-600" bg="bg-rose-50" />
+          <SummaryCard icon={TrendingUp} label={t('tax.gstCollected')} value={fmt(sum.gstCollected)} color="text-blue-600" bg="bg-blue-50" />
+          <SummaryCard icon={TrendingDown} label={t('tax.gstPaidInput')} value={fmt(sum.gstPaid)} color="text-rose-600" bg="bg-rose-50" />
           <SummaryCard
             icon={IndianRupee}
-            label={`Net ${sum.netStatus === 'payable' ? 'Payable' : 'Receivable'}`}
+            label={sum.netStatus === 'payable' ? t('tax.netPayable') : t('tax.netReceivable')}
             value={fmt(Math.abs(sum.netPayable))}
             color={sum.netPayable >= 0 ? 'text-amber-600' : 'text-lime-600'}
             bg={sum.netPayable >= 0 ? 'bg-amber-50' : 'bg-lime-50'}
           />
-          <SummaryCard icon={Receipt} label="Tax Rate" value={`${sum ? gstSummary?.taxRate : 18}%`} color="text-neutral-600" bg="bg-neutral-50" />
+          <SummaryCard icon={Receipt} label={t('tax.taxRateLabel')} value={`${sum ? gstSummary?.taxRate : 18}%`} color="text-neutral-600" bg="bg-neutral-50" />
         </div>
       )}
 
@@ -353,29 +365,29 @@ export default function TaxDashboardPage() {
       {estimates && (
         <div className="bg-white shadow-sm rounded-2xl p-4 space-y-3">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-            <h2 className="text-xs font-bold text-neutral-900">Income Tax Estimates — FY {estimates.financialYear}</h2>
+            <h2 className="text-xs font-bold text-neutral-900">{t('tax.incomeTaxEstimates')} — FY {estimates.financialYear}</h2>
             <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
-              Effective Rate: {estimates.effectiveRate}%
+              {t('tax.effectiveRateLabel')}: {estimates.effectiveRate}%
             </span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-            <MiniStat label="Projected Profit" value={fmt(estimates.projectedAnnualProfit)} />
-            <MiniStat label="Estimated Tax" value={fmt(estimates.estimatedAnnualTax)} />
-            <MiniStat label="TDS + Advance Paid" value={fmt(estimates.tdsDeducted + estimates.advanceTaxPaid)} />
-            <MiniStat label="Remaining Liability" value={fmt(estimates.remainingLiability)} highlight={estimates.remainingLiability > 0} />
+            <MiniStat label={t('tax.projectedProfit')} value={fmt(estimates.projectedAnnualProfit)} />
+            <MiniStat label={t('tax.estimatedTax')} value={fmt(estimates.estimatedAnnualTax)} />
+            <MiniStat label={t('tax.tdsAdvancePaid')} value={fmt(estimates.tdsDeducted + estimates.advanceTaxPaid)} />
+            <MiniStat label={t('tax.remainingLiability')} value={fmt(estimates.remainingLiability)} highlight={estimates.remainingLiability > 0} />
           </div>
 
           {/* Advance Tax Schedule */}
           <div className="mt-3">
-            <p className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider mb-2">Advance Tax Schedule</p>
+            <p className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider mb-2">{t('tax.advanceTaxSchedule')}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
               {estimates.advanceTaxSchedule.map((s) => {
                 const isPast = new Date(s.due_by) < new Date()
                 return (
                   <div key={s.quarter} className={`p-2.5 rounded-xl border ${isPast ? 'border-neutral-200 bg-neutral-50' : 'border-amber-200 bg-amber-50'}`}>
-                    <p className="text-[10px] font-bold text-neutral-500">{s.quarter} — Due {new Date(s.due_by).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</p>
+                    <p className="text-[10px] font-bold text-neutral-500">{s.quarter} — {t('tax.due')} {new Date(s.due_by).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</p>
                     <p className="text-xs font-bold text-neutral-900 font-mono">{fmt(s.amount)}</p>
-                    <p className="text-[10px] text-neutral-400">{s.cumulative_pct}% cumulative</p>
+                    <p className="text-[10px] text-neutral-400">{s.cumulative_pct}% {t('tax.cumulative')}</p>
                   </div>
                 )
               })}
@@ -384,10 +396,26 @@ export default function TaxDashboardPage() {
         </div>
       )}
 
+      {/* Income Tax Estimates — locked state for Pro/Premium */}
+      {!can('advancedTax') && (
+        <Link href="/dashboard/pricing" className="block bg-white shadow-sm rounded-2xl p-4 relative opacity-60 grayscale hover:opacity-75 transition">
+          <div className="absolute top-3 right-3 flex items-center gap-1 text-[10px] font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full">
+            <Lock className="w-2.5 h-2.5" /> {t('tax.enterpriseOnly')}
+          </div>
+          <h2 className="text-xs font-bold text-neutral-900 mb-3">{t('tax.incomeTaxAdvanceHeading')}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+            <MiniStat label={t('tax.projectedProfit')} value="₹••••••" />
+            <MiniStat label={t('tax.estimatedTax')} value="₹••••••" />
+            <MiniStat label={t('tax.tdsAdvancePaid')} value="₹••••••" />
+            <MiniStat label={t('tax.remainingLiability')} value="₹••••••" />
+          </div>
+        </Link>
+      )}
+
       {/* Monthly GST Chart */}
       {monthly.length > 0 && (
         <div className="bg-white shadow-sm rounded-2xl p-4">
-          <h2 className="text-xs font-bold text-neutral-900 mb-3">Monthly GST Breakdown</h2>
+          <h2 className="text-xs font-bold text-neutral-900 mb-3">{t('tax.monthlyGstBreakdown')}</h2>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={monthly} barGap={2}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -398,8 +426,8 @@ export default function TaxDashboardPage() {
                 formatter={(val: number) => fmt(val)}
               />
               <Legend iconSize={8} wrapperStyle={{ fontSize: 10 }} />
-              <Bar dataKey="gst_collected" name="GST Collected" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="gst_paid" name="GST Paid" fill="#ef4444" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="gst_collected" name={t('tax.gstCollected')} fill="#3b82f6" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="gst_paid" name={t('tax.gstPaidInput')} fill="#ef4444" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -408,16 +436,16 @@ export default function TaxDashboardPage() {
       {/* Tax Entries */}
       <div className="bg-white shadow-sm rounded-2xl overflow-hidden">
         <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
-          <h2 className="text-xs font-bold text-neutral-900">Tax Entries & Payments</h2>
+          <h2 className="text-xs font-bold text-neutral-900">{t('tax.taxEntriesPayments')}</h2>
           <button onClick={() => openEntryModal()} className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-lime-400 text-neutral-900 hover:bg-lime-300 transition font-bold">
-            <Plus className="w-3 h-3" /> Add Entry
+            <Plus className="w-3 h-3" /> {t('receivables.addEntry')}
           </button>
         </div>
 
         {(gstSummary?.taxEntries ?? []).length === 0 ? (
           <div className="flex flex-col items-center justify-center h-24 text-neutral-400 text-xs gap-1 p-4">
             <Receipt className="w-6 h-6 text-neutral-300" />
-            <p>No tax entries yet. <button onClick={() => openEntryModal()} className="text-lime-700 font-semibold">Add one</button></p>
+            <p>{t('tax.noTaxEntriesYet')} <button onClick={() => openEntryModal()} className="text-lime-700 font-semibold">{t('tax.addOne')}</button></p>
           </div>
         ) : (
           <div className="divide-y divide-neutral-100">
@@ -431,11 +459,11 @@ export default function TaxDashboardPage() {
                       <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${typeInfo.color}`}>{typeInfo.label}</span>
                       <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${statusInfo.color}`}>{statusInfo.label}</span>
                     </div>
-                    <p className="text-xs text-neutral-700 truncate">{entry.description || 'No description'}</p>
+                    <p className="text-xs text-neutral-700 truncate">{entry.description || t('tax.noDescription')}</p>
                     <p className="text-[10px] text-neutral-400">
                       {entry.quarter && `${entry.quarter} · `}
-                      {entry.due_date && `Due ${new Date(entry.due_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`}
-                      {entry.reference_number && ` · Ref: ${entry.reference_number}`}
+                      {entry.due_date && `${t('tax.due')} ${new Date(entry.due_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`}
+                      {entry.reference_number && ` · ${t('tax.ref')}: ${entry.reference_number}`}
                     </p>
                   </div>
                   <p className="text-xs font-bold font-mono text-neutral-900">{fmt(entry.amount)}</p>
@@ -460,7 +488,7 @@ export default function TaxDashboardPage() {
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setSettingsOpen(false)} />
           <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-5 animate-scaleIn">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold text-neutral-900">GST Settings</h2>
+              <h2 className="text-sm font-bold text-neutral-900">{t('tax.gstSettings')}</h2>
               <button onClick={() => setSettingsOpen(false)}><X className="w-4 h-4 text-neutral-400" /></button>
             </div>
             <div className="space-y-3">
@@ -471,11 +499,11 @@ export default function TaxDashboardPage() {
                   onChange={(e) => setSettingsForm({ ...settingsForm, gst_registered: e.target.checked })}
                   className="w-4 h-4 rounded border-neutral-300 text-lime-500 focus:ring-lime-500"
                 />
-                <span className="text-xs text-neutral-700 font-medium">GST Registered</span>
+                <span className="text-xs text-neutral-700 font-medium">{t('tax.gstRegistered')}</span>
               </label>
 
               <div>
-                <label className="text-[10px] font-medium text-neutral-500 uppercase">GSTIN</label>
+                <label className="text-[10px] font-medium text-neutral-500 uppercase">{t('tax.gstin')}</label>
                 <input
                   value={settingsForm.gstin}
                   onChange={(e) => setSettingsForm({ ...settingsForm, gstin: e.target.value.toUpperCase() })}
@@ -486,7 +514,7 @@ export default function TaxDashboardPage() {
               </div>
 
               <div>
-                <label className="text-[10px] font-medium text-neutral-500 uppercase">State Code</label>
+                <label className="text-[10px] font-medium text-neutral-500 uppercase">{t('tax.stateCode')}</label>
                 <input
                   value={settingsForm.state_code}
                   onChange={(e) => setSettingsForm({ ...settingsForm, state_code: e.target.value })}
@@ -497,13 +525,13 @@ export default function TaxDashboardPage() {
               </div>
 
               <div>
-                <label className="text-[10px] font-medium text-neutral-500 uppercase">Default Tax Rate (%)</label>
+                <label className="text-[10px] font-medium text-neutral-500 uppercase">{t('tax.defaultTaxRate')}</label>
                 <select
                   value={settingsForm.default_tax_rate}
                   onChange={(e) => setSettingsForm({ ...settingsForm, default_tax_rate: e.target.value })}
                   className="w-full mt-1 px-3 py-2 text-xs border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-400"
                 >
-                  <option value="0">Exempt (0%)</option>
+                  <option value="0">{t('tax.exempt')}</option>
                   <option value="5">5%</option>
                   <option value="12">12%</option>
                   <option value="18">18%</option>
@@ -512,7 +540,7 @@ export default function TaxDashboardPage() {
               </div>
 
               <div>
-                <label className="text-[10px] font-medium text-neutral-500 uppercase">Default HSN/SAC Code</label>
+                <label className="text-[10px] font-medium text-neutral-500 uppercase">{t('tax.defaultHsnSac')}</label>
                 <input
                   value={settingsForm.hsn_sac_code}
                   onChange={(e) => setSettingsForm({ ...settingsForm, hsn_sac_code: e.target.value })}
@@ -526,7 +554,7 @@ export default function TaxDashboardPage() {
                 disabled={saving}
                 className="w-full mt-2 py-2 bg-lime-400 hover:bg-lime-300 text-neutral-900 font-bold text-xs rounded-lg transition disabled:opacity-50"
               >
-                {saving ? 'Saving…' : 'Save Settings'}
+                {saving ? t('budgets.saving') : t('tax.saveSettings')}
               </button>
             </div>
           </div>
@@ -540,28 +568,28 @@ export default function TaxDashboardPage() {
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setEntryModalOpen(false)} />
           <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-5 animate-scaleIn">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold text-neutral-900">{editingEntry ? 'Edit Tax Entry' : 'Add Tax Entry'}</h2>
+              <h2 className="text-sm font-bold text-neutral-900">{editingEntry ? t('tax.editTaxEntry') : t('tax.addTaxEntry')}</h2>
               <button onClick={() => setEntryModalOpen(false)}><X className="w-4 h-4 text-neutral-400" /></button>
             </div>
             <div className="space-y-3">
               {!editingEntry && (
                 <div>
-                  <label className="text-[10px] font-medium text-neutral-500 uppercase">Type</label>
+                  <label className="text-[10px] font-medium text-neutral-500 uppercase">{t('common.type')}</label>
                   <select
                     value={entryForm.type}
                     onChange={(e) => setEntryForm({ ...entryForm, type: e.target.value })}
                     className="w-full mt-1 px-3 py-2 text-xs border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-400"
                   >
-                    <option value="gst_payable">GST Payable</option>
-                    <option value="tds_deducted">TDS Deducted</option>
-                    <option value="advance_tax">Advance Tax</option>
-                    <option value="tds_receivable">TDS Receivable</option>
+                    <option value="gst_payable">{t('tax.gstPayable')}</option>
+                    <option value="tds_deducted">{t('tax.tdsDeducted')}</option>
+                    <option value="advance_tax">{t('tax.advanceTax')}</option>
+                    <option value="tds_receivable">{t('tax.tdsReceivable')}</option>
                   </select>
                 </div>
               )}
 
               <div>
-                <label className="text-[10px] font-medium text-neutral-500 uppercase">Amount (₹)</label>
+                <label className="text-[10px] font-medium text-neutral-500 uppercase">{t('tax.amountRs')}</label>
                 <input
                   type="number"
                   step="0.01"
@@ -573,7 +601,7 @@ export default function TaxDashboardPage() {
               </div>
 
               <div>
-                <label className="text-[10px] font-medium text-neutral-500 uppercase">Description</label>
+                <label className="text-[10px] font-medium text-neutral-500 uppercase">{t('invoices.description')}</label>
                 <input
                   value={entryForm.description}
                   onChange={(e) => setEntryForm({ ...entryForm, description: e.target.value })}
@@ -584,7 +612,7 @@ export default function TaxDashboardPage() {
 
               {!editingEntry && (
                 <div>
-                  <label className="text-[10px] font-medium text-neutral-500 uppercase">Quarter</label>
+                  <label className="text-[10px] font-medium text-neutral-500 uppercase">{t('tax.quarter')}</label>
                   <select
                     value={entryForm.quarter}
                     onChange={(e) => setEntryForm({ ...entryForm, quarter: e.target.value })}
@@ -600,7 +628,7 @@ export default function TaxDashboardPage() {
               )}
 
               <div>
-                <label className="text-[10px] font-medium text-neutral-500 uppercase">Due Date</label>
+                <label className="text-[10px] font-medium text-neutral-500 uppercase">{t('receivables.dueDate')}</label>
                 <input
                   type="date"
                   value={entryForm.due_date}
@@ -610,25 +638,25 @@ export default function TaxDashboardPage() {
               </div>
 
               <div>
-                <label className="text-[10px] font-medium text-neutral-500 uppercase">Reference / Challan No.</label>
+                <label className="text-[10px] font-medium text-neutral-500 uppercase">{t('tax.referenceChallanNo')}</label>
                 <input
                   value={entryForm.reference_number}
                   onChange={(e) => setEntryForm({ ...entryForm, reference_number: e.target.value })}
-                  placeholder="Optional"
+                  placeholder={t('common.optional')}
                   className="w-full mt-1 px-3 py-2 text-xs border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-400"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] font-medium text-neutral-500 uppercase">Status</label>
+                <label className="text-[10px] font-medium text-neutral-500 uppercase">{t('common.status')}</label>
                 <select
                   value={entryForm.status}
                   onChange={(e) => setEntryForm({ ...entryForm, status: e.target.value })}
                   className="w-full mt-1 px-3 py-2 text-xs border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-400"
                 >
-                  <option value="pending">Pending</option>
-                  <option value="paid">Paid</option>
-                  <option value="filed">Filed</option>
+                  <option value="pending">{t('receivables.pending')}</option>
+                  <option value="paid">{t('invoices.paid')}</option>
+                  <option value="filed">{t('tax.filed')}</option>
                 </select>
               </div>
 
@@ -637,7 +665,7 @@ export default function TaxDashboardPage() {
                 disabled={saving || !entryForm.amount}
                 className="w-full mt-2 py-2 bg-lime-400 hover:bg-lime-300 text-neutral-900 font-bold text-xs rounded-lg transition disabled:opacity-50"
               >
-                {saving ? 'Saving…' : editingEntry ? 'Update Entry' : 'Add Entry'}
+                {saving ? t('budgets.saving') : editingEntry ? t('tax.updateEntry') : t('receivables.addEntry')}
               </button>
             </div>
           </div>

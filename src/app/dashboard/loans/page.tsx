@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { useBusiness } from '@/lib/contexts/BusinessContext'
 import { useCurrency } from '@/lib/contexts/CurrencyContext'
+import { useTranslation } from '@/lib/i18n'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
@@ -44,27 +45,37 @@ interface EmiPayment {
   notes: string | null
 }
 
-const loanTypeLabels: Record<string, string> = {
-  personal: 'Personal', home: 'Home', vehicle: 'Vehicle',
-  business: 'Business', education: 'Education', other: 'Other',
+function getLoanTypeLabels(t: (key: string) => string): Record<string, string> {
+  return {
+    personal: t('loans.personal'), home: t('loans.home'), vehicle: t('loans.vehicle'),
+    business: t('loans.business'), education: t('loans.education'), other: t('loans.other'),
+  }
 }
 
-const statusCfg: Record<string, { label: string; cls: string }> = {
-  active: { label: 'Active', cls: 'bg-lime-100 text-lime-700' },
-  closed: { label: 'Closed', cls: 'bg-blue-100 text-blue-700' },
-  defaulted: { label: 'Defaulted', cls: 'bg-rose-100 text-rose-700' },
+function getStatusCfg(t: (key: string) => string): Record<string, { label: string; cls: string }> {
+  return {
+    active: { label: t('loans.active'), cls: 'bg-lime-100 text-lime-700' },
+    closed: { label: t('loans.closed'), cls: 'bg-blue-100 text-blue-700' },
+    defaulted: { label: t('loans.defaulted'), cls: 'bg-rose-100 text-rose-700' },
+  }
 }
 
-const emiStatusCfg: Record<string, { label: string; cls: string }> = {
-  paid: { label: 'Paid', cls: 'bg-lime-100 text-lime-700' },
-  pending: { label: 'Pending', cls: 'bg-amber-100 text-amber-700' },
-  overdue: { label: 'Overdue', cls: 'bg-rose-100 text-rose-700' },
-  skipped: { label: 'Skipped', cls: 'bg-neutral-100 text-neutral-500' },
+function getEmiStatusCfg(t: (key: string) => string): Record<string, { label: string; cls: string }> {
+  return {
+    paid: { label: t('invoices.paid'), cls: 'bg-lime-100 text-lime-700' },
+    pending: { label: t('loans.pending'), cls: 'bg-amber-100 text-amber-700' },
+    overdue: { label: t('invoices.overdue'), cls: 'bg-rose-100 text-rose-700' },
+    skipped: { label: t('loans.skipped'), cls: 'bg-neutral-100 text-neutral-500' },
+  }
 }
 
 export default function LoansPage() {
   const { activeBusiness } = useBusiness()
   const { currentCurrency, currencies } = useCurrency()
+  const { t } = useTranslation()
+  const loanTypeLabels = getLoanTypeLabels(t)
+  const statusCfg = getStatusCfg(t)
+  const emiStatusCfg = getEmiStatusCfg(t)
   const [loans, setLoans] = useState<Loan[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -216,15 +227,15 @@ export default function LoansPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-base font-bold text-neutral-900">Loans & EMI</h1>
-          <p className="text-[10px] text-neutral-400">Track loan balances, EMI schedules, and interest paid</p>
+          <h1 className="text-base font-bold text-neutral-900">{t('loans.title')}</h1>
+          <p className="text-[10px] text-neutral-400">{t('loans.subtitle')}</p>
         </div>
         <div className="flex gap-2">
           <button onClick={() => setShowCalc(true)} className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-50 transition font-bold">
-            <Calculator className="w-3 h-3" /> EMI Calc
+            <Calculator className="w-3 h-3" /> {t('loans.emiCalculator')}
           </button>
           <button onClick={() => setShowModal(true)} className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-lime-400 text-neutral-900 hover:bg-lime-300 transition font-bold">
-            <Plus className="w-3 h-3" /> Add Loan
+            <Plus className="w-3 h-3" /> {t('loans.addLoan')}
           </button>
         </div>
       </div>
@@ -232,9 +243,9 @@ export default function LoansPage() {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
-          { label: 'Total Outstanding', value: totalOutstanding, icon: TrendingDown, cls: 'text-rose-700 bg-rose-50' },
-          { label: 'Monthly EMI', value: totalEmiMonthly, icon: CreditCard, cls: 'text-amber-700 bg-amber-50' },
-          { label: 'Active Loans', value: activeCount, icon: Landmark, cls: 'text-blue-700 bg-blue-50', raw: true },
+          { label: t('loans.outstanding'), value: totalOutstanding, icon: TrendingDown, cls: 'text-rose-700 bg-rose-50' },
+          { label: t('loans.emiAmount'), value: totalEmiMonthly, icon: CreditCard, cls: 'text-amber-700 bg-amber-50' },
+          { label: t('loans.activeLoans'), value: activeCount, icon: Landmark, cls: 'text-blue-700 bg-blue-50', raw: true },
         ].map(({ label, value, icon: Icon, cls, raw }) => (
           <div key={label} className={`flex items-center gap-3 px-4 py-3 rounded-2xl ${cls}`}>
             <Icon className="w-4 h-4 flex-shrink-0" />
@@ -255,8 +266,8 @@ export default function LoansPage() {
         ) : loans.length === 0 ? (
           <div className="rounded-2xl bg-white shadow-sm p-8 text-center">
             <Landmark className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
-            <p className="text-xs text-neutral-400">No loans added yet.</p>
-            <button onClick={() => setShowModal(true)} className="mt-2 text-xs text-lime-700 font-semibold">Add your first loan</button>
+            <p className="text-xs text-neutral-400">{t('loans.noLoansYet')}</p>
+            <button onClick={() => setShowModal(true)} className="mt-2 text-xs text-lime-700 font-semibold">{t('loans.addFirstLoan')}</button>
           </div>
         ) : loans.map(loan => {
           const paidPercent = loan.principal_amount > 0
@@ -288,7 +299,7 @@ export default function LoansPage() {
                 <div className="flex items-center gap-3">
                   <div className="text-right">
                     <p className="text-xs font-bold font-mono text-neutral-900">{fmt(loan.outstanding_balance || 0)}</p>
-                    <p className="text-[10px] text-neutral-400">EMI {fmt(loan.emi_amount)}</p>
+                    <p className="text-[10px] text-neutral-400">{t('loans.emiAmount')} {fmt(loan.emi_amount)}</p>
                   </div>
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${cfg.cls}`}>{cfg.label}</span>
                   {isExpanded ? <ChevronUp className="w-3.5 h-3.5 text-neutral-400" /> : <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />}
@@ -298,7 +309,7 @@ export default function LoansPage() {
               {/* Progress Bar */}
               <div className="px-4 pb-2">
                 <div className="flex items-center justify-between text-[10px] text-neutral-400 mb-1">
-                  <span>{paidPercent}% principal repaid</span>
+                  <span>{paidPercent}% {t('loans.principalRepaid')}</span>
                   <span>{fmt(loan.total_principal_paid || 0)} / {fmt(loan.principal_amount)}</span>
                 </div>
                 <div className="w-full h-1.5 bg-neutral-100 rounded-full overflow-hidden">
@@ -312,19 +323,19 @@ export default function LoansPage() {
                   {/* Stats row */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                     <div className="bg-neutral-50 rounded-xl px-3 py-2">
-                      <p className="text-[10px] text-neutral-400">Principal</p>
+                      <p className="text-[10px] text-neutral-400">{t('loans.principal')}</p>
                       <p className="font-bold font-mono">{fmt(loan.principal_amount)}</p>
                     </div>
                     <div className="bg-neutral-50 rounded-xl px-3 py-2">
-                      <p className="text-[10px] text-neutral-400">Interest Paid</p>
+                      <p className="text-[10px] text-neutral-400">{t('loans.totalInterest')}</p>
                       <p className="font-bold font-mono text-rose-600">{fmt(loan.total_interest_paid || 0)}</p>
                     </div>
                     <div className="bg-neutral-50 rounded-xl px-3 py-2">
-                      <p className="text-[10px] text-neutral-400">Next EMI</p>
+                      <p className="text-[10px] text-neutral-400">{t('loans.nextEmi')}</p>
                       <p className="font-bold">{loan.next_emi_date || '—'}</p>
                     </div>
                     <div className="bg-neutral-50 rounded-xl px-3 py-2">
-                      <p className="text-[10px] text-neutral-400">End Date</p>
+                      <p className="text-[10px] text-neutral-400">{t('loans.endDate')}</p>
                       <p className="font-bold">{loan.end_date || '—'}</p>
                     </div>
                   </div>
@@ -332,7 +343,7 @@ export default function LoansPage() {
                   {/* Amortization Chart */}
                   {chartData.length > 0 && (
                     <div>
-                      <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-2">Amortization Breakdown</p>
+                      <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-2">{t('loans.amortization')}</p>
                       <div className="h-40">
                         <ResponsiveContainer width="100%" height="100%">
                           <BarChart data={chartData}>
@@ -350,12 +361,12 @@ export default function LoansPage() {
 
                   {/* Payment History Table */}
                   <div>
-                    <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-2">EMI Schedule</p>
+                    <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-2">{t('loans.schedule')}</p>
                     <div className="max-h-48 overflow-y-auto rounded-xl border border-neutral-100">
                       <div className="overflow-x-auto -mx-3 sm:mx-0"><table className="w-full text-xs">
                         <thead className="bg-neutral-50 sticky top-0">
                           <tr>
-                            {['#', 'Date', 'Principal', 'Interest', 'EMI', 'Status', ''].map(h => (
+                            {['#', t('common.date'), t('loans.principal'), t('loans.interestRate').split(' ')[0], t('loans.emiAmount'), t('common.status'), ''].map(h => (
                               <th key={h} className="px-2 py-1.5 text-left text-[10px] font-medium text-neutral-400">{h}</th>
                             ))}
                           </tr>
@@ -374,7 +385,7 @@ export default function LoansPage() {
                                 <td className="px-2 py-1.5">
                                   {(p.status === 'pending' || p.status === 'overdue') && (
                                     <button onClick={(e) => { e.stopPropagation(); handlePayEmi(loan.id, p.id) }} className="text-[10px] px-2 py-0.5 rounded-lg bg-lime-400 text-neutral-900 font-bold hover:bg-lime-300 transition">
-                                      Pay
+                                      {t('loans.pay')}
                                     </button>
                                   )}
                                 </td>
@@ -389,7 +400,7 @@ export default function LoansPage() {
                   {/* Actions */}
                   <div className="flex justify-end gap-2">
                     <button onClick={() => handleDelete(loan.id)} className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-lg text-rose-500 hover:bg-rose-50 transition font-medium">
-                      <Trash2 className="w-3 h-3" /> Delete
+                      <Trash2 className="w-3 h-3" /> {t('common.delete')}
                     </button>
                   </div>
                 </div>
@@ -405,16 +416,16 @@ export default function LoansPage() {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowModal(false)} />
           <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold text-neutral-900">Add Loan</h2>
+              <h2 className="text-base font-bold text-neutral-900">{t('loans.addLoan')}</h2>
               <button onClick={() => setShowModal(false)} className="p-1 text-neutral-400 hover:text-neutral-900"><X className="w-4 h-4" /></button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
-                <label className="text-[10px] font-medium text-neutral-500">Lender Name *</label>
+                <label className="text-[10px] font-medium text-neutral-500">{t('loans.lender')} *</label>
                 <input value={form.lender_name} onChange={e => setForm(f => ({ ...f, lender_name: e.target.value }))} required className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:ring-2 focus:ring-lime-400 outline-none" placeholder="e.g. HDFC Bank" />
               </div>
               <div>
-                <label className="text-[10px] font-medium text-neutral-500">Loan Type</label>
+                <label className="text-[10px] font-medium text-neutral-500">{t('loans.loanType')}</label>
                 <select value={form.loan_type} onChange={e => setForm(f => ({ ...f, loan_type: e.target.value }))} className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:ring-2 focus:ring-lime-400 outline-none">
                   {Object.entries(loanTypeLabels).map(([val, lbl]) => (
                     <option key={val} value={val}>{lbl}</option>
@@ -423,30 +434,30 @@ export default function LoansPage() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] font-medium text-neutral-500">Principal Amount *</label>
+                  <label className="text-[10px] font-medium text-neutral-500">{t('loans.principal')} *</label>
                   <input type="number" step="0.01" value={form.principal_amount} onChange={e => setForm(f => ({ ...f, principal_amount: e.target.value }))} required className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:ring-2 focus:ring-lime-400 outline-none" placeholder="500000" />
                 </div>
                 <div>
-                  <label className="text-[10px] font-medium text-neutral-500">Interest Rate (%) *</label>
+                  <label className="text-[10px] font-medium text-neutral-500">{t('loans.interestRate')} (%) *</label>
                   <input type="number" step="0.01" value={form.interest_rate} onChange={e => setForm(f => ({ ...f, interest_rate: e.target.value }))} required className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:ring-2 focus:ring-lime-400 outline-none" placeholder="10.5" />
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] font-medium text-neutral-500">Tenure (Months) *</label>
+                  <label className="text-[10px] font-medium text-neutral-500">{t('loans.tenure')} *</label>
                   <input type="number" value={form.tenure_months} onChange={e => setForm(f => ({ ...f, tenure_months: e.target.value }))} required className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:ring-2 focus:ring-lime-400 outline-none" placeholder="36" />
                 </div>
                 <div>
-                  <label className="text-[10px] font-medium text-neutral-500">Start Date *</label>
+                  <label className="text-[10px] font-medium text-neutral-500">{t('loans.startDate')} *</label>
                   <input type="date" value={form.start_date} onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))} required className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:ring-2 focus:ring-lime-400 outline-none" />
                 </div>
               </div>
               <div>
-                <label className="text-[10px] font-medium text-neutral-500">Notes</label>
+                <label className="text-[10px] font-medium text-neutral-500">{t('common.notes')}</label>
                 <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:ring-2 focus:ring-lime-400 outline-none resize-none" rows={2} placeholder="Optional notes..." />
               </div>
               <button type="submit" disabled={submitting} className="w-full py-2.5 rounded-xl bg-lime-400 text-neutral-900 text-xs font-bold hover:bg-lime-300 transition disabled:opacity-50">
-                {submitting ? 'Creating...' : 'Add Loan'}
+                {submitting ? t('loans.creating') : t('loans.addLoan')}
               </button>
             </form>
           </div>
@@ -460,32 +471,32 @@ export default function LoansPage() {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowCalc(false)} />
           <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold text-neutral-900">EMI Calculator</h2>
+              <h2 className="text-base font-bold text-neutral-900">{t('loans.emiCalculator')}</h2>
               <button onClick={() => setShowCalc(false)} className="p-1 text-neutral-400 hover:text-neutral-900"><X className="w-4 h-4" /></button>
             </div>
             <div className="space-y-3">
               <div>
-                <label className="text-[10px] font-medium text-neutral-500">Loan Amount</label>
+                <label className="text-[10px] font-medium text-neutral-500">{t('loans.principal')}</label>
                 <input type="number" value={calcForm.principal} onChange={e => setCalcForm(f => ({ ...f, principal: e.target.value }))} className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:ring-2 focus:ring-lime-400 outline-none" placeholder="500000" />
               </div>
               <div>
-                <label className="text-[10px] font-medium text-neutral-500">Annual Interest Rate (%)</label>
+                <label className="text-[10px] font-medium text-neutral-500">{t('loans.interestRate')} (%)</label>
                 <input type="number" step="0.01" value={calcForm.rate} onChange={e => setCalcForm(f => ({ ...f, rate: e.target.value }))} className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:ring-2 focus:ring-lime-400 outline-none" placeholder="10.5" />
               </div>
               <div>
-                <label className="text-[10px] font-medium text-neutral-500">Tenure (Months)</label>
+                <label className="text-[10px] font-medium text-neutral-500">{t('loans.tenure')}</label>
                 <input type="number" value={calcForm.tenure} onChange={e => setCalcForm(f => ({ ...f, tenure: e.target.value }))} className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:ring-2 focus:ring-lime-400 outline-none" placeholder="36" />
               </div>
               <button onClick={handleCalc} className="w-full py-2.5 rounded-xl bg-lime-400 text-neutral-900 text-xs font-bold hover:bg-lime-300 transition">
-                Calculate EMI
+                {t('loans.calculateEmi')}
               </button>
               {calcResult !== null && (
                 <div className="bg-lime-50 rounded-xl p-4 text-center">
-                  <p className="text-[10px] text-neutral-400">Monthly EMI</p>
+                  <p className="text-[10px] text-neutral-400">{t('loans.emiAmount')}</p>
                   <p className="text-lg font-bold font-mono text-lime-700">{fmt(calcResult)}</p>
                   <p className="text-[10px] text-neutral-400 mt-1">
-                    Total: {fmt(calcResult * (parseInt(calcForm.tenure) || 0))} &middot;
-                    Interest: {fmt((calcResult * (parseInt(calcForm.tenure) || 0)) - (parseFloat(calcForm.principal) || 0))}
+                    {t('invoices.total')}: {fmt(calcResult * (parseInt(calcForm.tenure) || 0))} &middot;
+                    {t('loans.interestRate').split(' ')[0]}: {fmt((calcResult * (parseInt(calcForm.tenure) || 0)) - (parseFloat(calcForm.principal) || 0))}
                   </p>
                 </div>
               )}

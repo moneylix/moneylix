@@ -94,13 +94,17 @@ export default function LandingPage() {
       feats: ["1 Business", "Dashboard & Transactions", "Budgets & Goals", "Notifications", "Calculator"],
       locked: ["Bank Sync", "Invoicing", "AI Advisor"], cta: "Get Started Free", pop: false },
     { name: "Pro", pm: "₹199", py: "₹149", per: "/mo", icon: Crown, c: "#22d3ee", badge: "POPULAR",
-      feats: ["3 Businesses", "Bank Sync (Setu AA)", "GST Invoicing + Links", "Reconciliation", "Cash Flow Forecast", "Loan / EMI", "Time Tracking", "Export CSV"],
-      locked: ["AI Advisor", "Payroll & Inventory"], cta: "Get Pro", pop: true,
+      feats: ["3 Businesses", "Bank Sync (Setu AA)", "GST Invoicing + Links", "AI Investment Advisor", "Reconciliation", "Cash Flow Forecast", "Loan / EMI", "Time Tracking", "Export CSV"],
+      locked: ["Payroll & Inventory"], cta: "Get Pro", pop: true,
       noteM: "or ₹1,788/yr — save ₹600", noteY: "₹1,788 billed yearly — save ₹600" },
     { name: "Premium", pm: "₹499", py: "₹299", per: "/mo", icon: Sparkles, c: "#f59e0b", badge: "BEST VALUE",
-      feats: ["Unlimited Businesses", "All Pro Features", "AI Investment Advisor", "Payroll & Staff", "Inventory", "Team Roles", "OCR Receipts", "Export CSV & JSON"],
-      locked: [], cta: "Get Premium", pop: false,
+      feats: ["Unlimited Businesses", "All Pro Features", "Payroll & Staff", "Inventory", "Team Roles", "OCR Receipts", "Export CSV & JSON"],
+      locked: ["Advanced Tax & Audit Tools"], cta: "Get Premium", pop: false,
       noteM: "or ₹3,588/yr — save ₹2,400", noteY: "₹3,588 billed yearly — save ₹2,400" },
+    { name: "Enterprise", pm: "₹1,999", py: "₹1,499", per: "/mo", icon: Building2, c: "#a78bfa",
+      feats: ["All Premium Features", "Income Tax Estimates", "Advance Tax Schedule", "Tally-Compatible Export", "Multi-Entity Consolidation", "Priority Support"],
+      locked: [], cta: "Get Enterprise", pop: false,
+      noteM: "or ₹17,988/yr — save ₹6,000", noteY: "₹17,988 billed yearly — save ₹6,000" },
   ]
 
   const segments = [
@@ -194,45 +198,61 @@ export default function LandingPage() {
             </div>
             <p className="mt-5 text-xs" style={{ color: MUT2 }}>No credit card required · Free plan forever · 🇮🇳 Made for India</p>
           </div>
-          {/* Right: floating product cards (Zoho style) */}
-          <div className="relative h-[440px] hidden lg:block">
-            {/* Invoice card */}
-            <div style={{ background: CARD, border: `1px solid ${BORDER}`, boxShadow: "0 30px 80px rgba(0,0,0,0.5)" }} className="absolute top-0 right-0 w-64 rounded-2xl p-4">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-black" style={{ color: TXT }}>Invoice #INV-0042</span>
-                <span style={{ background: "rgba(16,185,129,0.15)", color: EMERGREEN() }} className="text-[8px] font-bold px-2 py-0.5 rounded-full">GST Ready</span>
+          {/* Right: dashboard mockup */}
+          <div className="relative hidden lg:block pb-10 pr-6">
+            <div style={{ background: CARD, border: `1px solid ${BORDER}`, boxShadow: "0 30px 80px rgba(0,0,0,0.5)" }} className="relative z-10 rounded-2xl p-5">
+              {/* Top bar: business switcher + AA badge */}
+              <div className="flex items-center justify-between mb-5 pb-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
+                <div style={{ background: BG2, border: `1px solid ${BORDER}` }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg">
+                  <Building2 className="w-3.5 h-3.5" style={{ color: EMERGREEN() }} />
+                  <span className="text-xs font-bold" style={{ color: TXT }}>My Business</span>
+                  <ChevronRight className="w-3 h-3 rotate-90" style={{ color: MUT2 }} />
+                </div>
+                <div style={{ background: "rgba(16,185,129,0.12)", color: EMERGREEN() }} className="flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded-full">
+                  <Lock className="w-2.5 h-2.5" /> RBI · Setu AA
+                </div>
               </div>
-              {[["Subtotal","₹50,000"],["CGST 9%","₹4,500"],["SGST 9%","₹4,500"]].map(([l,v]) => (
-                <div key={l} className="flex justify-between text-[11px] py-0.5" style={{ color: MUT }}><span>{l}</span><span>{v}</span></div>
-              ))}
-              <div className="flex justify-between text-sm font-black mt-2 pt-2" style={{ borderTop: `1px solid ${BORDER}`, color: EMERGREEN() }}><span style={{ color: TXT }}>Total</span><span>₹59,000</span></div>
-            </div>
-            {/* Bank sync card */}
-            <div style={{ background: CARD, border: `1px solid ${BORDER}`, boxShadow: "0 30px 80px rgba(0,0,0,0.5)" }} className="absolute top-40 left-0 w-60 rounded-2xl p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <div style={{ background: "rgba(34,211,238,0.15)" }} className="w-6 h-6 rounded-lg flex items-center justify-center"><Wallet className="w-3.5 h-3.5" style={{ color: CYANC() }} /></div>
-                <span className="text-xs font-black" style={{ color: TXT }}>Bank Sync · Setu AA</span>
+
+              <p className="text-sm font-black mb-4" style={{ color: TXT }}>Good morning, Rahul 👋</p>
+
+              {/* Stat row */}
+              <div className="grid grid-cols-3 gap-3 mb-5">
+                {([["Income", "₹85,000", EMERGREEN()], ["Expenses", "₹42,300", "#fb7185"], ["Outstanding", "₹12,500", "#f59e0b"]] as const).map(([l, v, c]) => (
+                  <div key={l} style={{ background: BG2, border: `1px solid ${BORDER}` }} className="rounded-xl p-3">
+                    <p className="text-[9px] font-bold" style={{ color: MUT2 }}>{l}</p>
+                    <p className="text-sm font-black mt-1" style={{ color: c }}>{v}</p>
+                  </div>
+                ))}
               </div>
-              {[["UPI/SWIGGY","Food · 98%","-₹480"],["UPI/SALARY","Income · 99%","+₹85,000"]].map(([l,c,a]) => (
+
+              {/* Mini cash flow chart */}
+              <div className="flex items-end gap-1 h-14 mb-5">
+                {[40,55,45,65,60,75,70,85,80,60,90,75].map((h, i) => (
+                  <div key={i} className="flex-1 rounded-t" style={{ height: `${h}%`, background: i >= 9 ? EMERGREEN() : "rgba(16,185,129,0.25)" }} />
+                ))}
+              </div>
+
+              {/* Recent UPI transactions */}
+              <p className="text-[10px] font-bold mb-2" style={{ color: MUT2 }}>RECENT UPI TRANSACTIONS</p>
+              {[["UPI/SWIGGY", "Food · AI-sorted", "-₹480"], ["UPI/SALARY", "Income · AI-sorted", "+₹85,000"], ["UPI/ZOMATO", "Food · AI-sorted", "-₹620"]].map(([l, c, a]) => (
                 <div key={l} className="flex items-center gap-2 py-1.5">
                   <span style={{ background: CYANC() }} className="w-1.5 h-1.5 rounded-full" />
-                  <div className="flex-1"><p className="text-[10px] font-semibold" style={{ color: TXT }}>{l}</p><p className="text-[8px]" style={{ color: CYANC() }}>{c}</p></div>
-                  <span className="text-[10px] font-black" style={{ color: a.startsWith("+") ? EMERGREEN() : "#fb7185" }}>{a}</span>
+                  <div className="flex-1"><p className="text-[11px] font-semibold" style={{ color: TXT }}>{l}</p><p className="text-[9px]" style={{ color: CYANC() }}>{c}</p></div>
+                  <span className="text-[11px] font-black" style={{ color: a.startsWith("+") ? EMERGREEN() : "#fb7185" }}>{a}</span>
                 </div>
               ))}
             </div>
-            {/* Forecast card */}
-            <div style={{ background: CARD, border: `1px solid ${BORDER}`, boxShadow: "0 30px 80px rgba(0,0,0,0.5)" }} className="absolute bottom-0 right-6 w-56 rounded-2xl p-4">
-              <p className="text-[10px] font-bold mb-2" style={{ color: MUT }}>Cash Flow · 90 days</p>
-              <div className="flex items-end gap-1 h-16">
-                {[40,55,45,65,60,75,70,85,80].map((h,i) => (
-                  <div key={i} className="flex-1 rounded-t" style={{ height: `${h}%`, background: i >= 6 ? EMERGREEN() : "rgba(16,185,129,0.25)" }} />
-                ))}
+
+            {/* Floating GST invoice accent card */}
+            <div style={{ background: CARD, border: `1px solid ${BORDER}`, boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }} className="absolute -bottom-6 -left-6 z-20 w-52 rounded-2xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-black" style={{ color: TXT }}>INV-0042</span>
+                <span style={{ background: "rgba(16,185,129,0.15)", color: EMERGREEN() }} className="text-[8px] font-bold px-2 py-0.5 rounded-full">GST Ready</span>
               </div>
-              <p className="text-lg font-black mt-2" style={{ color: TXT }}>₹1,45,230 <span className="text-[10px]" style={{ color: EMERGREEN() }}>↑ 12.5%</span></p>
+              <p className="text-lg font-black" style={{ color: TXT }}>₹59,000</p>
+              <p className="text-[10px]" style={{ color: MUT2 }}>CGST + SGST @ 9%</p>
             </div>
           </div>
-        </div>
         </div>
       </section>
 
@@ -391,7 +411,7 @@ export default function LandingPage() {
 
       {/* ── PRICING ── */}
       <section id="pricing" className="py-24 px-6 lg:px-10">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-10">
             <p className="font-black text-xs uppercase tracking-[0.3em] mb-3" style={{ color: EMERGREEN() }}>Pricing</p>
             <h2 className="text-3xl md:text-4xl font-black tracking-tight">The perfect balance of features & affordability</h2>
@@ -403,9 +423,9 @@ export default function LandingPage() {
               </button>
             </div>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
             {plans.map(p => (
-              <div key={p.name} style={{ background: CARD, border: `1px solid ${p.pop ? p.c + "66" : BORDER}`, boxShadow: p.pop ? `0 20px 60px ${p.c}22` : "none" }} className="relative rounded-2xl p-7 flex flex-col gap-5">
+              <div key={p.name} style={{ background: CARD, border: `1px solid ${p.pop ? p.c + "66" : BORDER}`, boxShadow: p.pop ? `0 20px 60px ${p.c}22` : "none" }} className="relative rounded-2xl p-6 flex flex-col gap-4">
                 {p.badge && <div style={{ background: p.c, color: "#04121e" }} className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{p.badge}</div>}
                 <div className="flex items-center gap-3 mt-1">
                   <div style={{ background: `${p.c}1a`, border: `1px solid ${p.c}33` }} className="w-10 h-10 rounded-xl flex items-center justify-center"><p.icon className="w-5 h-5" style={{ color: p.c }} /></div>

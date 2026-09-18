@@ -30,7 +30,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   if (bizIds.length > 0) {
     const placeholders = bizIds.map(() => '?').join(',')
     transactions = await dbQuery.all(
-      `SELECT t.id, t.date, t.type, t.amount, t.description, t.status, b.name as business_name
+      `SELECT t.id, t.date, t.type, t.amount, t.note as description, t.status, b.name as business_name
        FROM transactions t
        JOIN businesses b ON b.id = t.business_id
        WHERE t.business_id IN (${placeholders})

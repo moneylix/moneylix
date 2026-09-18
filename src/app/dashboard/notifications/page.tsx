@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useBusiness } from '@/lib/contexts/BusinessContext'
+import { useTranslation } from '@/lib/i18n'
 
 interface Notification {
   id: number
@@ -22,16 +23,18 @@ interface Notification {
   business_name: string | null
 }
 
-const TYPE_CONFIG: Record<string, { label: string; icon: typeof Bell; cls: string }> = {
-  low_balance:   { label: 'Low Balance',     icon: AlertTriangle, cls: 'bg-rose-100 text-rose-700' },
-  due_date:      { label: 'Due Date',        icon: Clock,         cls: 'bg-amber-100 text-amber-700' },
-  unusual_spend: { label: 'Unusual Spend',   icon: TrendingUp,    cls: 'bg-orange-100 text-orange-700' },
-  tax_deadline:  { label: 'Tax Deadline',    icon: AlertTriangle, cls: 'bg-red-100 text-red-700' },
-  budget_alert:  { label: 'Budget Alert',    icon: Target,        cls: 'bg-purple-100 text-purple-700' },
-  system:        { label: 'System',          icon: Megaphone,     cls: 'bg-blue-100 text-blue-700' },
+function getTypeConfig(t: (key: string) => string): Record<string, { label: string; icon: typeof Bell; cls: string }> {
+  return {
+    low_balance:   { label: t('notifications.lowBalance'),   icon: AlertTriangle, cls: 'bg-rose-100 text-rose-700' },
+    due_date:      { label: t('receivables.dueDate'),        icon: Clock,         cls: 'bg-amber-100 text-amber-700' },
+    unusual_spend: { label: t('notifications.unusualSpend'), icon: TrendingUp,    cls: 'bg-orange-100 text-orange-700' },
+    tax_deadline:  { label: t('notifications.taxDeadline'),  icon: AlertTriangle, cls: 'bg-red-100 text-red-700' },
+    budget_alert:  { label: t('notifications.budgetAlert'),  icon: Target,        cls: 'bg-purple-100 text-purple-700' },
+    system:        { label: t('notifications.systemType'),   icon: Megaphone,     cls: 'bg-blue-100 text-blue-700' },
+  }
 }
 
-function formatRelativeTime(dateStr: string): string {
+function formatRelativeTime(dateStr: string, t: (key: string) => string): string {
   const now = Date.now()
   const date = new Date(dateStr).getTime()
   const diffMs = now - date
@@ -39,14 +42,14 @@ function formatRelativeTime(dateStr: string): string {
   const diffHr = Math.floor(diffMs / 3600000)
   const diffDay = Math.floor(diffMs / 86400000)
 
-  if (diffMin < 1) return 'Just now'
-  if (diffMin < 60) return `${diffMin}m ago`
-  if (diffHr < 24) return `${diffHr}h ago`
-  if (diffDay < 7) return `${diffDay}d ago`
+  if (diffMin < 1) return t('notifications.justNow')
+  if (diffMin < 60) return `${diffMin}${t('notifications.mAgo')}`
+  if (diffHr < 24) return `${diffHr}${t('notifications.hAgo')}`
+  if (diffDay < 7) return `${diffDay}${t('notifications.dAgo')}`
   return new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
 }
 
-function groupByDate(items: Notification[]): Record<string, Notification[]> {
+function groupByDate(items: Notification[], t: (key: string) => string): Record<string, Notification[]> {
   const groups: Record<string, Notification[]> = {}
   const today = new Date().toISOString().split('T')[0]
   const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
@@ -54,8 +57,8 @@ function groupByDate(items: Notification[]): Record<string, Notification[]> {
   for (const item of items) {
     const d = item.created_at.split('T')[0] || item.created_at.split(' ')[0]
     let label = d
-    if (d === today) label = 'Today'
-    else if (d === yesterday) label = 'Yesterday'
+    if (d === today) label = t('time.today')
+    else if (d === yesterday) label = t('notifications.yesterday')
     else label = new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
     if (!groups[label]) groups[label] = []
     groups[label].push(item)
@@ -64,6 +67,8 @@ function groupByDate(items: Notification[]): Record<string, Notification[]> {
 }
 
 export default function NotificationsPage() {
+  const { t } = useTranslation()
+  const TYPE_CONFIG = getTypeConfig(t)
   const { activeBusiness } = useBusiness()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
@@ -138,16 +143,16 @@ export default function NotificationsPage() {
     setUnreadCount(0)
   }
 
-  const grouped = groupByDate(notifications)
+  const grouped = groupByDate(notifications, t)
 
   return (
     <div className="space-y-3">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-base font-bold text-neutral-900">Notifications</h1>
+          <h1 className="text-base font-bold text-neutral-900">{t('nav.notifications')}</h1>
           <p className="text-[10px] text-neutral-400">
-            {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}
+            {unreadCount > 0 ? `${unreadCount} ${t('notifications.unreadSuffix')}` : t('notifications.allCaughtUp')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -156,14 +161,14 @@ export default function NotificationsPage() {
               onClick={markAllRead}
               className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-lg bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition font-semibold"
             >
-              <CheckCheck className="w-3 h-3" /> Mark all read
+              <CheckCheck className="w-3 h-3" /> {t('notifications.markAllRead')}
             </button>
           )}
           <Link
             href="/dashboard/notifications/preferences"
             className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-lg bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition font-semibold"
           >
-            <Settings className="w-3 h-3" /> Preferences
+            <Settings className="w-3 h-3" /> {t('notifications.preferences')}
           </Link>
         </div>
       </div>
@@ -181,7 +186,7 @@ export default function NotificationsPage() {
                   : 'bg-white text-neutral-400 hover:text-neutral-900'
               }`}
             >
-              {f}
+              {f === 'all' ? t('common.all') : t('notifications.unread')}
               {f === 'unread' && unreadCount > 0 && (
                 <span className="ml-1 text-[10px] opacity-60">({unreadCount})</span>
               )}
@@ -196,7 +201,7 @@ export default function NotificationsPage() {
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-medium bg-white text-neutral-500 hover:text-neutral-900 transition border border-neutral-200"
           >
             <Filter className="w-3 h-3" />
-            {typeFilter === 'all' ? 'All types' : TYPE_CONFIG[typeFilter]?.label || typeFilter}
+            {typeFilter === 'all' ? t('notifications.allTypes') : TYPE_CONFIG[typeFilter]?.label || typeFilter}
             <ChevronDown className="w-3 h-3" />
           </button>
           {showTypeDropdown && (
@@ -205,7 +210,7 @@ export default function NotificationsPage() {
                 onClick={() => { setTypeFilter('all'); setShowTypeDropdown(false) }}
                 className={`w-full text-left px-3 py-1.5 text-xs hover:bg-neutral-50 ${typeFilter === 'all' ? 'font-bold text-lime-700' : 'text-neutral-600'}`}
               >
-                All types
+                {t('notifications.allTypes')}
               </button>
               {Object.entries(TYPE_CONFIG).map(([key, cfg]) => (
                 <button
@@ -229,8 +234,8 @@ export default function NotificationsPage() {
       ) : notifications.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-48 text-neutral-400">
           <BellOff className="w-10 h-10 mb-3 opacity-30" />
-          <p className="text-xs font-semibold">No notifications</p>
-          <p className="text-[10px] mt-1">You&apos;re all caught up!</p>
+          <p className="text-xs font-semibold">{t('notifications.noNotifications')}</p>
+          <p className="text-[10px] mt-1">{t('notifications.allCaughtUpExcl')}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -276,7 +281,7 @@ export default function NotificationsPage() {
                             </span>
                           )}
                           <span className="text-[9px] text-neutral-300 ml-auto">
-                            {formatRelativeTime(n.created_at)}
+                            {formatRelativeTime(n.created_at, t)}
                           </span>
                         </div>
                       </div>
@@ -286,7 +291,7 @@ export default function NotificationsPage() {
                           onClick={e => e.stopPropagation()}
                           className="flex-shrink-0 text-[9px] text-lime-700 font-bold hover:text-lime-600 mt-1"
                         >
-                          View →
+                          {t('notifications.viewArrow')}
                         </Link>
                       )}
                     </div>
@@ -304,7 +309,7 @@ export default function NotificationsPage() {
                 disabled={loading}
                 className="text-xs text-lime-700 font-semibold hover:text-lime-600 transition disabled:opacity-50"
               >
-                {loading ? 'Loading...' : 'Load more'}
+                {loading ? t('common.loading') : t('notifications.loadMore')}
               </button>
             </div>
           )}

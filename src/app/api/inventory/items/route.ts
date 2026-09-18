@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       if (existing) return NextResponse.json({ error: 'SKU already exists in this business' }, { status: 409 })
     }
 
-    const result = await db.run(
+    const result = await db.insert(
       `INSERT INTO inventory_items (user_id, business_id, name, sku, description, category, unit, cost_price, selling_price, current_stock, low_stock_threshold)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [

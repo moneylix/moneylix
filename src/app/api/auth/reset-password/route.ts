@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import dbQuery from '@/lib/db.async'
+import { toPgQuery } from '@/lib/db.postgres'
 import { hashPassword } from '@/lib/auth/password'
 
 export async function POST(request: NextRequest) {
@@ -31,9 +32,9 @@ export async function POST(request: NextRequest) {
 
     const hashed = await hashPassword(newPassword)
 
-    await dbQuery.transaction((db) => {
-      db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashed, record.user_id)
-      db.prepare("UPDATE password_resets SET used_at = datetime('now') WHERE id = ?").run(record.id)
+    await dbQuery.transaction(async (client) => {
+      await client.query(toPgQuery('UPDATE users SET password = ? WHERE id = ?'), [hashed, record.user_id])
+      await client.query(toPgQuery("UPDATE password_resets SET used_at = datetime('now') WHERE id = ?"), [record.id])
     })
 
     return NextResponse.json({ message: 'Password has been successfully reset' })

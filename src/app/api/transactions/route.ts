@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
 
     const now = new Date().toISOString()
 
-    const result = await db.run(
+    const result = await db.insert(
       `INSERT INTO transactions
          (type, amount, category_id, business_id, currency, date, due_date, reminder_days,
           note, method, tags, status, client_name, created_at, updated_at)

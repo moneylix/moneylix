@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     if (!name) return NextResponse.json({ error: 'Project name is required' }, { status: 400 })
 
-    const result = await db.run(
+    const result = await db.insert(
       `INSERT INTO time_projects (user_id, business_id, name, client_name, hourly_rate, color)
        VALUES (?, ?, ?, ?, ?, ?)`,
       [userId, business_id || null, name, client_name || null, hourly_rate || null, color || '#10B981']

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { User, Mail, Lock, CheckCircle, AlertCircle, Crown, Calendar, ArrowLeft } from 'lucide-react'
+import { useTranslation } from '@/lib/i18n'
 
 interface Profile {
   id: number
@@ -15,6 +16,7 @@ interface Profile {
 }
 
 export default function ProfilePage() {
+  const { t } = useTranslation()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -48,7 +50,7 @@ export default function ProfilePage() {
         setUsername(data.username)
         setEmail(data.email)
       } catch {
-        showToast('Failed to load profile', 'error')
+        showToast(t('profile.failedToLoad'), 'error')
       } finally {
         setLoading(false)
       }
@@ -69,17 +71,17 @@ export default function ProfilePage() {
         body = { email }
       } else if (field === 'password') {
         if (!currentPassword || !newPassword) {
-          showToast('Fill in both password fields', 'error')
+          showToast(t('profile.fillBothPasswordFields'), 'error')
           setSaving(false)
           return
         }
         if (newPassword !== confirmPassword) {
-          showToast('New passwords do not match', 'error')
+          showToast(t('profile.passwordsDoNotMatch'), 'error')
           setSaving(false)
           return
         }
         if (newPassword.length < 8) {
-          showToast('Password must be at least 8 characters', 'error')
+          showToast(t('profile.passwordMinLength'), 'error')
           setSaving(false)
           return
         }
@@ -97,9 +99,9 @@ export default function ProfilePage() {
       const data = await res.json()
 
       if (!res.ok) {
-        showToast(data.error || 'Failed to update', 'error')
+        showToast(data.error || t('profile.failedToUpdate'), 'error')
       } else {
-        showToast(field === 'password' ? 'Password changed!' : `${field.charAt(0).toUpperCase() + field.slice(1)} updated!`)
+        showToast(field === 'password' ? t('profile.passwordChanged') : `${field === 'username' ? t('auth.username') : t('common.email')} ${t('profile.updatedSuffix')}`)
         setEditingField(null)
         if (field === 'username') setProfile(p => p ? { ...p, username } : null)
         if (field === 'email') setProfile(p => p ? { ...p, email } : null)
@@ -110,7 +112,7 @@ export default function ProfilePage() {
         }
       }
     } catch {
-      showToast('Something went wrong', 'error')
+      showToast(t('common.error'), 'error')
     } finally {
       setSaving(false)
     }
@@ -119,38 +121,38 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="space-y-4 animate-pulse">
-        <div className="h-6 w-40 bg-white/10 rounded" />
-        <div className="h-32 bg-white/5 rounded-2xl" />
-        <div className="h-24 bg-white/5 rounded-2xl" />
+        <div className="h-6 w-40 bg-neutral-100 rounded" />
+        <div className="h-32 bg-neutral-100 rounded-2xl" />
+        <div className="h-24 bg-neutral-100 rounded-2xl" />
       </div>
     )
   }
 
   if (!profile) {
     return (
-      <div className="text-center py-12 text-slate-400">
+      <div className="text-center py-12 text-neutral-400">
         <AlertCircle className="w-8 h-8 mx-auto mb-2" />
-        <p className="text-sm">Failed to load profile</p>
+        <p className="text-sm">{t('profile.failedToLoad')}</p>
       </div>
     )
   }
 
   const planColors: Record<string, string> = {
-    free: 'text-slate-400 bg-slate-500/10 border-slate-500/20',
-    pro: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-    premium: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+    free: 'text-neutral-500 bg-neutral-100 border-neutral-200',
+    pro: 'text-emerald-700 bg-emerald-100 border-emerald-200',
+    premium: 'text-amber-700 bg-amber-100 border-amber-200',
   }
 
   return (
     <div className="space-y-4 max-w-lg">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Link href="/dashboard/settings" className="p-2 rounded-xl hover:bg-white/5 transition">
-          <ArrowLeft className="w-4 h-4 text-slate-400" />
+        <Link href="/dashboard/settings" className="p-2 rounded-xl hover:bg-neutral-100 transition">
+          <ArrowLeft className="w-4 h-4 text-neutral-400" />
         </Link>
         <div>
-          <h1 className="text-base font-bold text-white">Profile</h1>
-          <p className="text-[10px] text-slate-400">Manage your account details</p>
+          <h1 className="text-base font-bold text-neutral-900">{t('settings.profile')}</h1>
+          <p className="text-[10px] text-neutral-400">{t('profile.subtitle')}</p>
         </div>
       </div>
 
@@ -163,16 +165,16 @@ export default function ProfilePage() {
             </span>
           </div>
           <div>
-            <p className="text-sm font-bold text-white">{profile.username}</p>
-            <p className="text-[11px] text-slate-400">{profile.email}</p>
+            <p className="text-sm font-bold text-neutral-900">{profile.username}</p>
+            <p className="text-[11px] text-neutral-400">{profile.email}</p>
             <div className="flex items-center gap-2 mt-1">
               <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${planColors[profile.plan] || planColors.free}`}>
                 <Crown className="w-2.5 h-2.5 inline mr-0.5 -mt-px" />
                 {profile.plan.toUpperCase()}
               </span>
-              <span className="text-[9px] text-slate-500 flex items-center gap-1">
+              <span className="text-[9px] text-neutral-400 flex items-center gap-1">
                 <Calendar className="w-2.5 h-2.5" />
-                Joined {new Date(profile.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
+                {t('profile.joined')} {new Date(profile.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
               </span>
             </div>
           </div>
@@ -183,12 +185,12 @@ export default function ProfilePage() {
       <div className="rounded-2xl bg-white shadow-sm p-4">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-slate-400" />
-            <p className="text-xs font-semibold text-white">Username</p>
+            <User className="w-4 h-4 text-neutral-400" />
+            <p className="text-xs font-semibold text-neutral-900">{t('auth.username')}</p>
           </div>
           {editingField !== 'username' && (
             <button onClick={() => setEditingField('username')} className="text-[10px] text-lime-700 font-semibold hover:text-lime-600">
-              Edit
+              {t('common.edit')}
             </button>
           )}
         </div>
@@ -198,19 +200,19 @@ export default function ProfilePage() {
               type="text"
               value={username}
               onChange={e => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))}
-              className="w-full px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              className="w-full px-3 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
               maxLength={30}
               autoFocus
             />
             <div className="flex gap-2">
-              <button onClick={() => { setEditingField(null); setUsername(profile.username) }} className="px-3 py-1.5 rounded-lg border border-white/10 text-[11px] text-slate-400 hover:bg-white/5">Cancel</button>
+              <button onClick={() => { setEditingField(null); setUsername(profile.username) }} className="px-3 py-1.5 rounded-lg border border-neutral-200 text-[11px] text-neutral-500 hover:bg-neutral-50">{t('common.cancel')}</button>
               <button onClick={() => handleSave('username')} disabled={saving || username.length < 3} className="px-3 py-1.5 rounded-lg bg-lime-400 text-[11px] font-semibold text-neutral-900 hover:bg-lime-300 disabled:opacity-40">
-                {saving ? 'Saving...' : 'Save'}
+                {saving ? t('budgets.saving') : t('common.save')}
               </button>
             </div>
           </div>
         ) : (
-          <p className="text-sm text-slate-300 ml-6">{profile.username}</p>
+          <p className="text-sm text-neutral-600 ml-6">{profile.username}</p>
         )}
       </div>
 
@@ -218,12 +220,12 @@ export default function ProfilePage() {
       <div className="rounded-2xl bg-white shadow-sm p-4">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
-            <Mail className="w-4 h-4 text-slate-400" />
-            <p className="text-xs font-semibold text-white">Email</p>
+            <Mail className="w-4 h-4 text-neutral-400" />
+            <p className="text-xs font-semibold text-neutral-900">{t('common.email')}</p>
           </div>
           {editingField !== 'email' && (
             <button onClick={() => setEditingField('email')} className="text-[10px] text-lime-700 font-semibold hover:text-lime-600">
-              Edit
+              {t('common.edit')}
             </button>
           )}
         </div>
@@ -233,18 +235,18 @@ export default function ProfilePage() {
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              className="w-full px-3 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
               autoFocus
             />
             <div className="flex gap-2">
-              <button onClick={() => { setEditingField(null); setEmail(profile.email) }} className="px-3 py-1.5 rounded-lg border border-white/10 text-[11px] text-slate-400 hover:bg-white/5">Cancel</button>
+              <button onClick={() => { setEditingField(null); setEmail(profile.email) }} className="px-3 py-1.5 rounded-lg border border-neutral-200 text-[11px] text-neutral-500 hover:bg-neutral-50">{t('common.cancel')}</button>
               <button onClick={() => handleSave('email')} disabled={saving || !email.includes('@')} className="px-3 py-1.5 rounded-lg bg-lime-400 text-[11px] font-semibold text-neutral-900 hover:bg-lime-300 disabled:opacity-40">
-                {saving ? 'Saving...' : 'Save'}
+                {saving ? t('budgets.saving') : t('common.save')}
               </button>
             </div>
           </div>
         ) : (
-          <p className="text-sm text-slate-300 ml-6">{profile.email}</p>
+          <p className="text-sm text-neutral-600 ml-6">{profile.email}</p>
         )}
       </div>
 
@@ -252,12 +254,12 @@ export default function ProfilePage() {
       <div className="rounded-2xl bg-white shadow-sm p-4">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
-            <Lock className="w-4 h-4 text-slate-400" />
-            <p className="text-xs font-semibold text-white">Password</p>
+            <Lock className="w-4 h-4 text-neutral-400" />
+            <p className="text-xs font-semibold text-neutral-900">{t('auth.password')}</p>
           </div>
           {editingField !== 'password' && (
             <button onClick={() => setEditingField('password')} className="text-[10px] text-lime-700 font-semibold hover:text-lime-600">
-              Change
+              {t('profile.change')}
             </button>
           )}
         </div>
@@ -265,42 +267,42 @@ export default function ProfilePage() {
           <div className="mt-2 space-y-2">
             <input
               type="password"
-              placeholder="Current password"
+              placeholder={t('profile.currentPasswordPlaceholder')}
               value={currentPassword}
               onChange={e => setCurrentPassword(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              className="w-full px-3 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
               autoFocus
             />
             <input
               type="password"
-              placeholder="New password (min 8 characters)"
+              placeholder={t('profile.newPasswordPlaceholder')}
               value={newPassword}
               onChange={e => setNewPassword(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              className="w-full px-3 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
             />
             <input
               type="password"
-              placeholder="Confirm new password"
+              placeholder={t('profile.confirmNewPasswordPlaceholder')}
               value={confirmPassword}
               onChange={e => setConfirmPassword(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              className="w-full px-3 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
             />
             {newPassword && confirmPassword && newPassword !== confirmPassword && (
-              <p className="text-[10px] text-rose-400">Passwords do not match</p>
+              <p className="text-[10px] text-rose-600">{t('profile.passwordsDoNotMatch')}</p>
             )}
             <div className="flex gap-2">
-              <button onClick={() => { setEditingField(null); setCurrentPassword(''); setNewPassword(''); setConfirmPassword('') }} className="px-3 py-1.5 rounded-lg border border-white/10 text-[11px] text-slate-400 hover:bg-white/5">Cancel</button>
+              <button onClick={() => { setEditingField(null); setCurrentPassword(''); setNewPassword(''); setConfirmPassword('') }} className="px-3 py-1.5 rounded-lg border border-neutral-200 text-[11px] text-neutral-500 hover:bg-neutral-50">{t('common.cancel')}</button>
               <button
                 onClick={() => handleSave('password')}
                 disabled={saving || !currentPassword || newPassword.length < 8 || newPassword !== confirmPassword}
                 className="px-3 py-1.5 rounded-lg bg-lime-400 text-[11px] font-semibold text-neutral-900 hover:bg-lime-300 disabled:opacity-40"
               >
-                {saving ? 'Changing...' : 'Change Password'}
+                {saving ? t('profile.changingEllipsis') : t('profile.changePassword')}
               </button>
             </div>
           </div>
         ) : (
-          <p className="text-sm text-slate-300 ml-6">••••••••</p>
+          <p className="text-sm text-neutral-600 ml-6">••••••••</p>
         )}
       </div>
 
@@ -308,14 +310,14 @@ export default function ProfilePage() {
       {profile.planExpires && (
         <div className="rounded-2xl bg-white shadow-sm p-4">
           <div className="flex items-center gap-2 mb-1">
-            <Crown className="w-4 h-4 text-amber-400" />
-            <p className="text-xs font-semibold text-white">Subscription</p>
+            <Crown className="w-4 h-4 text-amber-600" />
+            <p className="text-xs font-semibold text-neutral-900">{t('profile.subscription')}</p>
           </div>
-          <p className="text-sm text-slate-300 ml-6">
-            {profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1)} plan · Expires {new Date(profile.planExpires).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+          <p className="text-sm text-neutral-600 ml-6">
+            {profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1)} {t('profile.planSuffix')} · {t('profile.expires')} {new Date(profile.planExpires).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
           </p>
           <Link href="/dashboard/pricing" className="text-[10px] text-lime-700 font-semibold ml-6 hover:underline">
-            Manage plan →
+            {t('profile.managePlanArrow')}
           </Link>
         </div>
       )}

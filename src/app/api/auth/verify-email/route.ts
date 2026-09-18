@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import dbQuery from '@/lib/db.async'
+import { toPgQuery } from '@/lib/db.postgres'
 import { sendWelcomeEmail } from '@/lib/email/resend'
 
 export async function GET(request: NextRequest) {
@@ -30,9 +31,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL('/auth/login?error=token_expired', request.url))
     }
 
-    await dbQuery.transaction((db) => {
-      db.prepare('UPDATE users SET email_verified = 1 WHERE id = ?').run(record.user_id)
-      db.prepare("UPDATE email_verifications SET used_at = datetime('now') WHERE id = ?").run(record.id)
+    await dbQuery.transaction(async (client) => {
+      // email_verified is a real BOOLEAN column in Postgres (unlike the
+      // INTEGER flag columns elsewhere) — TRUE, not 1.
+      await client.query(toPgQuery('UPDATE users SET email_verified = TRUE WHERE id = ?'), [record.user_id])
+      await client.query(toPgQuery("UPDATE email_verifications SET used_at = datetime('now') WHERE id = ?"), [record.id])
     })
 
     try { await sendWelcomeEmail(record.email, record.username) } catch { /* non-blocking */ }

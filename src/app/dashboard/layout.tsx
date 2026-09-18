@@ -386,7 +386,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
             )}
 
             {/* Page content — pb-24 ensures bottom nav never overlaps on mobile */}
-            <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-10 custom-scrollbar pb-24 lg:pb-10">
+            <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-5 lg:p-6 custom-scrollbar pb-24 lg:pb-6">
               <div className="animate-fadeIn max-w-[1400px] mx-auto">
                 <ErrorBoundary>{children}</ErrorBoundary>
               </div>

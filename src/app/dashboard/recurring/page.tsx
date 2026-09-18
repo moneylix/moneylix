@@ -163,12 +163,12 @@ export default function RecurringPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link href="/dashboard/settings" className="p-2 rounded-xl hover:bg-white/5 transition">
-            <ArrowLeft className="w-4 h-4 text-slate-400" />
+          <Link href="/dashboard/settings" className="p-2 rounded-xl hover:bg-neutral-100 transition">
+            <ArrowLeft className="w-4 h-4 text-neutral-400" />
           </Link>
           <div>
-            <h1 className="text-base font-bold text-white">Recurring Transactions</h1>
-            <p className="text-[10px] text-slate-400">Auto-create income & expenses on a schedule</p>
+            <h1 className="text-base font-bold text-neutral-900">Recurring Transactions</h1>
+            <p className="text-[10px] text-neutral-400">Auto-create income & expenses on a schedule</p>
           </div>
         </div>
         {!showForm && (
@@ -183,10 +183,10 @@ export default function RecurringPage() {
 
       {/* Create Form */}
       {showForm && (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
+        <div className="rounded-2xl bg-white shadow-sm p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-bold text-white">New Recurring Transaction</p>
-            <button onClick={() => setShowForm(false)} className="p-1 rounded-lg hover:bg-white/5"><X className="w-4 h-4 text-slate-400" /></button>
+            <p className="text-xs font-bold text-neutral-900">New Recurring Transaction</p>
+            <button onClick={() => setShowForm(false)} className="p-1 rounded-lg hover:bg-neutral-100"><X className="w-4 h-4 text-neutral-400" /></button>
           </div>
 
           {/* Type toggle */}
@@ -195,8 +195,8 @@ export default function RecurringPage() {
               <button key={t} onClick={() => setForm({ ...form, type: t })}
                 className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition ${
                   form.type === t
-                    ? t === 'credit' ? 'bg-lime-100 text-lime-700' : 'bg-rose-100 text-rose-700'
-                    : 'border-white/10 text-slate-400 hover:bg-white/5'
+                    ? t === 'credit' ? 'bg-lime-100 text-lime-700 border-lime-200' : 'bg-rose-100 text-rose-700 border-rose-200'
+                    : 'border-neutral-200 text-neutral-400 hover:bg-neutral-50'
                 }`}
               >
                 {t === 'credit' ? '↑ Income' : '↓ Expense'}
@@ -210,14 +210,14 @@ export default function RecurringPage() {
             placeholder="Amount (₹)"
             value={form.amount}
             onChange={e => setForm({ ...form, amount: e.target.value })}
-            className="w-full px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            className="w-full px-3 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
           />
 
           {/* Category */}
           <select
             value={form.category_id}
             onChange={e => setForm({ ...form, category_id: e.target.value })}
-            className="w-full px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            className="w-full px-3 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-emerald-400"
           >
             <option value="">No category</option>
             {categories.filter(c => c.type === form.type || c.type === 'both').map(c => (
@@ -231,7 +231,7 @@ export default function RecurringPage() {
             placeholder="Note (e.g., Rent, Salary, Netflix)"
             value={form.note}
             onChange={e => setForm({ ...form, note: e.target.value })}
-            className="w-full px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            className="w-full px-3 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
           />
 
           {/* Frequency */}
@@ -239,7 +239,7 @@ export default function RecurringPage() {
             <select
               value={form.frequency}
               onChange={e => setForm({ ...form, frequency: e.target.value })}
-              className="px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white focus:outline-none"
+              className="px-3 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 focus:outline-none"
             >
               <option value="daily">Daily</option>
               <option value="weekly">Weekly</option>
@@ -252,14 +252,14 @@ export default function RecurringPage() {
               placeholder="Every N"
               value={form.interval_value}
               onChange={e => setForm({ ...form, interval_value: e.target.value })}
-              className="px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white placeholder:text-slate-500 focus:outline-none"
+              className="px-3 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
             />
           </div>
 
           {/* Day selector */}
           {form.frequency === 'weekly' && (
             <select value={form.day_of_week} onChange={e => setForm({ ...form, day_of_week: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white focus:outline-none">
+              className="w-full px-3 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 focus:outline-none">
               <option value="">Day of week</option>
               {DAY_NAMES.map((d, i) => <option key={i} value={i}>{d}</option>)}
             </select>
@@ -267,20 +267,20 @@ export default function RecurringPage() {
           {['monthly', 'yearly'].includes(form.frequency) && (
             <input type="number" min="1" max="31" placeholder="Day of month (1-31)"
               value={form.day_of_month} onChange={e => setForm({ ...form, day_of_month: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white placeholder:text-slate-500 focus:outline-none" />
+              className="w-full px-3 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none" />
           )}
 
           {/* Dates */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[9px] text-slate-500 mb-0.5 block">Start date</label>
+              <label className="text-[9px] text-neutral-400 mb-0.5 block">Start date</label>
               <input type="date" value={form.start_date} onChange={e => setForm({ ...form, start_date: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white focus:outline-none" />
+                className="w-full px-3 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 focus:outline-none" />
             </div>
             <div>
-              <label className="text-[9px] text-slate-500 mb-0.5 block">End date (optional)</label>
+              <label className="text-[9px] text-neutral-400 mb-0.5 block">End date (optional)</label>
               <input type="date" value={form.end_date} onChange={e => setForm({ ...form, end_date: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white focus:outline-none" />
+                className="w-full px-3 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 focus:outline-none" />
             </div>
           </div>
 
@@ -298,21 +298,21 @@ export default function RecurringPage() {
       {/* Rules list */}
       {loading ? (
         <div className="space-y-3">
-          {[1, 2, 3].map(i => <div key={i} className="h-20 rounded-2xl bg-white/5 animate-pulse" />)}
+          {[1, 2, 3].map(i => <div key={i} className="h-20 rounded-2xl bg-neutral-100 animate-pulse" />)}
         </div>
       ) : rules.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center">
-          <RefreshCw className="w-8 h-8 text-slate-600 mx-auto mb-3" />
-          <p className="text-sm text-slate-400">No recurring transactions yet</p>
-          <p className="text-[10px] text-slate-500 mt-1">Set up rent, salary, subscriptions, or any repeat payment</p>
+        <div className="rounded-2xl bg-white shadow-sm p-8 text-center">
+          <RefreshCw className="w-8 h-8 text-neutral-300 mx-auto mb-3" />
+          <p className="text-sm text-neutral-400">No recurring transactions yet</p>
+          <p className="text-[10px] text-neutral-400 mt-1">Set up rent, salary, subscriptions, or any repeat payment</p>
         </div>
       ) : (
         <div className="space-y-2">
           {rules.map(rule => (
             <div key={rule.id} className={`rounded-2xl border p-4 transition ${
-              rule.status === 'active' ? 'border-white/10 bg-white/5' :
-              rule.status === 'paused' ? 'border-amber-500/20 bg-amber-500/5 opacity-70' :
-              'border-white/5 bg-white/3 opacity-50'
+              rule.status === 'active' ? 'border-transparent bg-white shadow-sm' :
+              rule.status === 'paused' ? 'border-amber-200 bg-amber-50 opacity-90' :
+              'border-transparent bg-neutral-50 opacity-60'
             }`}>
               <div className="flex items-center gap-3">
                 {/* Icon */}
@@ -328,13 +328,13 @@ export default function RecurringPage() {
                 {/* Details */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-xs font-bold text-white truncate">
+                    <p className="text-xs font-bold text-neutral-900 truncate">
                       {rule.note || rule.category_name || (rule.type === 'credit' ? 'Income' : 'Expense')}
                     </p>
-                    {rule.status === 'paused' && <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400">PAUSED</span>}
-                    {rule.status === 'completed' && <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-slate-500/20 text-slate-400">DONE</span>}
+                    {rule.status === 'paused' && <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">PAUSED</span>}
+                    {rule.status === 'completed' && <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-neutral-100 text-neutral-500">DONE</span>}
                   </div>
-                  <p className="text-[10px] text-slate-500">
+                  <p className="text-[10px] text-neutral-400">
                     {FREQUENCY_LABELS[rule.frequency]}
                     {rule.interval_value > 1 ? ` (every ${rule.interval_value})` : ''}
                     {rule.frequency === 'weekly' && rule.day_of_week !== null ? ` on ${DAY_NAMES[rule.day_of_week]}` : ''}
@@ -350,8 +350,8 @@ export default function RecurringPage() {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
-                <div className="flex items-center gap-3 text-[9px] text-slate-500">
+              <div className="flex items-center justify-between mt-2 pt-2 border-t border-black/5">
+                <div className="flex items-center gap-3 text-[9px] text-neutral-400">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-2.5 h-2.5" />
                     Next: {rule.next_run_date ? new Date(rule.next_run_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}
@@ -367,18 +367,18 @@ export default function RecurringPage() {
                   {rule.status !== 'completed' && (
                     <button
                       onClick={() => handleToggle(rule.id, rule.status)}
-                      className="p-1.5 rounded-lg hover:bg-white/5 transition"
+                      className="p-1.5 rounded-lg hover:bg-neutral-100 transition"
                       title={rule.status === 'active' ? 'Pause' : 'Resume'}
                     >
                       {rule.status === 'active'
-                        ? <Pause className="w-3.5 h-3.5 text-amber-400" />
+                        ? <Pause className="w-3.5 h-3.5 text-amber-600" />
                         : <Play className="w-3.5 h-3.5 text-lime-700" />
                       }
                     </button>
                   )}
                   <button
                     onClick={() => handleDelete(rule.id)}
-                    className="p-1.5 rounded-lg hover:bg-rose-500/10 transition"
+                    className="p-1.5 rounded-lg hover:bg-rose-50 transition"
                     title="Delete"
                   >
                     <Trash2 className="w-3.5 h-3.5 text-rose-600" />

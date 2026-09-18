@@ -212,7 +212,7 @@ export async function POST(request: NextRequest) {
       matchStatus = 'processing' // OCR failed, still processing
     }
 
-    const result = await db.run(
+    const result = await db.insert(
       `INSERT INTO receipts (user_id, business_id, transaction_id, file_path, ocr_text, ocr_amount, ocr_date, ocr_vendor, status)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [

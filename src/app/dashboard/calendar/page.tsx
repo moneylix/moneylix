@@ -8,6 +8,7 @@ import {
 import { ChevronLeft, ChevronRight, CalendarDays, Check, RefreshCw } from 'lucide-react'
 import { useBusiness } from '@/lib/contexts/BusinessContext'
 import { useCurrency } from '@/lib/contexts/CurrencyContext'
+import { useTranslation } from '@/lib/i18n'
 import Modal from '@/components/ui/Modal'
 import { projectOccurrences, type RecurringRuleLike } from '@/lib/utils/recurringOccurrences'
 
@@ -32,6 +33,7 @@ interface Transaction {
 const toISODate = (d: Date) => format(d, 'yyyy-MM-dd')
 
 export default function CalendarPage() {
+  const { t } = useTranslation()
   const { activeBusiness } = useBusiness()
   const { currentCurrency, currencies } = useCurrency()
   const fmt = useCallback(
@@ -132,8 +134,8 @@ export default function CalendarPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-base font-bold text-neutral-900">Calendar</h1>
-          <p className="text-[10px] text-neutral-400">Expenses and upcoming bill reminders</p>
+          <h1 className="text-base font-bold text-neutral-900">{t('nav.calendar')}</h1>
+          <p className="text-[10px] text-neutral-400">{t('calendar.subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => setMonthCursor(m => addMonths(m, -1))} className="p-1.5 rounded-lg bg-white hover:bg-neutral-100 transition">
@@ -152,14 +154,14 @@ export default function CalendarPage() {
       <div className="flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-50 text-rose-700">
           <CalendarDays className="w-3 h-3 flex-shrink-0" />
-          <span className="text-[10px] text-neutral-400">Spent this month:</span>
+          <span className="text-[10px] text-neutral-400">{t('calendar.spentThisMonth')}</span>
           <span className="text-xs font-bold font-mono">{fmt(monthTotals.spent)}</span>
         </div>
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 text-amber-700">
           <RefreshCw className="w-3 h-3 flex-shrink-0" />
-          <span className="text-[10px] text-neutral-400">Due this month:</span>
+          <span className="text-[10px] text-neutral-400">{t('calendar.dueThisMonth')}</span>
           <span className="text-xs font-bold font-mono">{fmt(monthTotals.dueTotal)}</span>
-          <span className="text-[10px] opacity-60">({monthTotals.dueCount} bill{monthTotals.dueCount === 1 ? '' : 's'})</span>
+          <span className="text-[10px] opacity-60">({monthTotals.dueCount} {t('calendar.bills')})</span>
         </div>
       </div>
 
@@ -197,7 +199,7 @@ export default function CalendarPage() {
                   )}
                   {dueItemCount > 0 && (
                     <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">
-                      Due {fmt(dueAmount)}
+                      {t('tax.due')} {fmt(dueAmount)}
                     </span>
                   )}
                 </button>
@@ -210,20 +212,20 @@ export default function CalendarPage() {
       {/* Day detail modal */}
       <Modal isOpen={selectedDay !== null} onClose={() => setSelectedDay(null)} title={selectedDay ? format(selectedDay, 'EEEE, d MMMM yyyy') : ''}>
         {selectedBucket && (selectedBucket.activity.length + selectedBucket.due.length + selectedBucket.recurring.length === 0) && (
-          <p className="text-xs text-muted-foreground py-4 text-center">Nothing on this day.</p>
+          <p className="text-xs text-muted-foreground py-4 text-center">{t('calendar.nothingOnThisDay')}</p>
         )}
 
         {selectedBucket && selectedBucket.activity.length > 0 && (
           <div className="space-y-1 mb-4">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-1.5">Activity</p>
-            {selectedBucket.activity.map(t => (
-              <div key={t.id} className="flex items-center justify-between px-3 py-2 rounded-xl bg-accent/40">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-1.5">{t('calendar.activity')}</p>
+            {selectedBucket.activity.map(tr => (
+              <div key={tr.id} className="flex items-center justify-between px-3 py-2 rounded-xl bg-accent/40">
                 <div className="min-w-0">
-                  <p className="text-xs font-medium text-foreground truncate">{t.note || t.category?.name || 'Transaction'}</p>
-                  <p className="text-[10px] text-muted-foreground">{t.category?.name ?? '—'}</p>
+                  <p className="text-xs font-medium text-foreground truncate">{tr.note || tr.category?.name || t('calendar.transaction')}</p>
+                  <p className="text-[10px] text-muted-foreground">{tr.category?.name ?? '—'}</p>
                 </div>
-                <span className={`text-xs font-bold font-mono flex-shrink-0 ${t.type === 'credit' ? 'text-lime-700' : 'text-rose-600'}`}>
-                  {t.type === 'credit' ? '+' : '-'}{fmt(t.amount)}
+                <span className={`text-xs font-bold font-mono flex-shrink-0 ${tr.type === 'credit' ? 'text-lime-700' : 'text-rose-600'}`}>
+                  {tr.type === 'credit' ? '+' : '-'}{fmt(tr.amount)}
                 </span>
               </div>
             ))}
@@ -232,16 +234,16 @@ export default function CalendarPage() {
 
         {selectedBucket && (selectedBucket.due.length > 0 || selectedBucket.recurring.length > 0) && (
           <div className="space-y-1">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-1.5">Due / Reminders</p>
-            {selectedBucket.due.map(t => (
-              <div key={t.id} className="flex items-center justify-between px-3 py-2 rounded-xl bg-amber-50">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-1.5">{t('calendar.dueReminders')}</p>
+            {selectedBucket.due.map(tr => (
+              <div key={tr.id} className="flex items-center justify-between px-3 py-2 rounded-xl bg-amber-50">
                 <div className="min-w-0">
-                  <p className="text-xs font-medium text-foreground truncate">{t.client_name || t.note || 'Bill'}</p>
-                  <p className="text-[10px] text-amber-700">{t.status === 'pending' && t.due_date && new Date(t.due_date) < now ? 'Overdue' : 'Pending'}</p>
+                  <p className="text-xs font-medium text-foreground truncate">{tr.client_name || tr.note || t('calendar.billFallback')}</p>
+                  <p className="text-[10px] text-amber-700">{tr.status === 'pending' && tr.due_date && new Date(tr.due_date) < now ? t('receivables.overdue') : t('receivables.pending')}</p>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-xs font-bold font-mono text-amber-700">{fmt(t.amount)}</span>
-                  <button onClick={() => markPaid(t)} title="Mark paid" className="p-1.5 rounded-lg bg-lime-400 hover:bg-lime-300 text-neutral-900 transition">
+                  <span className="text-xs font-bold font-mono text-amber-700">{fmt(tr.amount)}</span>
+                  <button onClick={() => markPaid(tr)} title={t('calendar.markPaid')} className="p-1.5 rounded-lg bg-lime-400 hover:bg-lime-300 text-neutral-900 transition">
                     <Check className="w-3 h-3" />
                   </button>
                 </div>
@@ -250,8 +252,8 @@ export default function CalendarPage() {
             {selectedBucket.recurring.map((occ, i) => (
               <div key={`${occ.rule.id}-${i}`} className="flex items-center justify-between px-3 py-2 rounded-xl bg-violet-50">
                 <div className="min-w-0">
-                  <p className="text-xs font-medium text-foreground truncate">{occ.rule.note || 'Recurring bill'}</p>
-                  <p className="text-[10px] text-violet-700 capitalize">{occ.rule.frequency} · auto-posts on due date</p>
+                  <p className="text-xs font-medium text-foreground truncate">{occ.rule.note || t('calendar.recurringBill')}</p>
+                  <p className="text-[10px] text-violet-700 capitalize">{occ.rule.frequency} · {t('calendar.autoPostsOnDueDate')}</p>
                 </div>
                 <span className="text-xs font-bold font-mono text-violet-700 flex-shrink-0">
                   {occ.rule.type === 'credit' ? '+' : '-'}{fmt(occ.rule.amount)}

@@ -47,7 +47,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     // Optionally create a debit transaction for this payment
     if (create_transaction) {
-      const txResult = await db.run(
+      const txResult = await db.insert(
         `INSERT INTO transactions (type, amount, category_id, business_id, currency, date, note, method, status)
          VALUES ('debit', ?, (SELECT id FROM categories WHERE name = 'Miscellaneous' LIMIT 1), ?, 'INR', ?, ?, 'bank', 'completed')`,
         [

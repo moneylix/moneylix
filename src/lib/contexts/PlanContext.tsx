@@ -6,7 +6,7 @@ import { useLocalStorage } from '@/lib/hooks/useLocalStorage'
 // In local dev, unlock all features regardless of plan
 const IS_DEV = process.env.NODE_ENV === 'development'
 
-export type Plan = 'free' | 'pro' | 'premium'
+export type Plan = 'free' | 'pro' | 'premium' | 'enterprise'
 
 interface PlanFeatures {
   maxBusinesses: number
@@ -27,18 +27,28 @@ interface PlanFeatures {
   payroll: boolean
   timeTracking: boolean
   reconciliation: boolean
+  /** Income tax estimates + advance tax payment schedule (/api/tax/estimates). */
+  advancedTax: boolean
+  /** Tally-compatible export, for handing books to an accountant/auditor. */
+  tallyExport: boolean
 }
 
+// Personal finance & investing features (transactions, budgets, AI advisor)
+// are available from Pro up — that's the tier a freelancer actually buys.
+// Deep compliance tooling (advancedTax, tallyExport) is Enterprise-only —
+// that's the tier a company or auditing firm buys.
 export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
-  free:    { maxBusinesses: 1,        editCategories: false, overall: false, receivables: false, aiAdvisor: false, exportCSV: false, exportJSON: false, ocrScanner: false, bankSync: false, taxModule: false, teamRoles: false, invoicing: false,  forecasting: false, loans: false, inventory: false, payroll: false, timeTracking: false, reconciliation: false },
-  pro:     { maxBusinesses: 3,        editCategories: true,  overall: true,  receivables: true,  aiAdvisor: false, exportCSV: true,  exportJSON: false, ocrScanner: false, bankSync: true,  taxModule: true,  teamRoles: false, invoicing: true,   forecasting: true,  loans: true,  inventory: false, payroll: false, timeTracking: true,  reconciliation: true  },
-  premium: { maxBusinesses: Infinity, editCategories: true,  overall: true,  receivables: true,  aiAdvisor: true,  exportCSV: true,  exportJSON: true,  ocrScanner: true,  bankSync: true,  taxModule: true,  teamRoles: true,  invoicing: true,   forecasting: true,  loans: true,  inventory: true,  payroll: true,  timeTracking: true,  reconciliation: true  },
+  free:       { maxBusinesses: 1,        editCategories: false, overall: false, receivables: false, aiAdvisor: false, exportCSV: false, exportJSON: false, ocrScanner: false, bankSync: false, taxModule: false, teamRoles: false, invoicing: false,  forecasting: false, loans: false, inventory: false, payroll: false, timeTracking: false, reconciliation: false, advancedTax: false, tallyExport: false },
+  pro:        { maxBusinesses: 3,        editCategories: true,  overall: true,  receivables: true,  aiAdvisor: true,  exportCSV: true,  exportJSON: false, ocrScanner: false, bankSync: true,  taxModule: true,  teamRoles: false, invoicing: true,   forecasting: true,  loans: true,  inventory: false, payroll: false, timeTracking: true,  reconciliation: true,  advancedTax: false, tallyExport: false },
+  premium:    { maxBusinesses: Infinity, editCategories: true,  overall: true,  receivables: true,  aiAdvisor: true,  exportCSV: true,  exportJSON: true,  ocrScanner: true,  bankSync: true,  taxModule: true,  teamRoles: true,  invoicing: true,   forecasting: true,  loans: true,  inventory: true,  payroll: true,  timeTracking: true,  reconciliation: true,  advancedTax: false, tallyExport: false },
+  enterprise: { maxBusinesses: Infinity, editCategories: true,  overall: true,  receivables: true,  aiAdvisor: true,  exportCSV: true,  exportJSON: true,  ocrScanner: true,  bankSync: true,  taxModule: true,  teamRoles: true,  invoicing: true,   forecasting: true,  loans: true,  inventory: true,  payroll: true,  timeTracking: true,  reconciliation: true,  advancedTax: true,  tallyExport: true  },
 }
 
 export const PLAN_LABELS: Record<Plan, { name: string; price: string; color: string; badge: string }> = {
-  free:    { name: 'Free',    price: '₹0/mo',   color: 'text-slate-400', badge: 'bg-slate-500/20 text-slate-300' },
-  pro:     { name: 'Pro',     price: '₹199/mo', color: 'text-cyan-400',  badge: 'bg-cyan-500/20 text-cyan-300'  },
-  premium: { name: 'Premium', price: '₹499/mo', color: 'text-amber-400', badge: 'bg-amber-500/20 text-amber-300'},
+  free:       { name: 'Free',       price: '₹0/mo',     color: 'text-slate-400',   badge: 'bg-slate-500/20 text-slate-300'   },
+  pro:        { name: 'Pro',        price: '₹199/mo',   color: 'text-cyan-400',    badge: 'bg-cyan-500/20 text-cyan-300'     },
+  premium:    { name: 'Premium',    price: '₹499/mo',   color: 'text-amber-400',   badge: 'bg-amber-500/20 text-amber-300'   },
+  enterprise: { name: 'Enterprise', price: '₹1,999/mo', color: 'text-violet-400',  badge: 'bg-violet-500/20 text-violet-300' },
 }
 
 interface PlanContextType {
@@ -57,7 +67,7 @@ const PlanContext = createContext<PlanContextType>({
 })
 
 function isValidPlan(v: unknown): v is Plan {
-  return v === 'free' || v === 'pro' || v === 'premium'
+  return v === 'free' || v === 'pro' || v === 'premium' || v === 'enterprise'
 }
 
 export function PlanProvider({ children }: { children: ReactNode }) {
@@ -86,7 +96,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
 
   const setPlan = (p: Plan) => setPlanStored(p)
   // In dev mode, always use premium features so nothing is gated
-  const effectivePlan: Plan = IS_DEV ? 'premium' : validPlan
+  const effectivePlan: Plan = IS_DEV ? 'enterprise' : validPlan
   const features = PLAN_FEATURES[effectivePlan]
   const can = (feature: keyof PlanFeatures) => IS_DEV ? true : !!features[feature]
 

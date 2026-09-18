@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
 
     // Create a transaction record for sales if requested
     if (create_transaction && type === 'sale') {
-      const txResult = await db.run(
+      const txResult = await db.insert(
         `INSERT INTO transactions (type, amount, category_id, business_id, currency, date, note, method, status)
          VALUES ('credit', ?, (SELECT id FROM categories WHERE name = 'Business Income' LIMIT 1), ?, 'INR', date('now'), ?, 'bank', 'completed')`,
         [totalAmount, business_id, `Sale: ${item.name} x${Math.abs(quantity)}`]
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (create_transaction && type === 'purchase') {
-      const txResult = await db.run(
+      const txResult = await db.insert(
         `INSERT INTO transactions (type, amount, category_id, business_id, currency, date, note, method, status)
          VALUES ('debit', ?, (SELECT id FROM categories WHERE name = 'Shopping' LIMIT 1), ?, 'INR', date('now'), ?, 'bank', 'completed')`,
         [totalAmount, business_id, `Purchase: ${item.name} x${Math.abs(quantity)}`]

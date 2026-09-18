@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   const { title, description, status, priority, category } = await request.json()
   if (!title?.trim()) return NextResponse.json({ error: 'Title required' }, { status: 400 })
 
-  const result = await dbQuery.run(
+  const result = await dbQuery.insert(
     `INSERT INTO feature_requests (title, description, status, priority, category) VALUES (?, ?, ?, ?, ?)`,
     [title.trim(), description ?? null, status ?? 'pending', priority ?? 'medium', category ?? 'general']
   )

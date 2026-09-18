@@ -11,7 +11,9 @@ import db from '@/lib/db.async'
  *   curl https://moneylix.in/api/cron/process-recurring?secret=$CRON_SECRET
  */
 export async function GET(request: NextRequest) {
-  const secret = request.nextUrl.searchParams.get('secret')
+  // Accept the secret via query param (the internal scheduler) or header
+  // (external cron services), for consistency with the other cron routes.
+  const secret = request.nextUrl.searchParams.get('secret') || request.headers.get('x-cron-secret')
   if (process.env.CRON_SECRET && secret !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

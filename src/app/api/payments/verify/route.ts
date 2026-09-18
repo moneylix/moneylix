@@ -10,8 +10,9 @@ const BILLING_DAYS: Record<string, number> = {
 }
 
 const BILLING_AMOUNTS: Record<string, Record<string, number>> = {
-  pro:     { monthly: 199, halfyearly: 999,  annual: 1788 },
-  premium: { monthly: 499, halfyearly: 2499, annual: 3588 },
+  pro:        { monthly: 199,  halfyearly: 999,  annual: 1788 },
+  premium:    { monthly: 499,  halfyearly: 2499, annual: 3588 },
+  enterprise: { monthly: 1999, halfyearly: 9999, annual: 17988 },
 }
 
 export async function POST(request: NextRequest) {

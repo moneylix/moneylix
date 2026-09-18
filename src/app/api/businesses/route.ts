@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import db from '@/lib/db.async'
+import { toPgQuery } from '@/lib/db.postgres'
 import { businessSchema } from '@/lib/schemas'
 
 async function getUserId(request: NextRequest): Promise<number | null> {
@@ -41,10 +42,13 @@ export async function POST(request: NextRequest) {
 
     const { name } = validation.data
     const now = new Date().toISOString()
-    const newBusiness = await db.transaction((tx) => {
-      const result = tx.prepare('INSERT INTO businesses (name, user_id, created_at) VALUES (?, ?, ?)').run(name, userId, now)
-      return tx.prepare('SELECT * FROM businesses WHERE id = ?').get(result.lastInsertRowid)
+    const result = await db.transaction(async (tx) => {
+      return tx.query(
+        toPgQuery('INSERT INTO businesses (name, user_id, created_at) VALUES (?, ?, ?) RETURNING *'),
+        [name, userId, now]
+      )
     })
+    const newBusiness = result.rows[0]
     return NextResponse.json(newBusiness, { status: 201 })
   } catch (error) {
     console.error('Failed to create business:', error)

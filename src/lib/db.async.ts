@@ -1,14 +1,14 @@
 /**
  * Async Database Compatibility Layer
- * 
+ *
  * This wraps the synchronous better-sqlite3 methods in async functions,
  * providing the same interface as db.postgres.ts will have.
- * 
+ *
  * Migration path:
  *   1. All routes import from '@/lib/db.async' (this file) — uses SQLite under the hood
  *   2. When PostgreSQL is ready, swap this import to '@/lib/db.postgres'
  *   3. No other code changes needed — same async interface
- * 
+ *
  * Interface:
  *   dbQuery.all<T>(sql, params?) → Promise<T[]>
  *   dbQuery.get<T>(sql, params?) → Promise<T | null>
@@ -35,6 +35,17 @@ export const dbQuery = {
   },
 
   async run(sql: string, params: Params = []): Promise<RunResult> {
+    return syncDb.run(sql, params)
+  },
+
+  /**
+   * Alias for run() on SQLite — better-sqlite3's .run() already returns
+   * lastInsertRowid natively, no RETURNING clause needed. Exists so call
+   * sites can use dbQuery.insert() uniformly across both this file and
+   * db.postgres.ts (where it appends RETURNING id, since Postgres has no
+   * equivalent of SQLite's implicit last-inserted-rowid).
+   */
+  async insert(sql: string, params: Params = []): Promise<RunResult> {
     return syncDb.run(sql, params)
   },
 

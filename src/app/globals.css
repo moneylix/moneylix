@@ -350,66 +350,187 @@ input[type="number"] {
 
 
 /* =====================================================
-   ADMIN PANEL — SCOPED DARK THEME (crisp, high-contrast)
+   ADMIN PANEL — SCOPED THEME (dark by default, light optional)
    Overrides the global light-conversion rules ONLY inside
-   the admin shell, so the admin dashboard renders as a
-   proper dark UI instead of the washed-out "misty" look.
+   the admin shell. Gated behind [data-theme="dark"|"light"]
+   (set on the shell by the theme toggle in admin/layout.tsx)
+   so the admin dashboard has its own independent light/dark
+   mode instead of inheriting the main app's single theme.
    ===================================================== */
 
-.admin-shell {
+.admin-shell[data-theme="dark"] {
   background: #0a0e1a !important;
   color: #f8fafc !important;
 }
+.admin-shell[data-theme="light"] {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+}
 
-/* Surfaces */
-[data-admin] .bg-background        { background-color: #0a0e1a !important; }
-[data-admin] .bg-white\/5,
-[data-admin] .bg-white\/\[0\.02\],
-[data-admin] .bg-white\/\[0\.03\] { background-color: rgba(255,255,255,0.04) !important; }
-[data-admin] .bg-white\/8,
-[data-admin] .bg-white\/10         { background-color: rgba(255,255,255,0.07) !important; }
-[data-admin] .bg-white\/15         { background-color: rgba(255,255,255,0.1) !important; }
-[data-admin] .bg-white             { background-color: #131a2c !important; }
+/* Re-theme the semantic design tokens (bg-secondary, text-muted-foreground,
+   border-border, bg-card, ...) inside the admin shell — components built on
+   these tokens (Badge, Button, Input, Select, Modal, .card, .chip) would
+   otherwise inherit the main app's :root values regardless of admin theme. */
+[data-admin][data-theme="dark"] {
+  --background: 225 45% 7%;
+  --foreground: 210 40% 98%;
+  --card: 223 40% 12%;
+  --card-foreground: 210 40% 98%;
+  --popover: 223 40% 12%;
+  --popover-foreground: 210 40% 98%;
+  --secondary: 217 33% 17%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 217 33% 17%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 220 20% 18%;
+  --input: 220 20% 18%;
+  --ring: 258 90% 66%;
+}
+[data-admin][data-theme="light"] {
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 47% 11%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222 47% 11%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 258 90% 66%;
+}
 
-[data-admin] .bg-slate-800,
-[data-admin] .bg-slate-800\/50,
-[data-admin] .bg-slate-800\/30,
-[data-admin] .bg-slate-900,
-[data-admin] .bg-slate-900\/40    { background-color: #131a2c !important; }
-[data-admin] .bg-slate-700,
-[data-admin] .bg-slate-700\/60    { background-color: #1e293b !important; }
+/* ── Dark surfaces ── */
+[data-admin][data-theme="dark"] .bg-background        { background-color: #0a0e1a !important; }
+[data-admin][data-theme="dark"] .bg-white\/5,
+[data-admin][data-theme="dark"] .bg-white\/\[0\.02\],
+[data-admin][data-theme="dark"] .bg-white\/\[0\.03\] { background-color: rgba(255,255,255,0.04) !important; }
+[data-admin][data-theme="dark"] .bg-white\/8,
+[data-admin][data-theme="dark"] .bg-white\/10         { background-color: rgba(255,255,255,0.07) !important; }
+[data-admin][data-theme="dark"] .bg-white\/15         { background-color: rgba(255,255,255,0.1) !important; }
+[data-admin][data-theme="dark"] .bg-white             { background-color: #131a2c !important; }
 
-/* Hover surfaces */
-[data-admin] .hover\:bg-white\/5:hover  { background-color: rgba(255,255,255,0.06) !important; }
-[data-admin] .hover\:bg-white\/8:hover  { background-color: rgba(255,255,255,0.08) !important; }
-[data-admin] .hover\:bg-white\/10:hover { background-color: rgba(255,255,255,0.1) !important; }
+[data-admin][data-theme="dark"] .bg-slate-800,
+[data-admin][data-theme="dark"] .bg-slate-800\/50,
+[data-admin][data-theme="dark"] .bg-slate-800\/30,
+[data-admin][data-theme="dark"] .bg-slate-800\/80,
+[data-admin][data-theme="dark"] .bg-slate-900,
+[data-admin][data-theme="dark"] .bg-slate-900\/40,
+[data-admin][data-theme="dark"] .bg-slate-900\/50,
+[data-admin][data-theme="dark"] .bg-slate-900\/60,
+[data-admin][data-theme="dark"] .bg-slate-900\/70,
+[data-admin][data-theme="dark"] .bg-slate-950\/60    { background-color: #131a2c !important; }
+[data-admin][data-theme="dark"] .bg-slate-700,
+[data-admin][data-theme="dark"] .bg-slate-700\/60    { background-color: #1e293b !important; }
+[data-admin][data-theme="dark"] .bg-slate-500,
+[data-admin][data-theme="dark"] .bg-slate-500\/10,
+[data-admin][data-theme="dark"] .bg-slate-500\/15,
+[data-admin][data-theme="dark"] .bg-slate-500\/20    { background-color: rgba(148,163,184,0.15) !important; }
 
-/* Borders */
-[data-admin] .border-white\/5   { border-color: rgba(255,255,255,0.08) !important; }
-[data-admin] .border-white\/8   { border-color: rgba(255,255,255,0.1) !important; }
-[data-admin] .border-white\/10  { border-color: rgba(255,255,255,0.12) !important; }
-[data-admin] .border-white\/15  { border-color: rgba(255,255,255,0.16) !important; }
-[data-admin] .divide-white\/5 > * + * { border-color: rgba(255,255,255,0.08) !important; }
+[data-admin][data-theme="dark"] .hover\:bg-white\/5:hover  { background-color: rgba(255,255,255,0.06) !important; }
+[data-admin][data-theme="dark"] .hover\:bg-white\/8:hover  { background-color: rgba(255,255,255,0.08) !important; }
+[data-admin][data-theme="dark"] .hover\:bg-white\/10:hover { background-color: rgba(255,255,255,0.1) !important; }
+[data-admin][data-theme="dark"] .hover\:bg-slate-800:hover { background-color: #1e293b !important; }
 
-/* Text — crisp, readable */
-[data-admin] .text-foreground   { color: #f8fafc !important; }
-[data-admin] .text-white        { color: #f8fafc !important; }
-[data-admin] .text-slate-200    { color: #e2e8f0 !important; }
-[data-admin] .text-slate-300    { color: #cbd5e1 !important; }
-[data-admin] .text-slate-400    { color: #94a3b8 !important; }
-[data-admin] .text-slate-500    { color: #94a3b8 !important; }
-[data-admin] .text-slate-600    { color: #64748b !important; }
+[data-admin][data-theme="dark"] .border-white\/5   { border-color: rgba(255,255,255,0.08) !important; }
+[data-admin][data-theme="dark"] .border-white\/8   { border-color: rgba(255,255,255,0.1) !important; }
+[data-admin][data-theme="dark"] .border-white\/10  { border-color: rgba(255,255,255,0.12) !important; }
+[data-admin][data-theme="dark"] .border-white\/15  { border-color: rgba(255,255,255,0.16) !important; }
+[data-admin][data-theme="dark"] .divide-white\/5 > * + * { border-color: rgba(255,255,255,0.08) !important; }
 
-/* Gradient stat cards read on dark */
-[data-admin] [class*="bg-gradient-to-br"] { background-color: #131a2c; }
+[data-admin][data-theme="dark"] .text-foreground   { color: #f8fafc !important; }
+[data-admin][data-theme="dark"] .text-white        { color: #f8fafc !important; }
+[data-admin][data-theme="dark"] .text-slate-200    { color: #e2e8f0 !important; }
+[data-admin][data-theme="dark"] .text-slate-300    { color: #cbd5e1 !important; }
+[data-admin][data-theme="dark"] .text-slate-400    { color: #94a3b8 !important; }
+[data-admin][data-theme="dark"] .text-slate-500    { color: #94a3b8 !important; }
+[data-admin][data-theme="dark"] .text-slate-600    { color: #64748b !important; }
+[data-admin][data-theme="dark"] .text-slate-700    { color: #475569 !important; }
+[data-admin][data-theme="dark"] .text-slate-950    { color: #f8fafc !important; }
+[data-admin][data-theme="dark"] .hover\:text-white:hover { color: #f8fafc !important; }
 
-/* Inputs */
-[data-admin] input,
-[data-admin] select,
-[data-admin] textarea { color: #f8fafc !important; }
-[data-admin] input::placeholder,
-[data-admin] textarea::placeholder { color: #64748b !important; }
+[data-admin][data-theme="dark"] [class*="bg-gradient-to-br"] { background-color: #131a2c; }
 
-/* Header/sidebar translucent backgrounds inside admin */
-[data-admin] .bg-background\/80 { background-color: rgba(10,14,26,0.85) !important; }
-[data-admin] .bg-background\/50 { background-color: rgba(10,14,26,0.6) !important; }
+[data-admin][data-theme="dark"] input,
+[data-admin][data-theme="dark"] select,
+[data-admin][data-theme="dark"] textarea { color: #f8fafc !important; }
+[data-admin][data-theme="dark"] input::placeholder,
+[data-admin][data-theme="dark"] textarea::placeholder { color: #64748b !important; }
+
+[data-admin][data-theme="dark"] .bg-background\/80 { background-color: rgba(10,14,26,0.85) !important; }
+[data-admin][data-theme="dark"] .bg-background\/50 { background-color: rgba(10,14,26,0.6) !important; }
+
+/* ── Light surfaces (mirrors the main app's light-surface conversion,
+   scoped to admin so it works independently of the main app's theme) ── */
+[data-admin][data-theme="light"] .bg-background        { background-color: #ffffff !important; }
+[data-admin][data-theme="light"] .bg-slate-950         { background-color: #ffffff !important; }
+[data-admin][data-theme="light"] .bg-slate-950\/80     { background-color: rgba(255,255,255,0.92) !important; }
+[data-admin][data-theme="light"] .bg-slate-950\/60     { background-color: rgba(255,255,255,0.85) !important; }
+
+[data-admin][data-theme="light"] .bg-white\/5,
+[data-admin][data-theme="light"] .bg-white\/\[0\.02\],
+[data-admin][data-theme="light"] .bg-white\/\[0\.03\] { background-color: rgba(0,0,0,0.02) !important; }
+[data-admin][data-theme="light"] .bg-white\/8,
+[data-admin][data-theme="light"] .bg-white\/10         { background-color: rgba(0,0,0,0.05) !important; }
+[data-admin][data-theme="light"] .bg-white\/15         { background-color: rgba(0,0,0,0.08) !important; }
+[data-admin][data-theme="light"] .bg-white             { background-color: #ffffff !important; }
+
+[data-admin][data-theme="light"] .hover\:bg-white\/5:hover  { background-color: rgba(0,0,0,0.04) !important; }
+[data-admin][data-theme="light"] .hover\:bg-white\/8:hover  { background-color: rgba(0,0,0,0.05) !important; }
+[data-admin][data-theme="light"] .hover\:bg-white\/10:hover { background-color: rgba(0,0,0,0.06) !important; }
+[data-admin][data-theme="light"] .hover\:bg-slate-800:hover { background-color: #f3f4f6 !important; }
+
+[data-admin][data-theme="light"] .border-white\/5   { border-color: rgba(0,0,0,0.06) !important; }
+[data-admin][data-theme="light"] .border-white\/8   { border-color: rgba(0,0,0,0.08) !important; }
+[data-admin][data-theme="light"] .border-white\/10  { border-color: rgba(0,0,0,0.1) !important; }
+[data-admin][data-theme="light"] .border-white\/15  { border-color: rgba(0,0,0,0.12) !important; }
+[data-admin][data-theme="light"] .divide-white\/5 > * + * { border-color: rgba(0,0,0,0.07) !important; }
+
+[data-admin][data-theme="light"] .text-foreground   { color: #0f172a !important; }
+[data-admin][data-theme="light"] .text-white        { color: #111827 !important; }
+[data-admin][data-theme="light"] .text-slate-200    { color: #1f2937 !important; }
+[data-admin][data-theme="light"] .text-slate-300    { color: #374151 !important; }
+[data-admin][data-theme="light"] .text-slate-400    { color: #6b7280 !important; }
+[data-admin][data-theme="light"] .text-slate-500    { color: #9ca3af !important; }
+[data-admin][data-theme="light"] .text-slate-600    { color: #d1d5db !important; }
+[data-admin][data-theme="light"] .text-slate-700    { color: #e5e7eb !important; }
+[data-admin][data-theme="light"] .text-slate-950    { color: #030712 !important; }
+[data-admin][data-theme="light"] .hover\:text-white:hover { color: #111827 !important; }
+
+[data-admin][data-theme="light"] .bg-slate-500        { background-color: #e5e7eb !important; }
+[data-admin][data-theme="light"] .bg-slate-500\/10    { background-color: rgba(229,231,235,0.5) !important; }
+[data-admin][data-theme="light"] .bg-slate-500\/15    { background-color: rgba(229,231,235,0.6) !important; }
+[data-admin][data-theme="light"] .bg-slate-500\/20    { background-color: rgba(229,231,235,0.7) !important; }
+[data-admin][data-theme="light"] .bg-slate-600        { background-color: #e5e7eb !important; }
+[data-admin][data-theme="light"] .bg-slate-700,
+[data-admin][data-theme="light"] .bg-slate-700\/60    { background-color: #e5e7eb !important; }
+[data-admin][data-theme="light"] .bg-slate-800,
+[data-admin][data-theme="light"] .bg-slate-800\/50,
+[data-admin][data-theme="light"] .bg-slate-800\/30,
+[data-admin][data-theme="light"] .bg-slate-800\/80    { background-color: #f3f4f6 !important; }
+[data-admin][data-theme="light"] .bg-slate-900,
+[data-admin][data-theme="light"] .bg-slate-900\/40,
+[data-admin][data-theme="light"] .bg-slate-900\/50,
+[data-admin][data-theme="light"] .bg-slate-900\/60,
+[data-admin][data-theme="light"] .bg-slate-900\/70    { background-color: #f9fafb !important; }
+
+[data-admin][data-theme="light"] [class*="bg-gradient-to-br"] { background-color: #f9fafb; }
+
+[data-admin][data-theme="light"] input,
+[data-admin][data-theme="light"] select,
+[data-admin][data-theme="light"] textarea { color: #0f172a !important; }
+[data-admin][data-theme="light"] input::placeholder,
+[data-admin][data-theme="light"] textarea::placeholder { color: #9ca3af !important; }
+
+[data-admin][data-theme="light"] .bg-background\/80 { background-color: rgba(255,255,255,0.9) !important; }
+[data-admin][data-theme="light"] .bg-background\/50 { background-color: rgba(255,255,255,0.7) !important; }

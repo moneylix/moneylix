@@ -12,6 +12,7 @@
  *   - Every 6 hours:  check-notifications (low balance, due dates, unusual spend, budgets)
  *   - Every 1 hour:   process-recurring (create transactions from recurring rules)
  *   - Every 24 hours: expire-subscriptions
+ *   - Every 24 hours: backup-database (SQLite only — no-ops once DATABASE_URL/Postgres is set)
  */
 
 let schedulerStarted = false
@@ -39,6 +40,11 @@ const jobs: CronJob[] = [
   {
     name: 'expire-subscriptions',
     endpoint: '/api/cron/expire-subscriptions',
+    intervalMs: 24 * 60 * 60 * 1000, // 24 hours
+  },
+  {
+    name: 'backup-database',
+    endpoint: '/api/cron/backup-database',
     intervalMs: 24 * 60 * 60 * 1000, // 24 hours
   },
 ]

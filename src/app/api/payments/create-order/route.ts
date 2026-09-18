@@ -13,13 +13,18 @@ const PLAN_PRICING: Record<string, Record<string, number>> = {
     halfyearly: 2499,
     annual:     3588,
   },
+  enterprise: {
+    monthly:    1999,
+    halfyearly: 9999,
+    annual:     17988,
+  },
 }
 
 export async function POST(request: NextRequest) {
   try {
     const { plan, userId, billing = 'monthly' } = await request.json()
 
-    if (!plan || !['pro', 'premium'].includes(plan)) {
+    if (!plan || !['pro', 'premium', 'enterprise'].includes(plan)) {
       return NextResponse.json({ error: 'Invalid plan selected' }, { status: 400 })
     }
     if (!['monthly', 'halfyearly', 'annual'].includes(billing)) {

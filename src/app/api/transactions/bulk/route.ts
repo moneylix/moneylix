@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import db from '@/lib/db.async'
+import { toPgQuery } from '@/lib/db.postgres'
 import { z } from 'zod'
 import { CreateTransactionSchema } from '@/lib/schemas'
 
@@ -27,20 +28,21 @@ export async function POST(request: Request) {
 
     const { transactions } = parsed.data
 
-    const results = await db.transaction((tx) => {
-      const stmt = tx.prepare(`
-        INSERT INTO transactions (type, amount, category_id, business_id, currency, date, due_date, reminder_days, note, method, tags, status, client_name, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-      `)
+    const insertSql = toPgQuery(`
+      INSERT INTO transactions (type, amount, category_id, business_id, currency, date, due_date, reminder_days, note, method, tags, status, client_name, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+      RETURNING id
+    `)
 
+    const results = await db.transaction(async (tx) => {
       const ids: number[] = []
       for (const t of transactions) {
-        const info = stmt.run(
-          t.type, t.amount, t.category_id, t.business_id ?? null, t.currency, 
-          t.date, t.due_date ?? null, t.reminder_days, t.note ?? null, 
+        const result = await tx.query(insertSql, [
+          t.type, t.amount, t.category_id, t.business_id ?? null, t.currency,
+          t.date, t.due_date ?? null, t.reminder_days, t.note ?? null,
           t.method ?? null, t.tags ?? null, t.status, t.client_name ?? null
-        )
-        ids.push(Number(info.lastInsertRowid))
+        ])
+        ids.push(Number(result.rows[0].id))
       }
       return ids
     })

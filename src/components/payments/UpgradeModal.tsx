@@ -1,15 +1,17 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Check, X, ShieldAlert, Sparkles, Loader2, Crown, Zap } from 'lucide-react'
+import { Check, X, ShieldAlert, Sparkles, Loader2, Crown, Zap, Building2 } from 'lucide-react'
 
 declare global { interface Window { Razorpay: any } }
 
 type Billing = 'monthly' | 'halfyearly' | 'annual'
+type PaidPlan = 'pro' | 'premium' | 'enterprise'
 
-const PRICING = {
-  pro:     { monthly: 199,  halfyearly: 999,  annual: 1788 },
-  premium: { monthly: 499,  halfyearly: 2499, annual: 3588 },
+const PRICING: Record<PaidPlan, Record<Billing, number>> = {
+  pro:        { monthly: 199,  halfyearly: 999,  annual: 1788 },
+  premium:    { monthly: 499,  halfyearly: 2499, annual: 3588 },
+  enterprise: { monthly: 1999, halfyearly: 9999, annual: 17988 },
 }
 
 const BILLING_LABELS: Record<Billing, { label: string; sublabel: string; badge?: string }> = {
@@ -18,16 +20,16 @@ const BILLING_LABELS: Record<Billing, { label: string; sublabel: string; badge?:
   annual:     { label: 'Annual',     sublabel: 'Billed once a year', badge: 'Most Savings' },
 }
 
-const MONTHLY_EQUIV: Record<Billing, { pro: string; premium: string }> = {
-  monthly:    { pro: '₹199/mo',    premium: '₹499/mo' },
-  halfyearly: { pro: '₹166/mo',    premium: '₹416/mo' },
-  annual:     { pro: '₹149/mo',    premium: '₹299/mo' },
+const MONTHLY_EQUIV: Record<Billing, Record<PaidPlan, string>> = {
+  monthly:    { pro: '₹199/mo',    premium: '₹499/mo',   enterprise: '₹1,999/mo' },
+  halfyearly: { pro: '₹166/mo',    premium: '₹416/mo',   enterprise: '₹1,666/mo' },
+  annual:     { pro: '₹149/mo',    premium: '₹299/mo',   enterprise: '₹1,499/mo' },
 }
 
-const SAVINGS: Record<Billing, { pro: string; premium: string } | null> = {
+const SAVINGS: Record<Billing, Record<PaidPlan, string> | null> = {
   monthly:    null,
-  halfyearly: { pro: 'Save ₹195',  premium: 'Save ₹495' },
-  annual:     { pro: 'Save ₹600',  premium: 'Save ₹2,400' },
+  halfyearly: { pro: 'Save ₹195',  premium: 'Save ₹495',   enterprise: 'Save ₹995' },
+  annual:     { pro: 'Save ₹600',  premium: 'Save ₹2,400', enterprise: 'Save ₹6,000' },
 }
 
 export default function UpgradeModal({
@@ -41,7 +43,7 @@ export default function UpgradeModal({
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const handleCheckout = async (plan: 'pro' | 'premium') => {
+  const handleCheckout = async (plan: PaidPlan) => {
     try {
       setLoadingPlan(plan); setError(null)
 
@@ -88,7 +90,7 @@ export default function UpgradeModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-      <div className="bg-slate-900 border border-slate-800 rounded-[32px] w-full max-w-4xl p-8 relative shadow-2xl">
+      <div className="bg-slate-900 border border-slate-800 rounded-[32px] w-full max-w-6xl p-8 relative shadow-2xl max-h-[90vh] overflow-y-auto">
         <button onClick={onClose} className="absolute right-6 top-6 text-slate-500 hover:text-white transition-colors">
           <X className="w-6 h-6" />
         </button>
@@ -127,7 +129,7 @@ export default function UpgradeModal({
           ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {/* Free */}
           <div className="rounded-3xl border border-slate-800 bg-slate-900/50 p-6 flex flex-col items-center">
             <div className="w-10 h-10 rounded-2xl bg-slate-700 flex items-center justify-center mb-3">
@@ -169,8 +171,8 @@ export default function UpgradeModal({
               <li className="flex items-center gap-3"><Check className="w-4 h-4 text-cyan-400" /> Up to 3 Businesses</li>
               <li className="flex items-center gap-3"><Check className="w-4 h-4 text-cyan-400" /> Full Transactions</li>
               <li className="flex items-center gap-3"><Check className="w-4 h-4 text-cyan-400" /> Reports & Receivables</li>
+              <li className="flex items-center gap-3 font-bold text-cyan-200"><Check className="w-4 h-4 text-cyan-400" /> AI Investment Advisor</li>
               <li className="flex items-center gap-3"><Check className="w-4 h-4 text-cyan-400" /> Export CSV</li>
-              <li className="flex items-center gap-3 text-slate-600"><X className="w-4 h-4" /> No AI Advisor</li>
             </ul>
             <button
               onClick={() => handleCheckout('pro')}
@@ -182,7 +184,7 @@ export default function UpgradeModal({
           </div>
 
           {/* Premium */}
-          <div className="rounded-3xl border border-amber-500/30 bg-amber-500/5 p-6 flex flex-col items-center relative shadow-[0_0_40px_rgba(245,158,11,0.1)] md:-translate-y-4">
+          <div className="rounded-3xl border border-amber-500/30 bg-amber-500/5 p-6 flex flex-col items-center relative shadow-[0_0_40px_rgba(245,158,11,0.1)]">
             <div className="absolute -top-3 bg-gradient-to-r from-amber-500 to-rose-500 text-white text-[10px] font-black uppercase tracking-widest py-1 px-4 rounded-full flex items-center gap-1">
               <Sparkles className="w-3 h-3" /> Best Value
             </div>
@@ -212,6 +214,37 @@ export default function UpgradeModal({
               className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 hover:opacity-90 text-white font-black transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)] flex items-center justify-center gap-2 text-sm disabled:opacity-60"
             >
               {loadingPlan === 'premium' ? <Loader2 className="w-5 h-5 animate-spin" /> : `Get Premium — ₹${PRICING.premium[billing].toLocaleString()}`}
+            </button>
+          </div>
+
+          {/* Enterprise */}
+          <div className="rounded-3xl border border-violet-500/30 bg-violet-500/5 p-6 flex flex-col items-center relative shadow-[0_0_40px_rgba(167,139,250,0.1)]">
+            <div className="w-10 h-10 rounded-2xl bg-violet-500/20 flex items-center justify-center mb-3 mt-2">
+              <Building2 className="w-5 h-5 text-violet-400" />
+            </div>
+            <p className="text-sm font-black text-violet-400 uppercase tracking-widest mb-2">Enterprise</p>
+            <div className="text-4xl font-black text-white mb-1">₹{PRICING.enterprise[billing].toLocaleString()}</div>
+            <p className="text-[10px] text-violet-500/70 font-bold uppercase tracking-widest">{BILLING_LABELS[billing].sublabel}</p>
+            <p className="text-[10px] text-slate-400 mt-1 mb-1">{MONTHLY_EQUIV[billing].enterprise} equivalent</p>
+            {SAVINGS[billing] && (
+              <span className="text-[10px] bg-violet-500/20 text-violet-300 px-2 py-0.5 rounded-full font-bold mb-4">
+                {SAVINGS[billing]!.enterprise}
+              </span>
+            )}
+            <div className={SAVINGS[billing] ? 'mb-2' : 'mb-6'} />
+            <ul className="space-y-3 text-sm text-slate-300 w-full mb-6 flex-1">
+              <li className="flex items-center gap-3"><Check className="w-4 h-4 text-violet-400" /> Everything in Premium</li>
+              <li className="flex items-center gap-3 font-bold text-violet-200"><Check className="w-4 h-4 text-violet-400" /> Income Tax Estimates</li>
+              <li className="flex items-center gap-3 font-bold text-violet-200"><Check className="w-4 h-4 text-violet-400" /> Advance Tax Schedule</li>
+              <li className="flex items-center gap-3 font-bold text-violet-200"><Check className="w-4 h-4 text-violet-400" /> Tally-Compatible Export</li>
+              <li className="flex items-center gap-3"><Check className="w-4 h-4 text-violet-400" /> Multi-Entity Consolidation</li>
+            </ul>
+            <button
+              onClick={() => handleCheckout('enterprise')}
+              disabled={!!loadingPlan}
+              className="w-full py-3 rounded-xl bg-violet-500 hover:bg-violet-400 text-white font-black transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-60"
+            >
+              {loadingPlan === 'enterprise' ? <Loader2 className="w-5 h-5 animate-spin" /> : `Get Enterprise — ₹${PRICING.enterprise[billing].toLocaleString()}`}
             </button>
           </div>
         </div>

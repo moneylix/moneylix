@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
 
     const entryStatus = status && VALID_STATUSES.includes(status) ? status : 'pending'
 
-    const result = await db.run(
+    const result = await db.insert(
       `INSERT INTO tax_entries (user_id, business_id, financial_year, quarter, month, type, amount, description, status, due_date, reference_number)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [

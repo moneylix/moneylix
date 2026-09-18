@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { useBusiness } from '@/lib/contexts/BusinessContext'
 import { useCurrency } from '@/lib/contexts/CurrencyContext'
+import { useTranslation } from '@/lib/i18n'
 
 interface BudgetItem {
   id: number
@@ -77,15 +78,16 @@ function progressColor(pct: number): string {
   return 'bg-lime-500'
 }
 
-function statusBadge(pct: number): { label: string; cls: string } {
-  if (pct > 100) return { label: 'Over Budget', cls: 'bg-rose-100 text-rose-700' }
-  if (pct > 80) return { label: 'Near Limit', cls: 'bg-amber-100 text-amber-700' }
-  return { label: 'On Track', cls: 'bg-lime-100 text-lime-700' }
+function statusBadge(pct: number, t: (key: string) => string): { label: string; cls: string } {
+  if (pct > 100) return { label: t('budgets.overBudget'), cls: 'bg-rose-100 text-rose-700' }
+  if (pct > 80) return { label: t('budgets.nearLimit'), cls: 'bg-amber-100 text-amber-700' }
+  return { label: t('budgets.onTrack'), cls: 'bg-lime-100 text-lime-700' }
 }
 
 export default function BudgetsPage() {
   const { activeBusiness } = useBusiness()
   const { currentCurrency, currencies } = useCurrency()
+  const { t } = useTranslation()
   const [budgets, setBudgets] = useState<BudgetItem[]>([])
   const [summary, setSummary] = useState<SummaryData | null>(null)
   const [categories, setCategories] = useState<CategoryOption[]>([])
@@ -208,14 +210,14 @@ export default function BudgetsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-base font-bold text-neutral-900">Budgets & Goals</h1>
-          <p className="text-[10px] text-neutral-400">Track spending against monthly targets</p>
+          <h1 className="text-base font-bold text-neutral-900">{t('budgets.title')}</h1>
+          <p className="text-[10px] text-neutral-400">{t('budgets.subtitle')}</p>
         </div>
         <button
           onClick={openAddModal}
           className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-lime-400 text-neutral-900 hover:bg-lime-300 transition font-bold"
         >
-          <Plus className="w-3 h-3" /> Set Budget
+          <Plus className="w-3 h-3" /> {t('budgets.addBudget')}
         </button>
       </div>
 
@@ -248,37 +250,37 @@ export default function BudgetsPage() {
           {summary && (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
               <div className="bg-white rounded-2xl shadow-sm p-3">
-                <p className="text-[10px] text-neutral-400">Total Budgeted</p>
+                <p className="text-[10px] text-neutral-400">{t('budgets.budgeted')}</p>
                 <p className="text-sm font-bold text-neutral-900 font-mono mt-0.5">
                   {fmt(summary.overall.overall_budget || summary.overall.total_budgeted)}
                 </p>
               </div>
               <div className="bg-white rounded-2xl shadow-sm p-3">
-                <p className="text-[10px] text-neutral-400">Actual Spent</p>
+                <p className="text-[10px] text-neutral-400">{t('budgets.actual')}</p>
                 <p className="text-sm font-bold text-neutral-900 font-mono mt-0.5">
                   {fmt(summary.overall.total_actual)}
                 </p>
               </div>
               <div className="bg-white rounded-2xl shadow-sm p-3">
-                <p className="text-[10px] text-neutral-400">Remaining</p>
+                <p className="text-[10px] text-neutral-400">{t('budgets.remaining')}</p>
                 <p className={`text-sm font-bold font-mono mt-0.5 ${
                   summary.overall.total_remaining >= 0 ? 'text-lime-700' : 'text-rose-700'
                 }`}>
                   {fmt(Math.abs(summary.overall.total_remaining))}
-                  {summary.overall.total_remaining < 0 && ' over'}
+                  {summary.overall.total_remaining < 0 && ` ${t('budgets.overBudget')}`}
                 </p>
               </div>
               <div className="bg-white rounded-2xl shadow-sm p-3">
-                <p className="text-[10px] text-neutral-400">Status</p>
+                <p className="text-[10px] text-neutral-400">{t('common.status')}</p>
                 <div className="flex items-center gap-1.5 mt-1">
                   {summary.stats.over_budget > 0 && (
                     <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-700 font-medium">
-                      {summary.stats.over_budget} over
+                      {summary.stats.over_budget} {t('budgets.overBudget')}
                     </span>
                   )}
                   {summary.stats.on_track > 0 && (
                     <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-lime-100 text-lime-700 font-medium">
-                      {summary.stats.on_track} on track
+                      {summary.stats.on_track} {t('budgets.onTrack')}
                     </span>
                   )}
                 </div>
@@ -290,7 +292,7 @@ export default function BudgetsPage() {
           {summary && (summary.overall.overall_budget > 0 || summary.overall.total_budgeted > 0) && (
             <div className="bg-white rounded-2xl shadow-sm p-4">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-semibold text-neutral-900">Overall Progress</p>
+                <p className="text-xs font-semibold text-neutral-900">{t('budgets.overall')}</p>
                 <p className="text-xs text-neutral-500 font-mono">
                   {fmt(summary.overall.total_actual)} / {fmt(summary.overall.overall_budget || summary.overall.total_budgeted)}
                 </p>
@@ -302,7 +304,7 @@ export default function BudgetsPage() {
                 />
               </div>
               <p className="text-[10px] text-neutral-400 mt-1 text-right">
-                {summary.overall.percent_used}% used
+                {summary.overall.percent_used}% {t('budgets.used')}
               </p>
             </div>
           )}
@@ -311,18 +313,18 @@ export default function BudgetsPage() {
           {budgets.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-36 text-neutral-400">
               <Target className="w-10 h-10 mb-2 opacity-30" />
-              <p className="text-xs font-semibold">No budgets set for {getMonthLabel(month)}</p>
+              <p className="text-xs font-semibold">{t('budgets.noBudgets')}</p>
               <button
                 onClick={openAddModal}
                 className="text-xs text-lime-700 font-bold mt-2 hover:text-lime-600"
               >
-                Set your first budget →
+                {t('budgets.setFirstBudget')} →
               </button>
             </div>
           ) : (
             <div className="space-y-2">
               {budgets.map(budget => {
-                const badge = statusBadge(budget.percent_used)
+                const badge = statusBadge(budget.percent_used, t)
                 return (
                   <div key={budget.id} className="bg-white rounded-2xl shadow-sm p-4">
                     <div className="flex items-center justify-between mb-2">
@@ -334,7 +336,7 @@ export default function BudgetsPage() {
                           />
                         )}
                         <p className="text-xs font-semibold text-neutral-900">
-                          {budget.category_name || 'Overall Budget'}
+                          {budget.category_name || t('budgets.overall')}
                         </p>
                         <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${badge.cls}`}>
                           {badge.label}
@@ -372,8 +374,8 @@ export default function BudgetsPage() {
                         budget.remaining >= 0 ? 'text-lime-700' : 'text-rose-700'
                       }`}>
                         {budget.remaining >= 0
-                          ? `${fmt(budget.remaining)} left`
-                          : `${fmt(Math.abs(budget.remaining))} over`
+                          ? `${fmt(budget.remaining)} ${t('budgets.left')}`
+                          : `${fmt(Math.abs(budget.remaining))} ${t('budgets.overBudget')}`
                         }
                       </p>
                     </div>
@@ -386,7 +388,7 @@ export default function BudgetsPage() {
           {/* Unbudgeted categories (from summary) */}
           {summary && summary.categories.filter(c => !c.has_budget && c.actual > 0).length > 0 && (
             <div className="bg-white rounded-2xl shadow-sm p-4">
-              <p className="text-xs font-semibold text-neutral-900 mb-2">Unbudgeted Spending</p>
+              <p className="text-xs font-semibold text-neutral-900 mb-2">{t('budgets.unbudgetedSpending')}</p>
               <div className="space-y-1.5">
                 {summary.categories
                   .filter(c => !c.has_budget && c.actual > 0)
@@ -418,7 +420,7 @@ export default function BudgetsPage() {
           <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl p-6 animate-scaleIn">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-base font-bold text-neutral-900">
-                {editingId ? 'Edit Budget' : 'Set Budget'}
+                {editingId ? t('budgets.editBudget') : t('budgets.addBudget')}
               </h2>
               <button onClick={() => setShowModal(false)} className="p-1 rounded-lg hover:bg-neutral-100">
                 <X className="w-4 h-4 text-neutral-400" />
@@ -429,14 +431,14 @@ export default function BudgetsPage() {
               {!editingId && (
                 <div>
                   <label className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1">
-                    Category
+                    {t('budgets.category')}
                   </label>
                   <select
                     value={formCategoryId}
                     onChange={e => setFormCategoryId(e.target.value)}
                     className="w-full rounded-xl border border-neutral-200 px-3 py-2 text-xs text-neutral-900 focus:outline-none focus:ring-2 focus:ring-lime-400"
                   >
-                    <option value="">Overall (all categories)</option>
+                    <option value="">{t('budgets.overallOption')}</option>
                     {availableCategories.map(cat => (
                       <option key={cat.id} value={cat.id.toString()}>
                         {cat.name}
@@ -448,7 +450,7 @@ export default function BudgetsPage() {
 
               <div>
                 <label className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1">
-                  Budget Amount
+                  {t('common.amount')}
                 </label>
                 <input
                   type="number"
@@ -463,7 +465,7 @@ export default function BudgetsPage() {
               </div>
 
               <div className="text-[10px] text-neutral-400 bg-neutral-50 rounded-xl p-2">
-                <strong>Month:</strong> {getMonthLabel(month)}
+                <strong>{t('budgets.month')}:</strong> {getMonthLabel(month)}
               </div>
 
               <div className="flex gap-2">
@@ -472,14 +474,14 @@ export default function BudgetsPage() {
                   onClick={() => setShowModal(false)}
                   className="flex-1 px-3 py-2 rounded-xl text-xs font-semibold text-neutral-500 hover:bg-neutral-100 transition"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={formSaving || !formAmount}
                   className="flex-1 px-3 py-2 rounded-xl text-xs font-bold bg-lime-400 text-neutral-900 hover:bg-lime-300 transition disabled:opacity-50"
                 >
-                  {formSaving ? 'Saving...' : editingId ? 'Update' : 'Save Budget'}
+                  {formSaving ? t('budgets.saving') : editingId ? t('common.save') : t('budgets.addBudget')}
                 </button>
               </div>
             </form>

@@ -50,7 +50,7 @@ export async function createNotification(
   message: string,
   opts?: CreateNotificationOpts
 ): Promise<number> {
-  const result = await db.run(
+  const result = await db.insert(
     `INSERT INTO notifications (user_id, business_id, type, title, message, action_url, metadata)
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [

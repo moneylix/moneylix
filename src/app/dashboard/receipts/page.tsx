@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { useBusiness } from '@/lib/contexts/BusinessContext'
 import { useCurrency } from '@/lib/contexts/CurrencyContext'
+import { useTranslation } from '@/lib/i18n'
 
 interface Receipt {
   id: number
@@ -33,13 +34,17 @@ interface SuggestedTx {
   category_name: string | null
 }
 
-const statusCfg: Record<string, { label: string; cls: string }> = {
-  processing: { label: 'Processing', cls: 'bg-amber-100 text-amber-700' },
-  matched:    { label: 'Matched',    cls: 'bg-lime-100 text-lime-700' },
-  unmatched:  { label: 'Unmatched',  cls: 'bg-rose-100 text-rose-700' },
+function getStatusCfg(t: (key: string) => string): Record<string, { label: string; cls: string }> {
+  return {
+    processing: { label: t('receipts.processing'),      cls: 'bg-amber-100 text-amber-700' },
+    matched:    { label: t('reconciliation.matched'),   cls: 'bg-lime-100 text-lime-700' },
+    unmatched:  { label: t('reconciliation.unmatched'), cls: 'bg-rose-100 text-rose-700' },
+  }
 }
 
 export default function ReceiptsPage() {
+  const { t } = useTranslation()
+  const statusCfg = getStatusCfg(t)
   const { activeBusiness } = useBusiness()
   const { currentCurrency, currencies } = useCurrency()
 
@@ -134,7 +139,7 @@ export default function ReceiptsPage() {
   const handleDragLeave = () => setDragActive(false)
 
   const deleteReceipt = async (id: number) => {
-    if (!confirm('Delete this receipt?')) return
+    if (!confirm(t('receipts.deleteReceiptConfirm'))) return
     const token = localStorage.getItem('moneylix_session_token') ?? ''
     await fetch(`/api/receipts/${id}`, {
       method: 'DELETE',
@@ -182,8 +187,8 @@ export default function ReceiptsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-base font-bold text-neutral-900">Receipts</h1>
-          <p className="text-[10px] text-neutral-400">Upload and match receipts to transactions</p>
+          <h1 className="text-base font-bold text-neutral-900">{t('nav.receipts')}</h1>
+          <p className="text-[10px] text-neutral-400">{t('receipts.subtitle')}</p>
         </div>
       </div>
 
@@ -201,18 +206,18 @@ export default function ReceiptsPage() {
         {uploading ? (
           <div className="flex flex-col items-center gap-2">
             <div className="w-5 h-5 border-2 border-lime-500 border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs text-neutral-500">Processing receipt...</p>
+            <p className="text-xs text-neutral-500">{t('receipts.processingReceipt')}</p>
           </div>
         ) : (
           <>
             <Upload className="w-6 h-6 text-neutral-300 mx-auto mb-2" />
             <p className="text-xs text-neutral-500 mb-2">
-              Drag & drop a receipt image, or{' '}
+              {t('receipts.dragDropPrefix')}{' '}
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="text-lime-700 font-bold hover:text-lime-900"
               >
-                browse
+                {t('receipts.browse')}
               </button>
             </p>
             <div className="flex items-center justify-center gap-2">
@@ -220,7 +225,7 @@ export default function ReceiptsPage() {
                 onClick={() => fileInputRef.current?.click()}
                 className="flex items-center gap-1 text-[10px] px-3 py-1.5 rounded-lg bg-lime-400 text-neutral-900 hover:bg-lime-300 transition font-bold"
               >
-                <ImageIcon className="w-3 h-3" /> Upload Image
+                <ImageIcon className="w-3 h-3" /> {t('receipts.uploadImage')}
               </button>
               <button
                 onClick={() => {
@@ -233,7 +238,7 @@ export default function ReceiptsPage() {
                 }}
                 className="flex items-center gap-1 text-[10px] px-3 py-1.5 rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition font-medium"
               >
-                <Camera className="w-3 h-3" /> Take Photo
+                <Camera className="w-3 h-3" /> {t('receipts.takePhoto')}
               </button>
             </div>
             <input
@@ -243,7 +248,7 @@ export default function ReceiptsPage() {
               onChange={handleFileSelect}
               className="hidden"
             />
-            <p className="text-[10px] text-neutral-400 mt-2">Supports JPEG, PNG, WebP, GIF</p>
+            <p className="text-[10px] text-neutral-400 mt-2">{t('receipts.supportsFormats')}</p>
           </>
         )}
       </div>
@@ -252,12 +257,12 @@ export default function ReceiptsPage() {
       <div className="flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-lime-50 text-lime-700">
           <Check className="w-3 h-3" />
-          <span className="text-[10px] text-neutral-400">Matched:</span>
+          <span className="text-[10px] text-neutral-400">{t('reconciliation.matched')}:</span>
           <span className="text-xs font-bold">{matchedCount}</span>
         </div>
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-50 text-rose-700">
           <AlertCircle className="w-3 h-3" />
-          <span className="text-[10px] text-neutral-400">Unmatched:</span>
+          <span className="text-[10px] text-neutral-400">{t('reconciliation.unmatched')}:</span>
           <span className="text-xs font-bold">{unmatchedCount}</span>
         </div>
         <div className="flex gap-1 ml-auto">
@@ -269,7 +274,7 @@ export default function ReceiptsPage() {
                 filter === f ? 'bg-lime-100 text-lime-700' : 'bg-white text-neutral-400 hover:text-neutral-900'
               }`}
             >
-              {f}
+              {f === 'all' ? t('common.all') : f === 'unmatched' ? t('reconciliation.unmatched') : f === 'matched' ? t('reconciliation.matched') : t('receipts.processing')}
             </button>
           ))}
         </div>
@@ -284,7 +289,7 @@ export default function ReceiptsPage() {
         ) : receipts.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 text-neutral-400 text-xs gap-1">
             <ImageIcon className="w-8 h-8 mb-1 opacity-30" />
-            <p>No receipts yet. Upload your first receipt above.</p>
+            <p>{t('receipts.noReceiptsYet')}</p>
           </div>
         ) : (
           <>
@@ -327,7 +332,7 @@ export default function ReceiptsPage() {
                       </div>
                       {r.status === 'matched' && r.tx_note && (
                         <p className="text-[10px] text-lime-700 mt-0.5 truncate">
-                          Linked to: {r.tx_note} ({r.tx_amount != null ? fmt(r.tx_amount) : ''})
+                          {t('receipts.linkedTo')} {r.tx_note} ({r.tx_amount != null ? fmt(r.tx_amount) : ''})
                         </p>
                       )}
                     </div>
@@ -339,14 +344,14 @@ export default function ReceiptsPage() {
                           onClick={() => openMatchModal(r)}
                           className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-lg bg-lime-100 text-lime-700 hover:bg-lime-200 transition font-bold"
                         >
-                          <Link2 className="w-3 h-3" /> Match
+                          <Link2 className="w-3 h-3" /> {t('receipts.match')}
                         </button>
                       )}
                       {r.status === 'matched' && (
                         <button
                           onClick={() => openMatchModal(r)}
                           className="p-1 rounded-lg hover:bg-neutral-100 transition"
-                          title="View match"
+                          title={t('receipts.viewMatch')}
                         >
                           <Eye className="w-3.5 h-3.5 text-neutral-400" />
                         </button>
@@ -354,7 +359,7 @@ export default function ReceiptsPage() {
                       <button
                         onClick={() => deleteReceipt(r.id)}
                         className="p-1 rounded-lg hover:bg-rose-50 transition"
-                        title="Delete"
+                        title={t('common.delete')}
                       >
                         <Trash2 className="w-3.5 h-3.5 text-rose-300 hover:text-rose-600" />
                       </button>
@@ -367,7 +372,7 @@ export default function ReceiptsPage() {
             {totalPages > 1 && (
               <div className="flex items-center justify-between px-4 py-2 border-t border-black/5">
                 <span className="text-[10px] text-neutral-400">
-                  {page * limit + 1}–{Math.min((page + 1) * limit, total)} of {total}
+                  {page * limit + 1}–{Math.min((page + 1) * limit, total)} {t('receipts.of')} {total}
                 </span>
                 <div className="flex gap-1">
                   <button
@@ -398,7 +403,7 @@ export default function ReceiptsPage() {
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowMatch(null)} />
             <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl p-6 max-h-[80vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-bold text-neutral-900">Match Receipt to Transaction</h2>
+                <h2 className="text-base font-bold text-neutral-900">{t('receipts.matchReceiptToTransaction')}</h2>
                 <button onClick={() => setShowMatch(null)}>
                   <X className="w-5 h-5 text-neutral-400 hover:text-neutral-900" />
                 </button>
@@ -406,7 +411,7 @@ export default function ReceiptsPage() {
 
               {/* Receipt Info */}
               <div className="bg-neutral-50 rounded-xl p-3 mb-4">
-                <p className="text-[10px] text-neutral-400 uppercase tracking-wider mb-1">Receipt</p>
+                <p className="text-[10px] text-neutral-400 uppercase tracking-wider mb-1">{t('receipts.receiptLabel')}</p>
                 <div className="flex items-center gap-2">
                   {showMatch.receipt.ocr_vendor && (
                     <span className="text-xs font-bold text-neutral-900">{showMatch.receipt.ocr_vendor}</span>
@@ -422,12 +427,12 @@ export default function ReceiptsPage() {
 
               {/* Suggestions */}
               <p className="text-[10px] text-neutral-400 uppercase tracking-wider mb-2">
-                Suggested Transactions ({showMatch.suggestions.length})
+                {t('receipts.suggestedTransactions')} ({showMatch.suggestions.length})
               </p>
               {showMatch.suggestions.length === 0 ? (
                 <div className="text-center text-xs text-neutral-400 py-6">
                   <AlertCircle className="w-5 h-5 mx-auto mb-1 opacity-40" />
-                  No matching transactions found
+                  {t('reconciliation.noMatchingFound')}
                 </div>
               ) : (
                 <div className="space-y-1.5">
@@ -439,7 +444,7 @@ export default function ReceiptsPage() {
                     >
                       <div>
                         <p className="text-xs font-bold text-neutral-900">
-                          {tx.note || tx.category_name || 'Transaction'}
+                          {tx.note || tx.category_name || t('calendar.transaction')}
                         </p>
                         <p className="text-[10px] text-neutral-400">
                           {new Date(tx.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
@@ -448,7 +453,7 @@ export default function ReceiptsPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-xs font-mono font-bold text-neutral-900">{fmt(tx.amount)}</p>
-                        <p className="text-[10px] text-lime-600 font-bold">Match →</p>
+                        <p className="text-[10px] text-lime-600 font-bold">{t('receipts.matchArrow')}</p>
                       </div>
                     </div>
                   ))}

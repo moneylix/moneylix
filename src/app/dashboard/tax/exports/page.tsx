@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import {
   Download, FileText, FileSpreadsheet, FileCode, ArrowLeft,
-  Calendar, Building2, Eye, Loader2, CheckCircle2, AlertCircle,
+  Calendar, Building2, Eye, Loader2, CheckCircle2, AlertCircle, Lock,
 } from 'lucide-react'
 import { useBusiness } from '@/lib/contexts/BusinessContext'
 import { useCurrency } from '@/lib/contexts/CurrencyContext'
@@ -250,9 +250,10 @@ export default function ExportCenterPage() {
           const Icon = report.icon
           const isDownloading = downloading === report.id
           const isSuccess = downloadSuccess === report.id
+          const isLocked = report.id === 'tally' && !can('tallyExport')
 
           return (
-            <div key={report.id} className={`bg-white shadow-sm rounded-2xl p-4 border ${isSuccess ? 'border-lime-300' : 'border-transparent'} transition-all`}>
+            <div key={report.id} className={`bg-white shadow-sm rounded-2xl p-4 border transition-all ${isSuccess ? 'border-lime-300' : 'border-transparent'} ${isLocked ? 'opacity-60 grayscale' : ''}`}>
               <div className="flex items-start gap-3">
                 <div className={`p-2.5 rounded-xl border ${report.color}`}>
                   <Icon className="w-5 h-5" />
@@ -261,36 +262,52 @@ export default function ExportCenterPage() {
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="text-xs font-bold text-neutral-900">{report.name}</h3>
                     <span className="text-[10px] bg-neutral-100 text-neutral-500 px-1.5 py-0.5 rounded font-mono">{report.format}</span>
+                    {isLocked && (
+                      <span className="flex items-center gap-1 text-[10px] font-bold text-violet-600 bg-violet-50 px-1.5 py-0.5 rounded">
+                        <Lock className="w-2.5 h-2.5" /> Enterprise
+                      </span>
+                    )}
                   </div>
                   <p className="text-[10px] text-neutral-400 leading-relaxed">{report.description}</p>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  {report.id === 'tax-report' && (
-                    <button
-                      onClick={() => handlePreview(report)}
-                      disabled={!activeBusiness || preview.loading}
-                      className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition font-medium disabled:opacity-50"
+                  {isLocked ? (
+                    <Link
+                      href="/dashboard/pricing"
+                      className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg font-bold transition bg-violet-100 text-violet-700 hover:bg-violet-200"
                     >
-                      <Eye className="w-3 h-3" /> Preview
-                    </button>
+                      Upgrade
+                    </Link>
+                  ) : (
+                    <>
+                      {report.id === 'tax-report' && (
+                        <button
+                          onClick={() => handlePreview(report)}
+                          disabled={!activeBusiness || preview.loading}
+                          className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition font-medium disabled:opacity-50"
+                        >
+                          <Eye className="w-3 h-3" /> Preview
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDownload(report)}
+                        disabled={!activeBusiness || isDownloading}
+                        className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg font-bold transition disabled:opacity-50 ${
+                          isSuccess
+                            ? 'bg-lime-100 text-lime-700'
+                            : 'bg-lime-400 text-neutral-900 hover:bg-lime-300'
+                        }`}
+                      >
+                        {isDownloading ? (
+                          <><Loader2 className="w-3 h-3 animate-spin" /> Generating…</>
+                        ) : isSuccess ? (
+                          <><CheckCircle2 className="w-3 h-3" /> Downloaded</>
+                        ) : (
+                          <><Download className="w-3 h-3" /> Download</>
+                        )}
+                      </button>
+                    </>
                   )}
-                  <button
-                    onClick={() => handleDownload(report)}
-                    disabled={!activeBusiness || isDownloading}
-                    className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg font-bold transition disabled:opacity-50 ${
-                      isSuccess
-                        ? 'bg-lime-100 text-lime-700'
-                        : 'bg-lime-400 text-neutral-900 hover:bg-lime-300'
-                    }`}
-                  >
-                    {isDownloading ? (
-                      <><Loader2 className="w-3 h-3 animate-spin" /> Generating…</>
-                    ) : isSuccess ? (
-                      <><CheckCircle2 className="w-3 h-3" /> Downloaded</>
-                    ) : (
-                      <><Download className="w-3 h-3" /> Download</>
-                    )}
-                  </button>
                 </div>
               </div>
             </div>

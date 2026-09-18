@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import dbQuery from '@/lib/db.async'
+import { toPgQuery } from '@/lib/db.postgres'
 
 export async function GET() {
   try {
@@ -30,9 +31,10 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    const setting = await dbQuery.transaction((tx) => {
-      tx.prepare('UPDATE settings SET value = ? WHERE key = ?').run(defaultCurrency, 'defaultCurrency')
-      return tx.prepare('SELECT value FROM settings WHERE key = ?').get('defaultCurrency') as any
+    const setting = await dbQuery.transaction(async (tx) => {
+      await tx.query(toPgQuery('UPDATE settings SET value = ? WHERE key = ?'), [defaultCurrency, 'defaultCurrency'])
+      const result = await tx.query(toPgQuery('SELECT value FROM settings WHERE key = ?'), ['defaultCurrency'])
+      return result.rows[0] as any
     })
     return NextResponse.json({
       success: true,

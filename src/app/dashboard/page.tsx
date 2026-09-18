@@ -171,7 +171,7 @@ export default function DashboardPage() {
   ]
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-10">
+    <div className="space-y-4 max-w-7xl mx-auto pb-4">
 
       {/* Plan expiry banner */}
       {daysLeft !== null && daysLeft <= 7 && plan !== 'free' && (
@@ -195,22 +195,22 @@ export default function DashboardPage() {
       )}
 
       {/* Header Panel */}
-      <header className="flex flex-col gap-6 rounded-[32px] bg-neutral-900 p-6 md:flex-row md:items-center md:justify-between shadow-2xl">
+      <header className="flex flex-col gap-4 rounded-[28px] bg-white p-4 sm:p-5 md:flex-row md:items-center md:justify-between shadow-sm border border-black/5">
         <div>
-          <p className="text-sm text-lime-400 font-bold tracking-widest uppercase">Welcome back</p>
-          <h2 className="text-3xl font-extrabold text-neutral-50 mt-1">{activeBusiness.name}</h2>
-          <p className="mt-2 text-sm text-neutral-400 font-medium">Your financial command center is ready.</p>
+          <p className="text-sm text-lime-700 font-bold tracking-widest uppercase">Welcome back</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-neutral-900 mt-0.5">{activeBusiness.name}</h2>
+          <p className="mt-1 text-sm text-neutral-400 font-medium">Your financial command center is ready.</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500 group-focus-within:text-lime-400 transition-colors" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 group-focus-within:text-lime-600 transition-colors" />
             <input
               placeholder="Quick search..."
-              className="rounded-2xl border border-neutral-700 bg-neutral-800 pl-11 pr-4 py-3 text-sm text-neutral-50 outline-none placeholder:text-neutral-500 focus:border-lime-400/50 w-full md:w-64 transition-all"
+              className="rounded-2xl border border-neutral-200 bg-neutral-50 pl-11 pr-4 py-3 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-lime-400 w-full md:w-64 transition-all"
             />
           </div>
-          <Button variant="outline" className="rounded-2xl !border-neutral-700 !text-neutral-50 hover:!bg-neutral-800">Export</Button>
+          <Button variant="outline" className="rounded-2xl">Export</Button>
           <Link href="/dashboard/transactions?action=add">
             <Button className="rounded-2xl px-6 gap-2"><PlusIcon className="w-4 h-4" /> Add Transaction</Button>
           </Link>
@@ -220,11 +220,11 @@ export default function DashboardPage() {
       {/* Summary Row */}
       <section className="grid gap-3 grid-cols-2 xl:grid-cols-4">
         {summaryCards.map((card) => (
-          <div key={card.title} className={cn("group rounded-2xl bg-white p-3 sm:p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col justify-between min-h-[110px]", card.glow)}>
+          <div key={card.title} className={cn("group rounded-2xl bg-white p-3 sm:p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col justify-between min-h-[96px]", card.glow)}>
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0 mr-2">
                 <p className="text-[9px] sm:text-xs font-bold text-neutral-400 uppercase tracking-widest truncate">{card.title}</p>
-                <h3 className="mt-2 text-sm sm:text-2xl md:text-3xl font-black text-neutral-900 font-mono tabular-nums truncate">
+                <h3 className="mt-1.5 text-sm sm:text-2xl md:text-3xl font-black text-neutral-900 font-mono tabular-nums truncate">
                   {'suffix' in card ? (
                     <><AnimatedValue value={card.raw} reducedMotion={reducedMotion} />{card.suffix}</>
                   ) : (
@@ -232,11 +232,11 @@ export default function DashboardPage() {
                   )}
                 </h3>
               </div>
-              <div className={cn("flex h-8 w-8 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110", card.iconWrap)}>
-                <card.icon className="w-4 h-4 sm:w-6 sm:h-6" />
+              <div className={cn("flex h-8 w-8 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110", card.iconWrap)}>
+                <card.icon className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
-            <div className="mt-3 flex items-center justify-between gap-2">
+            <div className="mt-2 flex items-center justify-between gap-2">
               <div className="flex items-center gap-1 min-w-0">
                 <span className={cn(
                   "rounded-full px-2 py-0.5 text-[9px] sm:text-[10px] font-black",
@@ -256,12 +256,12 @@ export default function DashboardPage() {
       </section>
 
       {/* Main Analytics Section */}
-      <section className="grid gap-6 grid-cols-1 xl:grid-cols-3">
+      <section className="grid gap-4 grid-cols-1 xl:grid-cols-3">
         {/* Cash Flow Chart */}
-        <div className={cn("xl:col-span-2 rounded-[32px] bg-white p-8 shadow-sm flex flex-col", CARD_HOVER)}>
-          <div className="mb-8 flex items-center justify-between">
+        <div className={cn("xl:col-span-2 rounded-[28px] bg-white p-4 sm:p-6 shadow-sm flex flex-col", CARD_HOVER)}>
+          <div className="mb-4 flex items-center justify-between">
             <div>
-              <h3 className="text-2xl font-black text-neutral-900 tracking-tight">Cash Flow Overview</h3>
+              <h3 className="text-xl font-black text-neutral-900 tracking-tight">Cash Flow Overview</h3>
               <p className="text-sm text-neutral-400 font-medium">Monthly performance and growth trend</p>
             </div>
             <select
@@ -274,7 +274,7 @@ export default function DashboardPage() {
             </select>
           </div>
 
-          <div className="h-[300px] w-full">
+          <div className="h-[260px] w-full">
             {dailyCashflow.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={dailyCashflow} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
@@ -306,17 +306,17 @@ export default function DashboardPage() {
         </div>
 
         {/* Categories Split */}
-        <div className={cn("rounded-[32px] bg-white p-8 shadow-sm flex flex-col items-center", CARD_HOVER)}>
-          <div className="w-full mb-8">
-            <h3 className="text-2xl font-black text-neutral-900 tracking-tight text-center">{t('dashboard.spendingSplit')}</h3>
+        <div className={cn("rounded-[28px] bg-white p-4 sm:p-6 shadow-sm flex flex-col items-center", CARD_HOVER)}>
+          <div className="w-full mb-4">
+            <h3 className="text-xl font-black text-neutral-900 tracking-tight text-center">{t('dashboard.spendingSplit')}</h3>
             <p className="text-sm text-neutral-400 font-medium text-center">Top expense categories</p>
           </div>
 
-          <div className="relative flex items-center justify-center h-56 w-56 mb-8 mt-4">
+          <div className="relative flex items-center justify-center h-44 w-44 mb-4">
              <ResponsiveContainer width="100%" height="100%">
                <PieChart>
                  <Pie
-                   data={categorySpend} dataKey="amount" cx="50%" cy="50%" innerRadius={65} outerRadius={90} paddingAngle={2} stroke="none"
+                   data={categorySpend} dataKey="amount" cx="50%" cy="50%" innerRadius={52} outerRadius={72} paddingAngle={2} stroke="none"
                    onMouseEnter={(_, index) => setHoveredSlice(index)}
                    onMouseLeave={() => setHoveredSlice(null)}
                  >
@@ -338,13 +338,13 @@ export default function DashboardPage() {
              </div>
           </div>
 
-          <div className="w-full space-y-3">
+          <div className="w-full space-y-2">
             {categorySpend.slice(0, 4).map((cat, index) => (
               <div
                 key={cat.categoryName}
                 onMouseEnter={() => setHoveredSlice(index)}
                 onMouseLeave={() => setHoveredSlice(null)}
-                className={cn("flex items-center justify-between rounded-2xl px-4 py-3 group transition-colors", hoveredSlice === index ? "bg-secondary" : "bg-muted hover:bg-secondary")}
+                className={cn("flex items-center justify-between rounded-xl px-3.5 py-2.5 group transition-colors", hoveredSlice === index ? "bg-secondary" : "bg-muted hover:bg-secondary")}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.categoryColor }} />
@@ -358,10 +358,10 @@ export default function DashboardPage() {
       </section>
 
       {/* Recent Activity Section */}
-      <section className={cn("rounded-[32px] bg-white p-8 shadow-sm", CARD_HOVER)}>
-        <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <section className={cn("rounded-[28px] bg-white p-4 sm:p-6 shadow-sm", CARD_HOVER)}>
+        <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h3 className="text-2xl font-black text-neutral-900 tracking-tight">{t('dashboard.recentTransactions')}</h3>
+            <h3 className="text-xl font-black text-neutral-900 tracking-tight">{t('dashboard.recentTransactions')}</h3>
             <p className="text-sm text-neutral-400 font-medium font-mono uppercase tracking-widest">Live Activity Log</p>
           </div>
           <Link href="/dashboard/transactions">
@@ -371,43 +371,43 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {recentTransactions.length === 0 ? (
-            <div className="text-center py-20 text-neutral-400 font-medium">No activity recorded yet for this business.</div>
+            <div className="text-center py-14 text-neutral-400 font-medium">No activity recorded yet for this business.</div>
           ) : (
             <>
               {/* Desktop Table View */}
               <div className="overflow-x-auto hidden lg:block">
-                <table className="w-full min-w-[720px] border-separate border-spacing-y-4">
+                <table className="w-full min-w-[720px] border-separate border-spacing-y-2">
                   <thead>
                     <tr className="text-left text-[11px] font-black text-neutral-400 uppercase tracking-[0.2em] px-4">
-                      <th className="px-6 py-2">Entity</th>
-                      <th className="px-6 py-2">Timestamp</th>
-                      <th className="px-6 py-2">Category</th>
-                      <th className="px-6 py-2 text-right">Amount</th>
-                      <th className="px-6 py-2 text-center">Status</th>
+                      <th className="px-6 py-1.5">Entity</th>
+                      <th className="px-6 py-1.5">Timestamp</th>
+                      <th className="px-6 py-1.5">Category</th>
+                      <th className="px-6 py-1.5 text-right">Amount</th>
+                      <th className="px-6 py-1.5 text-center">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="space-y-4">
+                  <tbody className="space-y-2">
                     {recentTransactions.map((tx) => (
                       <tr key={tx.id} className="rounded-2xl bg-muted group hover:bg-secondary transition-all duration-300">
-                        <td className="rounded-l-3xl px-6 py-5">
+                        <td className="rounded-l-3xl px-6 py-3">
                           <div className="font-bold text-neutral-900 group-hover:text-lime-700 transition-colors">{tx.note || 'Internal Transfer'}</div>
                           {tx.tags && <div className="text-[10px] text-neutral-400 mt-1">#{tx.tags}</div>}
                         </td>
-                        <td className="px-6 py-5 text-sm text-neutral-400 font-medium">
+                        <td className="px-6 py-3 text-sm text-neutral-400 font-medium">
                           {new Date(tx.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                         </td>
-                        <td className="px-6 py-5">
+                        <td className="px-6 py-3">
                            <span className="flex items-center gap-2">
                               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: tx.category?.color || '#94A3B8' }} />
                               <span className="text-sm font-bold text-neutral-600">{tx.category?.name || 'Unsorted'}</span>
                            </span>
                         </td>
-                        <td className={cn("px-6 py-5 text-right font-black font-mono text-base tabular-nums", tx.type === 'credit' ? 'text-lime-700' : 'text-rose-600')}>
+                        <td className={cn("px-6 py-3 text-right font-black font-mono text-base tabular-nums", tx.type === 'credit' ? 'text-lime-700' : 'text-rose-600')}>
                           {tx.type === 'credit' ? '+' : '-'}{fmt(tx.amount)}
                         </td>
-                        <td className="rounded-r-3xl px-6 py-5 text-center">
+                        <td className="rounded-r-3xl px-6 py-3 text-center">
                           <Badge variant={tx.type as any} className="font-black text-[10px] shadow-sm">
                             {tx.method || 'CASH'}
                           </Badge>
@@ -450,8 +450,8 @@ export default function DashboardPage() {
 
       {/* Bank Activity Section (Pro/Premium only) */}
       {can('bankSync') && bankTxs.length > 0 && (
-        <section className={cn("rounded-[32px] bg-white p-8 shadow-sm", CARD_HOVER)}>
-          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <section className={cn("rounded-[28px] bg-white p-4 sm:p-6 shadow-sm", CARD_HOVER)}>
+          <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-lime-100 flex items-center justify-center">
                 <Building2 className="w-5 h-5 text-lime-700" />

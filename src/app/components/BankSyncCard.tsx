@@ -347,9 +347,9 @@ export function BankSyncCard() {
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-4 animate-pulse">
-        <div className="h-4 w-32 bg-white/10 rounded mb-2" />
-        <div className="h-3 w-48 bg-white/5 rounded" />
+      <div className="rounded-2xl bg-white shadow-sm p-4 animate-pulse">
+        <div className="h-4 w-32 bg-neutral-100 rounded mb-2" />
+        <div className="h-3 w-48 bg-neutral-100 rounded" />
       </div>
     )
   }
@@ -361,33 +361,33 @@ export function BankSyncCard() {
     const isManual = connection.fip_id === 'MANUAL'
 
     return (
-      <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4 space-y-3">
+      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 space-y-3">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-emerald-400" />
+            <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center">
+              <Building2 className="w-5 h-5 text-emerald-600" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <p className="text-xs font-bold text-white">{connection.bank_name || 'Bank Account'}</p>
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                <p className="text-xs font-bold text-neutral-900">{connection.bank_name || 'Bank Account'}</p>
+                <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
               </div>
-              <p className="text-[10px] text-slate-400">
+              <p className="text-[10px] text-neutral-500">
                 {isManual
                   ? `${connection.masked_account_number || ''} · ${connection.ifsc_code || ''}`
                   : `${connection.masked_account_number || 'Connected'} · ${connection.transactionCount} transactions synced`}
               </p>
             </div>
           </div>
-          <button onClick={() => setExpanded(!expanded)} className="p-1.5 rounded-lg hover:bg-white/5 transition">
-            {expanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+          <button onClick={() => setExpanded(!expanded)} className="p-1.5 rounded-lg hover:bg-black/5 transition">
+            {expanded ? <ChevronUp className="w-4 h-4 text-neutral-400" /> : <ChevronDown className="w-4 h-4 text-neutral-400" />}
           </button>
         </div>
 
         {!isManual && (
           /* Last sync info */
-          <div className="flex items-center gap-4 text-[10px] text-slate-500">
+          <div className="flex items-center gap-4 text-[10px] text-neutral-400">
             <span className="flex items-center gap-1">
               <Clock className="w-3 h-3" />
               {connection.last_synced_at
@@ -396,7 +396,7 @@ export function BankSyncCard() {
               }
             </span>
             {isExpiringSoon && (
-              <span className="flex items-center gap-1 text-amber-400">
+              <span className="flex items-center gap-1 text-amber-600">
                 <AlertCircle className="w-3 h-3" /> Consent expiring soon
               </span>
             )}
@@ -405,7 +405,7 @@ export function BankSyncCard() {
 
         {/* Action buttons */}
         {isManual ? (
-          <div className="text-[10px] text-slate-400">
+          <div className="text-[10px] text-neutral-500">
             {connection.branch_name && <p>Branch: {connection.branch_name}</p>}
           </div>
         ) : (
@@ -413,7 +413,7 @@ export function BankSyncCard() {
             <button
               onClick={handleSync}
               disabled={syncing}
-              className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-300 font-semibold hover:bg-emerald-500/20 active:scale-95 transition-all disabled:opacity-40"
+              className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-xl border border-emerald-200 bg-emerald-100 text-emerald-700 font-semibold hover:bg-emerald-200 active:scale-95 transition-all disabled:opacity-40"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
               {syncing ? 'Syncing...' : 'Sync Now'}
@@ -421,7 +421,7 @@ export function BankSyncCard() {
             <button
               onClick={handleCategorise}
               disabled={categorising}
-              className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-xl border border-violet-500/20 bg-violet-500/10 text-violet-300 font-semibold hover:bg-violet-500/20 active:scale-95 transition-all disabled:opacity-40"
+              className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-xl border border-violet-200 bg-violet-100 text-violet-700 font-semibold hover:bg-violet-200 active:scale-95 transition-all disabled:opacity-40"
             >
               <Sparkles className={`w-3.5 h-3.5 ${categorising ? 'animate-pulse' : ''}`} />
               {categorising ? 'Categorising...' : 'AI Categorise'}
@@ -431,14 +431,14 @@ export function BankSyncCard() {
 
         {/* Expanded: disconnect option */}
         {expanded && (
-          <div className="pt-2 border-t border-white/5">
+          <div className="pt-2 border-t border-black/5">
             {connection.last_sync_error && (
-              <p className="text-[10px] text-rose-400 mb-2">⚠️ Last error: {connection.last_sync_error}</p>
+              <p className="text-[10px] text-rose-600 mb-2">⚠️ Last error: {connection.last_sync_error}</p>
             )}
             <button
               onClick={handleDisconnect}
               disabled={disconnecting}
-              className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 transition disabled:opacity-40"
+              className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 transition disabled:opacity-40"
             >
               <Unlink className="w-3 h-3" />
               {disconnecting ? (isManual ? 'Removing...' : 'Disconnecting...') : (isManual ? 'Remove Bank Account' : 'Disconnect Bank')}
@@ -446,7 +446,7 @@ export function BankSyncCard() {
           </div>
         )}
 
-        {toast && <div className="text-[10px] text-emerald-400 font-medium mt-1">{toast}</div>}
+        {toast && <div className="text-[10px] text-emerald-600 font-medium mt-1">{toast}</div>}
       </div>
     )
   }
@@ -454,17 +454,17 @@ export function BankSyncCard() {
   // Pending state
   if (connection && connection.status === 'pending') {
     return (
-      <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 space-y-3">
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 space-y-3">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-amber-500/20 flex items-center justify-center">
-            <Clock className="w-5 h-5 text-amber-400 animate-pulse" />
+          <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center">
+            <Clock className="w-5 h-5 text-amber-600 animate-pulse" />
           </div>
           <div>
-            <p className="text-xs font-bold text-white">Waiting for Approval</p>
-            <p className="text-[10px] text-slate-400">Complete consent approval on your bank&apos;s app to connect</p>
+            <p className="text-xs font-bold text-neutral-900">Waiting for Approval</p>
+            <p className="text-[10px] text-neutral-500">Complete consent approval on your bank&apos;s app to connect</p>
           </div>
         </div>
-        <p className="text-[10px] text-slate-500">
+        <p className="text-[10px] text-neutral-400">
           Check your mobile for a notification from your bank. Once approved, this will update automatically.
         </p>
       </div>
@@ -473,37 +473,37 @@ export function BankSyncCard() {
 
   // Not connected — show connect card
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
+    <div className="rounded-2xl bg-white shadow-sm p-4 space-y-3">
       <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-blue-500/15 flex items-center justify-center">
-          <Building2 className="w-5 h-5 text-blue-400" />
+        <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center">
+          <Building2 className="w-5 h-5 text-blue-600" />
         </div>
         <div>
-          <p className="text-xs font-bold text-white">Connect Bank Account</p>
-          <p className="text-[10px] text-slate-400">Auto-import transactions via Account Aggregator</p>
+          <p className="text-xs font-bold text-neutral-900">Connect Bank Account</p>
+          <p className="text-[10px] text-neutral-500">Auto-import transactions via Account Aggregator</p>
         </div>
       </div>
 
       {!showConnect ? (
         <button
           onClick={() => setShowConnect(true)}
-          className="flex items-center gap-1.5 text-xs px-4 py-2 rounded-xl border border-blue-500/20 bg-blue-500/10 text-blue-300 font-semibold hover:bg-blue-500/20 active:scale-95 transition-all"
+          className="flex items-center gap-1.5 text-xs px-4 py-2 rounded-xl border border-blue-200 bg-blue-100 text-blue-700 font-semibold hover:bg-blue-200 active:scale-95 transition-all"
         >
           <Building2 className="w-3.5 h-3.5" /> Connect Bank
         </button>
       ) : (
         <div className="space-y-3">
           {/* Mode toggle */}
-          <div className="flex gap-1 p-1 rounded-xl bg-white/5 border border-white/10">
+          <div className="flex gap-1 p-1 rounded-xl bg-neutral-100">
             <button
               onClick={() => setConnectMode('aa')}
-              className={`flex-1 text-[11px] font-semibold py-1.5 rounded-lg transition ${connectMode === 'aa' ? 'bg-blue-500/20 text-blue-300' : 'text-slate-400 hover:text-slate-300'}`}
+              className={`flex-1 text-[11px] font-semibold py-1.5 rounded-lg transition ${connectMode === 'aa' ? 'bg-blue-100 text-blue-700' : 'text-neutral-400 hover:text-neutral-700'}`}
             >
               Account Aggregator
             </button>
             <button
               onClick={() => setConnectMode('manual')}
-              className={`flex-1 text-[11px] font-semibold py-1.5 rounded-lg transition ${connectMode === 'manual' ? 'bg-blue-500/20 text-blue-300' : 'text-slate-400 hover:text-slate-300'}`}
+              className={`flex-1 text-[11px] font-semibold py-1.5 rounded-lg transition ${connectMode === 'manual' ? 'bg-blue-100 text-blue-700' : 'text-neutral-400 hover:text-neutral-700'}`}
             >
               Add Manually
             </button>
@@ -512,23 +512,23 @@ export function BankSyncCard() {
           {connectMode === 'aa' ? (
             <>
               <div>
-                <label className="text-[10px] text-slate-400 mb-1 block">Select your bank</label>
+                <label className="text-[10px] text-neutral-400 mb-1 block">Select your bank</label>
                 <select
                   value={selectedBank}
                   onChange={e => setSelectedBank(e.target.value)}
                   disabled={otpSent}
-                  className="w-full px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-60"
+                  className="w-full px-4 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60"
                 >
-                  <option value="" className="bg-slate-800">Select your bank</option>
+                  <option value="">Select your bank</option>
                   {AA_BANKS.map(b => (
-                    <option key={b} value={b} className="bg-slate-800">{b}</option>
+                    <option key={b} value={b}>{b}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="text-[10px] text-slate-400 mb-1 block">Mobile number linked to your bank</label>
+                <label className="text-[10px] text-neutral-400 mb-1 block">Mobile number linked to your bank</label>
                 <div className="flex gap-2">
-                  <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-slate-400">
+                  <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-400">
                     <Smartphone className="w-3.5 h-3.5" /> +91
                   </div>
                   <input
@@ -538,7 +538,7 @@ export function BankSyncCard() {
                     value={mobileNumber}
                     onChange={e => setMobileNumber(e.target.value.replace(/\D/g, ''))}
                     disabled={otpSent}
-                    className="flex-1 px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-60"
+                    className="flex-1 px-4 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60"
                     autoFocus
                   />
                 </div>
@@ -546,18 +546,18 @@ export function BankSyncCard() {
 
               {otpSent && (
                 <div>
-                  <label className="text-[10px] text-slate-400 mb-1 block">Enter OTP sent to +91 {mobileNumber}</label>
+                  <label className="text-[10px] text-neutral-400 mb-1 block">Enter OTP sent to +91 {mobileNumber}</label>
                   <input
                     type="tel"
                     placeholder="6-digit OTP"
                     maxLength={6}
                     value={otp}
                     onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
-                    className="w-full px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 tracking-widest"
+                    className="w-full px-4 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-400 tracking-widest"
                     autoFocus
                   />
                   {devOtp && (
-                    <p className="text-[10px] text-amber-400 mt-1">Demo OTP: {devOtp} (no SMS gateway configured)</p>
+                    <p className="text-[10px] text-amber-600 mt-1">Demo OTP: {devOtp} (no SMS gateway configured)</p>
                   )}
                 </div>
               )}
@@ -565,7 +565,7 @@ export function BankSyncCard() {
               <div className="flex gap-2">
                 <button
                   onClick={() => { if (otpSent) { setOtpSent(false); setOtp(''); setDevOtp(null) } else { setShowConnect(false); resetAaFlow() } }}
-                  className="px-4 py-2 rounded-xl border border-white/10 text-xs font-semibold text-slate-400 hover:bg-white/5 transition"
+                  className="px-4 py-2 rounded-xl border border-neutral-200 text-xs font-semibold text-neutral-500 hover:bg-neutral-50 transition"
                 >
                   {otpSent ? 'Change details' : 'Cancel'}
                 </button>
@@ -573,7 +573,7 @@ export function BankSyncCard() {
                   <button
                     onClick={handleSendOtp}
                     disabled={sendingOtp || !selectedBank || mobileNumber.length !== 10}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-blue-500/20 border border-blue-500/30 text-xs font-bold text-blue-300 hover:bg-blue-500/30 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-blue-100 border border-blue-200 text-xs font-bold text-blue-700 hover:bg-blue-200 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {sendingOtp ? (
                       <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Sending OTP...</>
@@ -585,7 +585,7 @@ export function BankSyncCard() {
                   <button
                     onClick={handleConnect}
                     disabled={connecting || otp.length !== 6}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-blue-500/20 border border-blue-500/30 text-xs font-bold text-blue-300 hover:bg-blue-500/30 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-blue-100 border border-blue-200 text-xs font-bold text-blue-700 hover:bg-blue-200 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {connecting ? (
                       <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Connecting...</>
@@ -595,7 +595,7 @@ export function BankSyncCard() {
                   </button>
                 )}
               </div>
-              <p className="text-[9px] text-slate-500 leading-relaxed">
+              <p className="text-[9px] text-neutral-400 leading-relaxed">
                 🔒 Your data is fetched securely via RBI-licensed Account Aggregator framework. We never see your banking credentials.
                 Consent can be revoked anytime.
               </p>
@@ -603,7 +603,7 @@ export function BankSyncCard() {
           ) : (
             <>
               <div>
-                <label className="text-[10px] text-slate-400 mb-1 block">Account number</label>
+                <label className="text-[10px] text-neutral-400 mb-1 block">Account number</label>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -611,24 +611,24 @@ export function BankSyncCard() {
                   maxLength={18}
                   value={accountNumber}
                   onChange={e => setAccountNumber(e.target.value.replace(/\D/g, ''))}
-                  className="w-full px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                  className="w-full px-4 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   autoFocus
                 />
               </div>
               <div>
-                <label className="text-[10px] text-slate-400 mb-1 block">IFSC code</label>
+                <label className="text-[10px] text-neutral-400 mb-1 block">IFSC code</label>
                 <input
                   type="text"
                   placeholder="e.g. HDFC0000001"
                   maxLength={11}
                   value={ifscCode}
                   onChange={e => setIfscCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
-                  className="w-full px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-sm text-white uppercase placeholder:text-slate-500 placeholder:normal-case focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                  className="w-full px-4 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 uppercase placeholder:text-neutral-400 placeholder:normal-case focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
-                {ifscLoading && <p className="text-[10px] text-slate-500 mt-1">Looking up bank...</p>}
-                {ifscError && <p className="text-[10px] text-rose-400 mt-1">{ifscError}</p>}
+                {ifscLoading && <p className="text-[10px] text-neutral-400 mt-1">Looking up bank...</p>}
+                {ifscError && <p className="text-[10px] text-rose-600 mt-1">{ifscError}</p>}
                 {ifscPreview && (
-                  <p className="text-[10px] text-emerald-400 mt-1">
+                  <p className="text-[10px] text-emerald-600 mt-1">
                     {ifscPreview.bank} · {ifscPreview.branch}
                   </p>
                 )}
@@ -636,14 +636,14 @@ export function BankSyncCard() {
               <div className="flex gap-2">
                 <button
                   onClick={() => { setShowConnect(false); setAccountNumber(''); setIfscCode(''); setIfscPreview(null) }}
-                  className="px-4 py-2 rounded-xl border border-white/10 text-xs font-semibold text-slate-400 hover:bg-white/5 transition"
+                  className="px-4 py-2 rounded-xl border border-neutral-200 text-xs font-semibold text-neutral-500 hover:bg-neutral-50 transition"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleAddManual}
                   disabled={addingManual || !ifscPreview || !/^\d{9,18}$/.test(accountNumber)}
-                  className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-blue-500/20 border border-blue-500/30 text-xs font-bold text-blue-300 hover:bg-blue-500/30 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-blue-100 border border-blue-200 text-xs font-bold text-blue-700 hover:bg-blue-200 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {addingManual ? (
                     <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Adding...</>
@@ -652,7 +652,7 @@ export function BankSyncCard() {
                   )}
                 </button>
               </div>
-              <p className="text-[9px] text-slate-500 leading-relaxed">
+              <p className="text-[9px] text-neutral-400 leading-relaxed">
                 Bank name and branch are fetched automatically from your IFSC code.
               </p>
             </>
@@ -660,7 +660,7 @@ export function BankSyncCard() {
         </div>
       )}
 
-      {toast && <div className="text-[10px] text-rose-400 font-medium mt-1">{toast}</div>}
+      {toast && <div className="text-[10px] text-rose-600 font-medium mt-1">{toast}</div>}
     </div>
   )
 }

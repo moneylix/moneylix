@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { useBusiness } from '@/lib/contexts/BusinessContext'
 import { useCurrency } from '@/lib/contexts/CurrencyContext'
+import { useTranslation } from '@/lib/i18n'
 
 // ─── types ──────────────────────────────────────────────────────────────────
 
@@ -61,15 +62,19 @@ function formatPeriod(period: string): string {
 
 // ─── status configs ─────────────────────────────────────────────────────────
 
-const statusCfg: Record<string, { label: string; cls: string; icon: React.ComponentType<{ className?: string }> }> = {
-  pending:   { label: 'Pending',   cls: 'bg-amber-100 text-amber-700',   icon: Clock },
-  paid:      { label: 'Paid',      cls: 'bg-lime-100 text-lime-700',     icon: CheckCircle2 },
-  cancelled: { label: 'Cancelled', cls: 'bg-neutral-100 text-neutral-500', icon: Ban },
+function getStatusCfg(t: (key: string) => string): Record<string, { label: string; cls: string; icon: React.ComponentType<{ className?: string }> }> {
+  return {
+    pending:   { label: t('receivables.pending'), cls: 'bg-amber-100 text-amber-700',   icon: Clock },
+    paid:      { label: t('invoices.paid'),        cls: 'bg-lime-100 text-lime-700',     icon: CheckCircle2 },
+    cancelled: { label: t('invoices.cancelled'),   cls: 'bg-neutral-100 text-neutral-500', icon: Ban },
+  }
 }
 
 // ─── component ──────────────────────────────────────────────────────────────
 
 export default function PayrollPage() {
+  const { t } = useTranslation()
+  const statusCfg = getStatusCfg(t)
   const { activeBusiness } = useBusiness()
   const { currentCurrency, currencies } = useCurrency()
 
@@ -206,14 +211,14 @@ export default function PayrollPage() {
         body: JSON.stringify(payload),
       })
       const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Failed'); return }
+      if (!res.ok) { setError(data.error || t('payroll.failed')); return }
       setShowStaffModal(false)
       fetchStaff()
-    } catch { setError('Network error') } finally { setSubmitting(false) }
+    } catch { setError(t('team.networkError')) } finally { setSubmitting(false) }
   }
 
   const handleDeleteStaff = async (id: number) => {
-    if (!confirm('Delete this staff member? Payroll entries will also be deleted.')) return
+    if (!confirm(t('payroll.deleteStaffConfirm'))) return
     try {
       const token = localStorage.getItem('moneylix_session_token') ?? ''
       await fetch(`/api/payroll/staff/${id}`, {
@@ -250,9 +255,9 @@ export default function PayrollPage() {
         body: JSON.stringify({ businessId: activeBusiness.id, period }),
       })
       const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Failed to generate'); return }
+      if (!res.ok) { setError(data.error || t('payroll.failedToGenerate')); return }
       fetchEntries()
-    } catch { setError('Network error') } finally { setSubmitting(false) }
+    } catch { setError(t('team.networkError')) } finally { setSubmitting(false) }
   }
 
   const openAdjust = (entry: PayrollEntry) => {
@@ -284,14 +289,14 @@ export default function PayrollPage() {
         }),
       })
       const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Failed'); return }
+      if (!res.ok) { setError(data.error || t('payroll.failed')); return }
       setShowAdjustModal(false)
       fetchEntries()
-    } catch { setError('Network error') } finally { setSubmitting(false) }
+    } catch { setError(t('team.networkError')) } finally { setSubmitting(false) }
   }
 
   const handlePayEntry = async (entryId: number) => {
-    if (!confirm('Mark as paid? This will create a debit transaction.')) return
+    if (!confirm(t('payroll.markPaidConfirm'))) return
     try {
       const token = localStorage.getItem('moneylix_session_token') ?? ''
       const res = await fetch(`/api/payroll/entries/${entryId}/pay`, {
@@ -299,7 +304,7 @@ export default function PayrollPage() {
         headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({}),
       })
-      if (!res.ok) { const d = await res.json(); alert(d.error || 'Failed'); return }
+      if (!res.ok) { const d = await res.json(); alert(d.error || t('payroll.failed')); return }
       fetchEntries()
     } catch (e) { console.error(e) }
   }
@@ -318,21 +323,21 @@ export default function PayrollPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h1 className="text-base font-bold text-neutral-900">Payroll</h1>
-          <p className="text-[10px] text-neutral-400">Manage staff salaries &amp; monthly payroll</p>
+          <h1 className="text-base font-bold text-neutral-900">{t('payroll.title')}</h1>
+          <p className="text-[10px] text-neutral-400">{t('payroll.subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setTab('payroll')}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${tab === 'payroll' ? 'bg-lime-400 text-neutral-900' : 'bg-white text-neutral-400'}`}
           >
-            Payroll
+            {t('payroll.title')}
           </button>
           <button
             onClick={() => setTab('staff')}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${tab === 'staff' ? 'bg-lime-400 text-neutral-900' : 'bg-white text-neutral-400'}`}
           >
-            Staff
+            {t('payroll.staff')}
           </button>
         </div>
       </div>
@@ -341,19 +346,19 @@ export default function PayrollPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="flex items-center gap-2 px-3 py-3 rounded-xl bg-blue-50 text-blue-700">
           <Users className="w-4 h-4" />
-          <div><p className="text-[10px] opacity-70">Active Staff</p><p className="text-sm font-bold">{activeStaff}</p></div>
+          <div><p className="text-[10px] opacity-70">{t('payroll.activeStaff')}</p><p className="text-sm font-bold">{activeStaff}</p></div>
         </div>
         <div className="flex items-center gap-2 px-3 py-3 rounded-xl bg-violet-50 text-violet-700">
           <DollarSign className="w-4 h-4" />
-          <div><p className="text-[10px] opacity-70">Total ({formatPeriod(period)})</p><p className="text-sm font-bold font-mono">{fmt(totalPayroll)}</p></div>
+          <div><p className="text-[10px] opacity-70">{t('payroll.totalPayroll')} ({formatPeriod(period)})</p><p className="text-sm font-bold font-mono">{fmt(totalPayroll)}</p></div>
         </div>
         <div className="flex items-center gap-2 px-3 py-3 rounded-xl bg-amber-50 text-amber-700">
           <Clock className="w-4 h-4" />
-          <div><p className="text-[10px] opacity-70">Pending</p><p className="text-sm font-bold font-mono">{fmt(pendingAmount)}</p></div>
+          <div><p className="text-[10px] opacity-70">{t('receivables.pending')}</p><p className="text-sm font-bold font-mono">{fmt(pendingAmount)}</p></div>
         </div>
         <div className="flex items-center gap-2 px-3 py-3 rounded-xl bg-lime-50 text-lime-700">
           <CheckCircle2 className="w-4 h-4" />
-          <div><p className="text-[10px] opacity-70">Paid</p><p className="text-sm font-bold font-mono">{fmt(paidAmount)}</p></div>
+          <div><p className="text-[10px] opacity-70">{t('invoices.paid')}</p><p className="text-sm font-bold font-mono">{fmt(paidAmount)}</p></div>
         </div>
       </div>
 
@@ -376,7 +381,7 @@ export default function PayrollPage() {
               disabled={submitting}
               className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-lime-400 text-neutral-900 hover:bg-lime-300 transition font-bold disabled:opacity-50"
             >
-              <Plus className="w-3 h-3" /> Generate Payroll
+              <Plus className="w-3 h-3" /> {t('payroll.generatePayroll')}
             </button>
           </div>
 
@@ -390,14 +395,14 @@ export default function PayrollPage() {
               </div>
             ) : entries.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-24 text-neutral-400 text-xs gap-1">
-                <p>No payroll entries for {formatPeriod(period)}.</p>
-                <button onClick={handleGeneratePayroll} className="text-lime-700 font-semibold">Generate now</button>
+                <p>{t('payroll.noEntriesForPeriod')} {formatPeriod(period)}.</p>
+                <button onClick={handleGeneratePayroll} className="text-lime-700 font-semibold">{t('payroll.generateNow')}</button>
               </div>
             ) : (
               <div className="overflow-x-auto -mx-3 sm:mx-0"><table className="w-full text-xs">
                 <thead className="border-b border-black/5 bg-neutral-50">
                   <tr>
-                    {['Staff', 'Base', 'Allowances', 'Deductions', 'Net', 'Status', ''].map((h) => (
+                    {[t('payroll.staff'), t('payroll.base'), t('payroll.allowances'), t('payroll.deductions'), t('payroll.net'), t('common.status'), ''].map((h) => (
                       <th key={h} className="px-3 py-2 text-left text-[10px] font-medium text-neutral-400">{h}</th>
                     ))}
                   </tr>
@@ -431,14 +436,14 @@ export default function PayrollPage() {
                               <button
                                 onClick={() => openAdjust(entry)}
                                 className="p-1 rounded-lg hover:bg-neutral-100 text-neutral-400 transition"
-                                title="Adjust"
+                                title={t('payroll.adjust')}
                               >
                                 <Pencil className="w-3 h-3" />
                               </button>
                               <button
                                 onClick={() => handlePayEntry(entry.id)}
                                 className="p-1 rounded-lg hover:bg-lime-50 text-lime-600 transition"
-                                title="Mark as Paid"
+                                title={t('payroll.markPaid')}
                               >
                                 <Banknote className="w-3 h-3" />
                               </button>
@@ -463,7 +468,7 @@ export default function PayrollPage() {
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400" />
               <input
                 type="text"
-                placeholder="Search staff..."
+                placeholder={t('payroll.searchStaffPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-8 pr-3 py-1.5 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-lime-400 transition"
@@ -473,7 +478,7 @@ export default function PayrollPage() {
               onClick={openAddStaff}
               className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-lime-400 text-neutral-900 hover:bg-lime-300 transition font-bold"
             >
-              <UserPlus className="w-3 h-3" /> Add Staff
+              <UserPlus className="w-3 h-3" /> {t('payroll.addStaff')}
             </button>
           </div>
 
@@ -484,14 +489,14 @@ export default function PayrollPage() {
               </div>
             ) : staff.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-24 text-neutral-400 text-xs gap-1">
-                <p>No staff members yet.</p>
-                <button onClick={openAddStaff} className="text-lime-700 font-semibold">Add one</button>
+                <p>{t('payroll.noStaffYet')}</p>
+                <button onClick={openAddStaff} className="text-lime-700 font-semibold">{t('tax.addOne')}</button>
               </div>
             ) : (
               <div className="overflow-x-auto -mx-3 sm:mx-0"><table className="w-full text-xs">
                 <thead className="border-b border-black/5 bg-neutral-50">
                   <tr>
-                    {['Name', 'Role', 'Salary', 'Frequency', 'Status', ''].map((h) => (
+                    {[t('common.name'), t('team.role'), t('payroll.salary'), t('payroll.frequency'), t('common.status'), ''].map((h) => (
                       <th key={h} className="px-3 py-2 text-left text-[10px] font-medium text-neutral-400">{h}</th>
                     ))}
                   </tr>
@@ -515,15 +520,15 @@ export default function PayrollPage() {
                             s.status === 'active' ? 'bg-lime-100 text-lime-700' : 'bg-neutral-100 text-neutral-500'
                           }`}
                         >
-                          {s.status === 'active' ? 'Active' : 'Inactive'}
+                          {s.status === 'active' ? t('team.active') : t('payroll.inactive')}
                         </button>
                       </td>
                       <td className="px-3 py-2.5 text-right">
                         <div className="flex items-center gap-1 justify-end">
-                          <button onClick={() => openEditStaff(s)} className="p-1 rounded-lg hover:bg-neutral-100 text-neutral-400 transition" title="Edit">
+                          <button onClick={() => openEditStaff(s)} className="p-1 rounded-lg hover:bg-neutral-100 text-neutral-400 transition" title={t('common.edit')}>
                             <Pencil className="w-3 h-3" />
                           </button>
-                          <button onClick={() => handleDeleteStaff(s.id)} className="p-1 rounded-lg hover:bg-rose-50 text-neutral-400 hover:text-rose-600 transition" title="Delete">
+                          <button onClick={() => handleDeleteStaff(s.id)} className="p-1 rounded-lg hover:bg-rose-50 text-neutral-400 hover:text-rose-600 transition" title={t('common.delete')}>
                             <Trash2 className="w-3 h-3" />
                           </button>
                         </div>
@@ -544,7 +549,7 @@ export default function PayrollPage() {
           <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 animate-scaleIn">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold text-neutral-900">
-                {editingStaff ? 'Edit Staff Member' : 'Add Staff Member'}
+                {editingStaff ? t('payroll.editStaffMember') : t('payroll.addStaffMember')}
               </h2>
               <button onClick={() => setShowStaffModal(false)} className="p-1 text-neutral-400 hover:text-neutral-900 transition">
                 <X className="w-4 h-4" />
@@ -553,48 +558,48 @@ export default function PayrollPage() {
             {error && <div className="mb-3 px-3 py-2 rounded-lg bg-rose-50 text-rose-700 text-[10px]">{error}</div>}
             <form onSubmit={handleStaffSubmit} className="space-y-3">
               <div>
-                <label className="text-[10px] font-semibold text-neutral-500 mb-1 block">Name *</label>
+                <label className="text-[10px] font-semibold text-neutral-500 mb-1 block">{t('common.name')} *</label>
                 <input type="text" required value={staffForm.name} onChange={(e) => setStaffForm({ ...staffForm, name: e.target.value })} className="w-full px-3 py-2 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-lime-400 transition" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] font-semibold text-neutral-500 mb-1 block">Role / Title</label>
+                  <label className="text-[10px] font-semibold text-neutral-500 mb-1 block">{t('payroll.roleTitle')}</label>
                   <input type="text" value={staffForm.role_title} onChange={(e) => setStaffForm({ ...staffForm, role_title: e.target.value })} placeholder="e.g. Barista, Developer" className="w-full px-3 py-2 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-lime-400 transition" />
                 </div>
                 <div>
-                  <label className="text-[10px] font-semibold text-neutral-500 mb-1 block">Salary Amount</label>
+                  <label className="text-[10px] font-semibold text-neutral-500 mb-1 block">{t('payroll.salaryAmount')}</label>
                   <input type="number" step="0.01" value={staffForm.salary_amount} onChange={(e) => setStaffForm({ ...staffForm, salary_amount: e.target.value })} placeholder="0" className="w-full px-3 py-2 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-lime-400 transition" />
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] font-semibold text-neutral-500 mb-1 block">Email</label>
+                  <label className="text-[10px] font-semibold text-neutral-500 mb-1 block">{t('common.email')}</label>
                   <input type="email" value={staffForm.email} onChange={(e) => setStaffForm({ ...staffForm, email: e.target.value })} className="w-full px-3 py-2 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-lime-400 transition" />
                 </div>
                 <div>
-                  <label className="text-[10px] font-semibold text-neutral-500 mb-1 block">Phone</label>
+                  <label className="text-[10px] font-semibold text-neutral-500 mb-1 block">{t('common.phone')}</label>
                   <input type="tel" value={staffForm.phone} onChange={(e) => setStaffForm({ ...staffForm, phone: e.target.value })} className="w-full px-3 py-2 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-lime-400 transition" />
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] font-semibold text-neutral-500 mb-1 block">Frequency</label>
+                  <label className="text-[10px] font-semibold text-neutral-500 mb-1 block">{t('payroll.frequency')}</label>
                   <select value={staffForm.salary_frequency} onChange={(e) => setStaffForm({ ...staffForm, salary_frequency: e.target.value })} className="w-full px-3 py-2 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-lime-400 transition">
-                    <option value="monthly">Monthly</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="biweekly">Bi-weekly</option>
+                    <option value="monthly">{t('payroll.monthly')}</option>
+                    <option value="weekly">{t('payroll.weekly')}</option>
+                    <option value="biweekly">{t('payroll.biweekly')}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-[10px] font-semibold text-neutral-500 mb-1 block">Joined Date</label>
+                  <label className="text-[10px] font-semibold text-neutral-500 mb-1 block">{t('payroll.joinedDate')}</label>
                   <input type="date" value={staffForm.joined_date} onChange={(e) => setStaffForm({ ...staffForm, joined_date: e.target.value })} className="w-full px-3 py-2 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-lime-400 transition" />
                 </div>
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setShowStaffModal(false)} className="px-3 py-1.5 text-xs text-neutral-500">Cancel</button>
+                <button type="button" onClick={() => setShowStaffModal(false)} className="px-3 py-1.5 text-xs text-neutral-500">{t('common.cancel')}</button>
                 <button type="submit" disabled={submitting || !staffForm.name.trim()} className="flex items-center gap-1 px-4 py-1.5 text-xs font-bold bg-lime-400 text-neutral-900 hover:bg-lime-300 rounded-xl transition disabled:opacity-50">
                   {submitting ? <div className="w-3 h-3 border-2 border-neutral-900 border-t-transparent rounded-full animate-spin" /> : <Check className="w-3 h-3" />}
-                  {editingStaff ? 'Update' : 'Add Staff'}
+                  {editingStaff ? t('payroll.update') : t('payroll.addStaff')}
                 </button>
               </div>
             </form>
@@ -609,7 +614,7 @@ export default function PayrollPage() {
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setShowAdjustModal(false)} />
           <div className="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl p-6 animate-scaleIn">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold text-neutral-900">Adjust — {adjustingEntry.staff_name}</h2>
+              <h2 className="text-sm font-bold text-neutral-900">{t('payroll.adjust')} — {adjustingEntry.staff_name}</h2>
               <button onClick={() => setShowAdjustModal(false)} className="p-1 text-neutral-400 hover:text-neutral-900 transition">
                 <X className="w-4 h-4" />
               </button>
@@ -617,32 +622,32 @@ export default function PayrollPage() {
             {error && <div className="mb-3 px-3 py-2 rounded-lg bg-rose-50 text-rose-700 text-[10px]">{error}</div>}
             <form onSubmit={handleAdjustSubmit} className="space-y-3">
               <div className="px-3 py-2 rounded-xl bg-neutral-50 text-[10px] text-neutral-500">
-                Base salary: <span className="font-bold font-mono">{fmt(adjustingEntry.base_salary)}</span>
+                {t('payroll.baseSalary')} <span className="font-bold font-mono">{fmt(adjustingEntry.base_salary)}</span>
               </div>
               <div>
-                <label className="text-[10px] font-semibold text-neutral-500 mb-1 block">Allowances (+)</label>
+                <label className="text-[10px] font-semibold text-neutral-500 mb-1 block">{t('payroll.allowances')} (+)</label>
                 <input type="number" step="0.01" value={adjustForm.allowances} onChange={(e) => setAdjustForm({ ...adjustForm, allowances: e.target.value })} placeholder="0" className="w-full px-3 py-2 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-lime-400 transition" />
               </div>
               <div>
-                <label className="text-[10px] font-semibold text-neutral-500 mb-1 block">Deductions (−)</label>
+                <label className="text-[10px] font-semibold text-neutral-500 mb-1 block">{t('payroll.deductions')} (−)</label>
                 <input type="number" step="0.01" value={adjustForm.deductions} onChange={(e) => setAdjustForm({ ...adjustForm, deductions: e.target.value })} placeholder="0" className="w-full px-3 py-2 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-lime-400 transition" />
               </div>
               <div>
-                <label className="text-[10px] font-semibold text-neutral-500 mb-1 block">Notes</label>
+                <label className="text-[10px] font-semibold text-neutral-500 mb-1 block">{t('common.notes')}</label>
                 <textarea value={adjustForm.notes} onChange={(e) => setAdjustForm({ ...adjustForm, notes: e.target.value })} rows={2} className="w-full px-3 py-2 text-xs border border-neutral-200 rounded-xl focus:outline-none focus:border-lime-400 transition resize-none" />
               </div>
               <div className="px-3 py-2 rounded-xl bg-lime-50 text-xs text-lime-700 font-bold font-mono">
-                Net: {fmt(
+                {t('payroll.net')}: {fmt(
                   adjustingEntry.base_salary +
                   (parseFloat(adjustForm.allowances) || 0) -
                   (parseFloat(adjustForm.deductions) || 0)
                 )}
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setShowAdjustModal(false)} className="px-3 py-1.5 text-xs text-neutral-500">Cancel</button>
+                <button type="button" onClick={() => setShowAdjustModal(false)} className="px-3 py-1.5 text-xs text-neutral-500">{t('common.cancel')}</button>
                 <button type="submit" disabled={submitting} className="flex items-center gap-1 px-4 py-1.5 text-xs font-bold bg-lime-400 text-neutral-900 hover:bg-lime-300 rounded-xl transition disabled:opacity-50">
                   {submitting ? <div className="w-3 h-3 border-2 border-neutral-900 border-t-transparent rounded-full animate-spin" /> : <Check className="w-3 h-3" />}
-                  Save Adjustments
+                  {t('payroll.saveAdjustments')}
                 </button>
               </div>
             </form>

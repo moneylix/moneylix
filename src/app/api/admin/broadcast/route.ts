@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       )
     } else {
       users = await dbQuery.all<{ id: number; email: string; username: string }>(
-        'SELECT id, email, username FROM users WHERE email_verified = 1'
+        'SELECT id, email, username FROM users WHERE email_verified = TRUE'
       )
     }
 

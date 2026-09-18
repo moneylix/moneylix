@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { useBusiness } from '@/lib/contexts/BusinessContext'
 import { useCurrency } from '@/lib/contexts/CurrencyContext'
+import { useTranslation } from '@/lib/i18n'
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, Legend,
@@ -39,6 +40,7 @@ interface ForecastSummary {
 }
 
 export default function ForecastPage() {
+  const { t } = useTranslation()
   const { activeBusiness } = useBusiness()
   const { currentCurrency, currencies } = useCurrency()
   const [forecast, setForecast] = useState<ForecastDay[]>([])
@@ -107,9 +109,9 @@ export default function ForecastPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h1 className="text-base font-bold text-neutral-900">Cash Flow Forecast</h1>
+          <h1 className="text-base font-bold text-neutral-900">{t('forecast.title')}</h1>
           <p className="text-[10px] text-neutral-400">
-            Projected balance based on history, recurring transactions &amp; receivables
+            {t('forecast.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -123,7 +125,7 @@ export default function ForecastPage() {
                   : 'bg-white text-neutral-400 hover:text-neutral-900'
               }`}
             >
-              {d} days
+              {d === 30 ? t('forecast.days30') : d === 60 ? t('forecast.days60') : t('forecast.days90')}
             </button>
           ))}
           <button
@@ -140,31 +142,31 @@ export default function ForecastPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <SummaryCard
             icon={Wallet}
-            label="Starting Balance"
+            label={t('forecast.startingBalance')}
             value={fmt(summary.starting_balance)}
             cls="text-blue-700 bg-blue-50"
           />
           <SummaryCard
             icon={TrendingUp}
-            label="Projected End"
+            label={t('forecast.projectedEnd')}
             value={(summary.projected_end_balance >= 0 ? '' : '-') + fmt(summary.projected_end_balance)}
             cls={summary.projected_end_balance >= 0 ? 'text-lime-700 bg-lime-50' : 'text-rose-700 bg-rose-50'}
           />
           <SummaryCard
             icon={ArrowDownLeft}
-            label="Total Income"
+            label={t('forecast.totalIncome')}
             value={fmt(summary.total_projected_income)}
             cls="text-emerald-700 bg-emerald-50"
           />
           <SummaryCard
             icon={ArrowUpRight}
-            label="Total Expense"
+            label={t('forecast.totalExpense')}
             value={fmt(summary.total_projected_expense)}
             cls="text-rose-700 bg-rose-50"
           />
           <SummaryCard
             icon={AlertTriangle}
-            label="Lowest Balance"
+            label={t('forecast.lowestBalance')}
             value={
               (summary.lowest_balance_amount < 0 ? '-' : '') +
               fmt(summary.lowest_balance_amount)
@@ -180,10 +182,10 @@ export default function ForecastPage() {
 
       {/* Chart */}
       <div className="bg-white shadow-sm rounded-2xl p-4">
-        <p className="text-xs font-bold text-neutral-900 mb-3">Projected Balance</p>
+        <p className="text-xs font-bold text-neutral-900 mb-3">{t('forecast.chartTitle')}</p>
         {chartData.length === 0 ? (
           <div className="flex items-center justify-center h-48 text-neutral-400 text-xs">
-            No data to forecast. Add some transactions first.
+            {t('forecast.noDataToForecast')}
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
@@ -219,7 +221,7 @@ export default function ForecastPage() {
                 dataKey="UpperBand"
                 stroke="none"
                 fill="url(#bandGrad)"
-                name="Confidence Band"
+                name={t('forecast.confidenceBand')}
                 dot={false}
               />
               <Area
@@ -237,7 +239,7 @@ export default function ForecastPage() {
                 stroke="#84cc16"
                 fill="url(#balGrad)"
                 strokeWidth={2}
-                name="Projected Balance"
+                name={t('forecast.chartTitle')}
                 dot={false}
               />
             </AreaChart>
@@ -248,12 +250,12 @@ export default function ForecastPage() {
       {/* Upcoming Known Events */}
       <div className="bg-white shadow-sm rounded-2xl overflow-hidden">
         <div className="px-4 py-3 border-b border-black/5">
-          <p className="text-xs font-bold text-neutral-900">Upcoming Known Events</p>
-          <p className="text-[10px] text-neutral-400">Recurring transactions &amp; pending receivables within the forecast</p>
+          <p className="text-xs font-bold text-neutral-900">{t('forecast.upcomingEvents')}</p>
+          <p className="text-[10px] text-neutral-400">{t('forecast.upcomingEventsSubtitle')}</p>
         </div>
         {upcomingEvents.length === 0 ? (
           <div className="flex items-center justify-center h-20 text-neutral-400 text-xs">
-            No upcoming events found
+            {t('forecast.noUpcomingEvents')}
           </div>
         ) : (
           <div className="divide-y divide-black/5">

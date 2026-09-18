@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
-  LayoutDashboard, Users, CreditCard, Lightbulb, LogOut, Shield, Menu, X, ArrowLeft, Megaphone, TicketCheck, KeyRound, UserCog, Settings, ScrollText, Palette, Database
+  LayoutDashboard, Users, CreditCard, Lightbulb, LogOut, Shield, Menu, X, ArrowLeft, Megaphone, TicketCheck, KeyRound, UserCog, Settings, ScrollText, Palette, Database, Sun, Moon
 } from 'lucide-react'
 import { cn } from '@/lib/utils/format'
 
@@ -33,6 +33,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [pwdError, setPwdError] = useState('')
   const [pwdSuccess, setPwdSuccess] = useState(false)
   const [pwdLoading, setPwdLoading] = useState(false)
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
 
   useEffect(() => {
     setMounted(true)
@@ -44,7 +45,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     } catch {
       router.push('/admin/login')
     }
+    const savedTheme = localStorage.getItem('moneylix_admin_theme')
+    if (savedTheme === 'light' || savedTheme === 'dark') setTheme(savedTheme)
   }, [router])
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    setTheme(next)
+    localStorage.setItem('moneylix_admin_theme', next)
+  }
 
   const handleLogout = () => {
     localStorage.removeItem('moneylix_admin_auth')
@@ -74,7 +83,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (pathname === '/admin/login') return <>{children}</>
 
   return (
-    <div data-admin className="admin-shell h-screen overflow-hidden flex">
+    <div data-admin data-theme={theme} className="admin-shell h-screen overflow-hidden flex">
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
@@ -208,6 +217,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
           
           <div className="flex items-center gap-3">
+             <button
+               onClick={toggleTheme}
+               aria-label="Toggle theme"
+               className="p-2.5 rounded-xl border border-white/10 bg-white/5 text-slate-400 hover:text-white transition"
+             >
+               {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+             </button>
              <button
                onClick={() => setShowChangePwd(true)}
                className="flex items-center gap-2 px-3 py-2 rounded-xl border border-violet-500/20 bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 transition text-[10px] font-black uppercase tracking-widest"

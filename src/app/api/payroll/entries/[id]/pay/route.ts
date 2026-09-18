@@ -87,7 +87,7 @@ export async function POST(
     const txNote = `Salary: ${staff?.name ?? 'Staff'}${staff?.role_title ? ' (' + staff.role_title + ')' : ''} — ${entry.period}`
 
     // Create the debit transaction
-    const txResult = await db.run(
+    const txResult = await db.insert(
       `INSERT INTO transactions (user_id, type, amount, category_id, business_id, currency, date, note, method, status)
        VALUES (?, 'debit', ?, ?, ?, 'INR', ?, ?, ?, 'completed')`,
       [userId, entry.net_amount, txCategoryId, entry.business_id, date, txNote, method],

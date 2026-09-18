@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { Delete } from 'lucide-react'
+import { useTranslation } from '@/lib/i18n'
 
 const buttons = [
   ['C', '+/-', '%', '÷'],
@@ -12,6 +13,7 @@ const buttons = [
 ]
 
 export default function CalculatorPage() {
+  const { t } = useTranslation()
   const [display, setDisplay] = useState('0')
   const [expression, setExpression] = useState('')
   const [prevValue, setPrevValue] = useState<number | null>(null)
@@ -87,24 +89,24 @@ export default function CalculatorPage() {
   const btnStyle = (btn: string) => {
     if (btn === '=') return 'bg-gradient-to-br from-emerald-400 to-cyan-500 text-slate-950 font-bold'
     if (['+', '−', '×', '÷'].includes(btn)) return 'bg-lime-100 text-lime-700 font-bold hover:bg-lime-200'
-    if (['C', '+/-', '%'].includes(btn)) return 'bg-white/10 text-slate-300 hover:bg-white/15'
-    if (btn === '⌫') return 'bg-white/10 text-rose-400 hover:bg-rose-500/15'
-    return 'bg-slate-800/80 text-white hover:bg-slate-700'
+    if (['C', '+/-', '%'].includes(btn)) return 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200'
+    if (btn === '⌫') return 'bg-neutral-100 text-rose-600 hover:bg-rose-50'
+    return 'bg-neutral-100 text-neutral-900 hover:bg-neutral-200'
   }
 
   return (
     <div className="space-y-2">
       <div>
-        <h1 className="text-base font-bold text-white">Calculator</h1>
-        <p className="text-[10px] text-slate-400">Financial calculator with history</p>
+        <h1 className="text-base font-bold text-neutral-900">{t('nav.calculator')}</h1>
+        <p className="text-[10px] text-neutral-400">{t('calculator.subtitle')}</p>
       </div>
 
       <div className="flex gap-3 items-start">
         {/* Calculator pad */}
-        <div className="w-56 rounded-2xl border border-white/10 bg-white/5 overflow-hidden flex-shrink-0">
-          <div className="px-4 py-3 min-h-[72px] flex flex-col justify-end items-end bg-slate-900/50">
-            <p className="text-[10px] text-slate-500 truncate w-full text-right">{expression || ' '}</p>
-            <p className={`font-bold text-white font-mono break-all text-right ${display.length > 10 ? 'text-xl' : display.length > 7 ? 'text-2xl' : 'text-3xl'}`}>{display}</p>
+        <div className="w-56 rounded-2xl bg-white shadow-sm overflow-hidden flex-shrink-0">
+          <div className="px-4 py-3 min-h-[72px] flex flex-col justify-end items-end bg-neutral-50">
+            <p className="text-[10px] text-neutral-400 truncate w-full text-right">{expression || ' '}</p>
+            <p className={`font-bold text-neutral-900 font-mono break-all text-right ${display.length > 10 ? 'text-xl' : display.length > 7 ? 'text-2xl' : 'text-3xl'}`}>{display}</p>
           </div>
           <div className="p-2 grid grid-cols-4 gap-1.5">
             {buttons.flat().map((btn, i) => (
@@ -117,21 +119,21 @@ export default function CalculatorPage() {
         </div>
 
         {/* History */}
-        <div className="flex-1 rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
-          <div className="flex items-center justify-between px-3 py-2 border-b border-white/10 bg-slate-800/30">
-            <p className="text-xs font-semibold text-white">History</p>
-            {history.length > 0 && <button onClick={() => setHistory([])} className="text-[10px] text-slate-500 hover:text-rose-400 transition">Clear</button>}
+        <div className="flex-1 rounded-2xl bg-white shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between px-3 py-2 border-b border-black/5 bg-neutral-50">
+            <p className="text-xs font-semibold text-neutral-900">{t('calculator.history')}</p>
+            {history.length > 0 && <button onClick={() => setHistory([])} className="text-[10px] text-neutral-400 hover:text-rose-600 transition">{t('calculator.clear')}</button>}
           </div>
           {history.length === 0 ? (
-            <div className="flex items-center justify-center h-32 text-slate-600 text-xs">No calculations yet</div>
+            <div className="flex items-center justify-center h-32 text-neutral-300 text-xs">{t('calculator.noCalculationsYet')}</div>
           ) : (
-            <div className="divide-y divide-white/5">
+            <div className="divide-y divide-black/5">
               {history.map((entry, i) => {
                 const parts = entry.split('=')
                 return (
                   <div key={i} onClick={() => { const r = parts[1]?.trim(); if (r) { setDisplay(r); setWaitingForNext(true) } }}
-                    className="px-3 py-2 cursor-pointer hover:bg-white/5 transition">
-                    <p className="text-[10px] text-slate-500">{parts[0]?.trim()} =</p>
+                    className="px-3 py-2 cursor-pointer hover:bg-neutral-50 transition">
+                    <p className="text-[10px] text-neutral-400">{parts[0]?.trim()} =</p>
                     <p className="text-sm font-bold font-mono text-lime-700">{parts[1]?.trim()}</p>
                   </div>
                 )

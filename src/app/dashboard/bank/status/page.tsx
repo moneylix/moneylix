@@ -99,7 +99,7 @@ function HealthDot({ health }: { health: SyncStatus['healthStatus'] }) {
         {pulse && <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${color} opacity-60`} />}
         <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${color}`} />
       </span>
-      <span className="text-xs font-semibold text-white">{label}</span>
+      <span className="text-xs font-semibold text-neutral-900">{label}</span>
     </span>
   )
 }
@@ -118,12 +118,12 @@ function ConsentBar({ daysRemaining }: { daysRemaining: number | null }) {
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between text-[10px]">
-        <span className="text-slate-400">Consent remaining</span>
-        <span className={`font-bold ${daysRemaining <= 30 ? 'text-amber-400' : 'text-slate-300'}`}>
+        <span className="text-neutral-400">Consent remaining</span>
+        <span className={`font-bold ${daysRemaining <= 30 ? 'text-amber-600' : 'text-neutral-600'}`}>
           {daysRemaining <= 0 ? 'Expired' : `${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}`}
         </span>
       </div>
-      <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+      <div className="h-1.5 w-full rounded-full bg-neutral-100 overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-700 ${color}`}
           style={{ width: `${pct}%` }}
@@ -138,34 +138,34 @@ function SyncHistoryRow({ item }: { item: SyncHistoryItem }) {
   const isFailure = item.status === 'failure'
 
   return (
-    <div className="flex items-start gap-3 py-2.5 border-b border-white/5 last:border-0">
+    <div className="flex items-start gap-3 py-2.5 border-b border-black/5 last:border-0">
       {/* Icon */}
       <div className={`mt-0.5 w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 ${
-        isSuccess ? 'bg-emerald-500/15' :
-        isFailure ? 'bg-rose-500/15' :
-        'bg-slate-500/15'
+        isSuccess ? 'bg-emerald-100' :
+        isFailure ? 'bg-rose-100' :
+        'bg-neutral-100'
       }`}>
         {isSuccess ? (
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
         ) : isFailure ? (
-          <XCircle className="w-3.5 h-3.5 text-rose-400" />
+          <XCircle className="w-3.5 h-3.5 text-rose-600" />
         ) : (
-          <Clock className="w-3.5 h-3.5 text-slate-400" />
+          <Clock className="w-3.5 h-3.5 text-neutral-400" />
         )}
       </div>
 
       {/* Text */}
       <div className="flex-1 min-w-0">
-        <p className="text-[11px] font-semibold text-white leading-tight truncate">
+        <p className="text-[11px] font-semibold text-neutral-900 leading-tight truncate">
           {item.description || item.action.replace(/_/g, ' ')}
         </p>
         {item.error_message && (
-          <p className="text-[10px] text-rose-400 mt-0.5 truncate">{item.error_message}</p>
+          <p className="text-[10px] text-rose-600 mt-0.5 truncate">{item.error_message}</p>
         )}
       </div>
 
       {/* Time */}
-      <span className="text-[10px] text-slate-500 flex-shrink-0 mt-0.5">{timeAgo(item.created_at)}</span>
+      <span className="text-[10px] text-neutral-400 flex-shrink-0 mt-0.5">{timeAgo(item.created_at)}</span>
     </div>
   )
 }
@@ -228,13 +228,13 @@ export default function BankSyncStatusPage() {
   if (loading) {
     return (
       <div className="space-y-5 animate-pulse">
-        <div className="h-6 w-48 bg-white/10 rounded-xl" />
-        <div className="h-36 rounded-2xl bg-white/5 border border-white/10" />
+        <div className="h-6 w-48 bg-neutral-100 rounded-xl" />
+        <div className="h-36 rounded-2xl bg-neutral-100" />
         <div className="grid grid-cols-2 gap-3">
-          <div className="h-24 rounded-2xl bg-white/5 border border-white/10" />
-          <div className="h-24 rounded-2xl bg-white/5 border border-white/10" />
+          <div className="h-24 rounded-2xl bg-neutral-100" />
+          <div className="h-24 rounded-2xl bg-neutral-100" />
         </div>
-        <div className="h-48 rounded-2xl bg-white/5 border border-white/10" />
+        <div className="h-48 rounded-2xl bg-neutral-100" />
       </div>
     )
   }
@@ -246,17 +246,17 @@ export default function BankSyncStatusPage() {
     return (
       <div className="space-y-5">
         <PageHeader />
-        <div className="flex flex-col items-center justify-center py-16 text-center rounded-2xl border border-white/10 bg-white/5">
-          <div className="w-16 h-16 rounded-3xl bg-slate-500/10 flex items-center justify-center mb-4">
-            <WifiOff className="w-8 h-8 text-slate-500" />
+        <div className="flex flex-col items-center justify-center py-16 text-center rounded-2xl bg-white shadow-sm">
+          <div className="w-16 h-16 rounded-3xl bg-neutral-100 flex items-center justify-center mb-4">
+            <WifiOff className="w-8 h-8 text-neutral-400" />
           </div>
-          <h3 className="text-sm font-bold text-white mb-1">No Bank Connected</h3>
-          <p className="text-[11px] text-slate-400 max-w-xs mb-5">
+          <h3 className="text-sm font-bold text-neutral-900 mb-1">No Bank Connected</h3>
+          <p className="text-[11px] text-neutral-400 max-w-xs mb-5">
             Connect your bank via Account Aggregator to start importing transactions automatically.
           </p>
           <Link
             href="/dashboard/bank"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-300 text-xs font-bold hover:bg-emerald-500/25 transition"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-100 border border-emerald-200 text-emerald-700 text-xs font-bold hover:bg-emerald-200 transition"
           >
             <Building2 className="w-4 h-4" /> Go to Bank Dashboard
           </Link>
@@ -272,18 +272,18 @@ export default function BankSyncStatusPage() {
 
   // ── Connection health banner colour ──────────────────────────────────────
   const bannerBorder =
-    s.healthStatus === 'healthy'       ? 'border-emerald-500/25 bg-emerald-500/5'  :
-    s.healthStatus === 'expiring_soon' ? 'border-amber-500/25  bg-amber-500/5'     :
-    s.healthStatus === 'expired'       ? 'border-rose-500/25   bg-rose-500/5'      :
-    s.healthStatus === 'pending'       ? 'border-blue-500/25   bg-blue-500/5'      :
-    'border-white/10 bg-white/5'
+    s.healthStatus === 'healthy'       ? 'border-emerald-200 bg-emerald-50'  :
+    s.healthStatus === 'expiring_soon' ? 'border-amber-200  bg-amber-50'     :
+    s.healthStatus === 'expired'       ? 'border-rose-200   bg-rose-50'      :
+    s.healthStatus === 'pending'       ? 'border-blue-200   bg-blue-50'      :
+    'border-neutral-200 bg-neutral-50'
 
   const bankIcon =
-    s.healthStatus === 'healthy'       ? <Wifi        className="w-5 h-5 text-emerald-400" /> :
-    s.healthStatus === 'expiring_soon' ? <AlertTriangle className="w-5 h-5 text-amber-400" /> :
-    s.healthStatus === 'expired'       ? <ShieldAlert  className="w-5 h-5 text-rose-400"   /> :
-    s.healthStatus === 'pending'       ? <Clock        className="w-5 h-5 text-blue-400 animate-pulse" /> :
-    <WifiOff className="w-5 h-5 text-slate-500" />
+    s.healthStatus === 'healthy'       ? <Wifi        className="w-5 h-5 text-emerald-600" /> :
+    s.healthStatus === 'expiring_soon' ? <AlertTriangle className="w-5 h-5 text-amber-600" /> :
+    s.healthStatus === 'expired'       ? <ShieldAlert  className="w-5 h-5 text-rose-600"   /> :
+    s.healthStatus === 'pending'       ? <Clock        className="w-5 h-5 text-blue-600 animate-pulse" /> :
+    <WifiOff className="w-5 h-5 text-neutral-400" />
 
   return (
     <div className="space-y-5">
@@ -295,19 +295,19 @@ export default function BankSyncStatusPage() {
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-              s.healthStatus === 'healthy'       ? 'bg-emerald-500/20' :
-              s.healthStatus === 'expiring_soon' ? 'bg-amber-500/20'   :
-              s.healthStatus === 'expired'       ? 'bg-rose-500/20'    :
-              s.healthStatus === 'pending'       ? 'bg-blue-500/20'    :
-              'bg-slate-500/20'
+              s.healthStatus === 'healthy'       ? 'bg-emerald-100' :
+              s.healthStatus === 'expiring_soon' ? 'bg-amber-100'   :
+              s.healthStatus === 'expired'       ? 'bg-rose-100'    :
+              s.healthStatus === 'pending'       ? 'bg-blue-100'    :
+              'bg-neutral-100'
             }`}>
               {bankIcon}
             </div>
             <div>
-              <p className="text-sm font-bold text-white leading-tight">
+              <p className="text-sm font-bold text-neutral-900 leading-tight">
                 {s.bankName || 'Bank Account'}
               </p>
-              <p className="text-[10px] text-slate-400 mt-0.5">
+              <p className="text-[10px] text-neutral-400 mt-0.5">
                 {s.maskedAccount ? `${s.maskedAccount} · ` : ''}
                 {s.accountType || 'Account'}
                 {s.fipId ? ` · ${s.fipId}` : ''}
@@ -322,14 +322,14 @@ export default function BankSyncStatusPage() {
 
         {/* Consent dates */}
         <div className="grid grid-cols-2 gap-3 text-[11px]">
-          <div className="rounded-xl bg-white/5 border border-white/8 p-3">
-            <p className="text-slate-500 uppercase tracking-wider font-bold text-[9px] mb-1">Consent Start</p>
-            <p className="text-white font-semibold">{fmtDate(s.consentStart)}</p>
+          <div className="rounded-xl bg-neutral-50 p-3">
+            <p className="text-neutral-400 uppercase tracking-wider font-bold text-[9px] mb-1">Consent Start</p>
+            <p className="text-neutral-900 font-semibold">{fmtDate(s.consentStart)}</p>
           </div>
-          <div className="rounded-xl bg-white/5 border border-white/8 p-3">
-            <p className="text-slate-500 uppercase tracking-wider font-bold text-[9px] mb-1">Consent Expiry</p>
+          <div className="rounded-xl bg-neutral-50 p-3">
+            <p className="text-neutral-400 uppercase tracking-wider font-bold text-[9px] mb-1">Consent Expiry</p>
             <p className={`font-semibold ${
-              (s.consentDaysRemaining ?? 99) <= 30 ? 'text-amber-400' : 'text-white'
+              (s.consentDaysRemaining ?? 99) <= 30 ? 'text-amber-600' : 'text-neutral-900'
             }`}>
               {fmtDate(s.consentExpiry)}
             </p>
@@ -338,9 +338,9 @@ export default function BankSyncStatusPage() {
 
         {/* Error notice */}
         {s.lastSyncError && (
-          <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20">
-            <AlertTriangle className="w-3.5 h-3.5 text-rose-400 flex-shrink-0 mt-0.5" />
-            <p className="text-[11px] text-rose-300 leading-relaxed">{s.lastSyncError}</p>
+          <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl bg-rose-50 border border-rose-200">
+            <AlertTriangle className="w-3.5 h-3.5 text-rose-600 flex-shrink-0 mt-0.5" />
+            <p className="text-[11px] text-rose-700 leading-relaxed">{s.lastSyncError}</p>
           </div>
         )}
 
@@ -353,7 +353,7 @@ export default function BankSyncStatusPage() {
               title={!s.canSyncNow && s.nextAllowedSyncAt
                 ? `Next sync available ${fmtDateTime(s.nextAllowedSyncAt)}`
                 : undefined}
-              className="flex items-center gap-1.5 text-xs px-4 py-2 rounded-xl border border-emerald-500/25 bg-emerald-500/10 text-emerald-300 font-semibold hover:bg-emerald-500/20 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 text-xs px-4 py-2 rounded-xl border border-emerald-200 bg-emerald-100 text-emerald-700 font-semibold hover:bg-emerald-200 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {syncing
                 ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Syncing…</>
@@ -365,7 +365,7 @@ export default function BankSyncStatusPage() {
           {(needsReconnect || s.healthStatus === 'expiring_soon') && (
             <Link
               href="/dashboard/bank"
-              className="flex items-center gap-1.5 text-xs px-4 py-2 rounded-xl border border-blue-500/25 bg-blue-500/10 text-blue-300 font-semibold hover:bg-blue-500/20 active:scale-95 transition-all"
+              className="flex items-center gap-1.5 text-xs px-4 py-2 rounded-xl border border-blue-200 bg-blue-100 text-blue-700 font-semibold hover:bg-blue-200 active:scale-95 transition-all"
             >
               <PlugZap className="w-3.5 h-3.5" />
               {needsReconnect ? 'Reconnect Bank' : 'Renew Consent'}
@@ -375,10 +375,10 @@ export default function BankSyncStatusPage() {
 
         {/* Next allowed sync notice */}
         {!s.canSyncNow && s.nextAllowedSyncAt && (
-          <div className="flex items-center gap-2 text-[10px] text-slate-500">
+          <div className="flex items-center gap-2 text-[10px] text-neutral-400">
             <CalendarClock className="w-3.5 h-3.5" />
-            Next sync available: <span className="text-slate-300 font-semibold">{fmtDateTime(s.nextAllowedSyncAt)}</span>
-            <span className="text-slate-600">
+            Next sync available: <span className="text-neutral-700 font-semibold">{fmtDateTime(s.nextAllowedSyncAt)}</span>
+            <span className="text-neutral-400">
               (frequency: every {s.syncFrequency.value} {s.syncFrequency.unit.toLowerCase()})
             </span>
           </div>
@@ -388,57 +388,57 @@ export default function BankSyncStatusPage() {
       {/* ── Stats Row ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard
-          icon={<Hash className="w-4 h-4 text-blue-400" />}
+          icon={<Hash className="w-4 h-4 text-blue-600" />}
           label="Total Imported"
           value={s.totalTransactions.toLocaleString('en-IN')}
-          bg="bg-blue-500/10"
+          bg="bg-blue-50"
         />
         <StatCard
-          icon={<Tag className="w-4 h-4 text-amber-400" />}
+          icon={<Tag className="w-4 h-4 text-amber-600" />}
           label="Uncategorised"
           value={s.uncategorisedCount.toLocaleString('en-IN')}
-          bg={s.uncategorisedCount > 0 ? 'bg-amber-500/10' : 'bg-emerald-500/10'}
-          valueClass={s.uncategorisedCount > 0 ? 'text-amber-400' : 'text-emerald-400'}
+          bg={s.uncategorisedCount > 0 ? 'bg-amber-50' : 'bg-emerald-50'}
+          valueClass={s.uncategorisedCount > 0 ? 'text-amber-600' : 'text-emerald-600'}
         />
         <StatCard
-          icon={<Clock className="w-4 h-4 text-slate-400" />}
+          icon={<Clock className="w-4 h-4 text-neutral-400" />}
           label="Last Sync"
           value={timeAgo(s.lastSyncedAt)}
-          bg="bg-white/5"
-          valueClass="text-slate-200"
+          bg="bg-neutral-50"
+          valueClass="text-neutral-900"
         />
         <StatCard
-          icon={<Activity className="w-4 h-4 text-violet-400" />}
+          icon={<Activity className="w-4 h-4 text-violet-600" />}
           label="Sync Frequency"
           value={`${s.syncFrequency.value}×/${s.syncFrequency.unit.toLowerCase()}`}
-          bg="bg-violet-500/10"
-          valueClass="text-violet-300"
+          bg="bg-violet-50"
+          valueClass="text-violet-700"
         />
       </div>
 
       {/* ── Sync History ── */}
-      <div className="rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden">
+      <div className="rounded-2xl bg-white shadow-sm overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/8">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-black/5">
           <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4 text-slate-400" />
-            <h2 className="text-xs font-bold text-white">Recent Sync Activity</h2>
+            <Activity className="w-4 h-4 text-neutral-400" />
+            <h2 className="text-xs font-bold text-neutral-900">Recent Sync Activity</h2>
           </div>
           <button
             onClick={fetchStatus}
-            className="flex items-center gap-1 text-[10px] text-slate-500 hover:text-slate-300 transition"
+            className="flex items-center gap-1 text-[10px] text-neutral-400 hover:text-neutral-700 transition"
           >
             <RotateCcw className="w-3 h-3" /> Refresh
           </button>
         </div>
 
         {/* Rows */}
-        <div className="px-5 divide-y divide-white/5">
+        <div className="px-5 divide-y divide-black/5">
           {s.recentSyncHistory.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center">
-              <Info className="w-6 h-6 text-slate-600 mb-2" />
-              <p className="text-[11px] text-slate-500">No sync history yet.</p>
-              <p className="text-[10px] text-slate-600 mt-0.5">
+              <Info className="w-6 h-6 text-neutral-300 mb-2" />
+              <p className="text-[11px] text-neutral-400">No sync history yet.</p>
+              <p className="text-[10px] text-neutral-400 mt-0.5">
                 Run a sync to see activity appear here.
               </p>
             </div>
@@ -450,10 +450,10 @@ export default function BankSyncStatusPage() {
         </div>
 
         {/* Footer link */}
-        <div className="px-5 py-3 border-t border-white/8">
+        <div className="px-5 py-3 border-t border-black/5">
           <Link
             href="/dashboard/bank"
-            className="flex items-center gap-1 text-[10px] text-slate-500 hover:text-emerald-400 transition font-semibold"
+            className="flex items-center gap-1 text-[10px] text-neutral-400 hover:text-emerald-600 transition font-semibold"
           >
             View all transactions <ChevronRight className="w-3 h-3" />
           </Link>
@@ -464,23 +464,23 @@ export default function BankSyncStatusPage() {
       <div className="grid grid-cols-2 gap-3">
         <Link
           href="/dashboard/bank"
-          className="flex items-center justify-between px-4 py-3 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition group"
+          className="flex items-center justify-between px-4 py-3 rounded-2xl bg-white shadow-sm hover:bg-neutral-50 transition group"
         >
           <div className="flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-emerald-400" />
-            <span className="text-xs font-semibold text-white">Transactions</span>
+            <Building2 className="w-4 h-4 text-emerald-600" />
+            <span className="text-xs font-semibold text-neutral-900">Transactions</span>
           </div>
-          <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-white transition" />
+          <ArrowRight className="w-3.5 h-3.5 text-neutral-400 group-hover:text-neutral-900 transition" />
         </Link>
         <Link
           href="/dashboard/settings"
-          className="flex items-center justify-between px-4 py-3 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition group"
+          className="flex items-center justify-between px-4 py-3 rounded-2xl bg-white shadow-sm hover:bg-neutral-50 transition group"
         >
           <div className="flex items-center gap-2">
-            <PlugZap className="w-4 h-4 text-blue-400" />
-            <span className="text-xs font-semibold text-white">Bank Settings</span>
+            <PlugZap className="w-4 h-4 text-blue-600" />
+            <span className="text-xs font-semibold text-neutral-900">Bank Settings</span>
           </div>
-          <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-white transition" />
+          <ArrowRight className="w-3.5 h-3.5 text-neutral-400 group-hover:text-neutral-900 transition" />
         </Link>
       </div>
 
@@ -507,17 +507,17 @@ function PageHeader() {
   return (
     <div className="flex items-center justify-between">
       <div>
-        <h1 className="text-base font-bold text-white flex items-center gap-2">
-          <Activity className="w-5 h-5 text-emerald-400" />
+        <h1 className="text-base font-bold text-neutral-900 flex items-center gap-2">
+          <Activity className="w-5 h-5 text-emerald-600" />
           Bank Sync Status
         </h1>
-        <p className="text-[10px] text-slate-400 mt-0.5">
+        <p className="text-[10px] text-neutral-400 mt-0.5">
           Connection health, consent validity, and sync history
         </p>
       </div>
       <Link
         href="/dashboard/bank"
-        className="flex items-center gap-1.5 text-[10px] text-slate-400 hover:text-white transition"
+        className="flex items-center gap-1.5 text-[10px] text-neutral-400 hover:text-neutral-900 transition"
       >
         <Building2 className="w-3.5 h-3.5" /> Transactions
         <ChevronRight className="w-3 h-3" />
@@ -527,7 +527,7 @@ function PageHeader() {
 }
 
 function StatCard({
-  icon, label, value, bg, valueClass = 'text-white',
+  icon, label, value, bg, valueClass = 'text-neutral-900',
 }: {
   icon: React.ReactNode
   label: string
@@ -536,10 +536,10 @@ function StatCard({
   valueClass?: string
 }) {
   return (
-    <div className={`rounded-2xl border border-white/10 p-3 ${bg || 'bg-white/5'}`}>
+    <div className={`rounded-2xl p-3 shadow-sm ${bg || 'bg-neutral-50'}`}>
       <div className="flex items-center gap-1.5 mb-2">
         {icon}
-        <p className="text-[9px] text-slate-400 uppercase tracking-wider font-bold">{label}</p>
+        <p className="text-[9px] text-neutral-400 uppercase tracking-wider font-bold">{label}</p>
       </div>
       <p className={`text-base font-black ${valueClass}`}>{value}</p>
     </div>

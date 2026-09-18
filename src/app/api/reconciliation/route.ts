@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create session
-    const result = await db.run(
+    const result = await db.insert(
       `INSERT INTO reconciliation_sessions
          (user_id, business_id, bank_connection_id, period_start, period_end, status)
        VALUES (?, ?, ?, ?, ?, 'in_progress')`,

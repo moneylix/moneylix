@@ -287,8 +287,8 @@ export default function AdminUsersPage() {
              </div>
 
              <div className="grid grid-cols-2 gap-4">
-                <Select label="Deployment Tier" value={editing.plan} onChange={e => setEditing({ ...editing, plan: e.target.value })} 
-                  options={[{ label: 'Free Tier', value: 'free' }, { label: 'Professional Tier', value: 'pro' }, { label: 'Premium Enterprise', value: 'premium' }]} />
+                <Select label="Deployment Tier" value={editing.plan} onChange={e => setEditing({ ...editing, plan: e.target.value })}
+                  options={[{ label: 'Free Tier', value: 'free' }, { label: 'Professional Tier', value: 'pro' }, { label: 'Premium Tier', value: 'premium' }, { label: 'Enterprise Tier', value: 'enterprise' }]} />
                 <Select label="Entity Status" value={editing.status} onChange={e => setEditing({ ...editing, status: e.target.value })}
                   options={[{ label: 'Active', value: 'active' }, { label: 'Trial Period', value: 'trial' }, { label: 'Cancelled', value: 'cancelled' }, { label: 'Expired', value: 'expired' }]} />
              </div>
@@ -371,6 +371,7 @@ export default function AdminUsersPage() {
 }
 
 function LicenseTierBadge({ plan }: { plan: string | null }) {
+  if (plan === 'enterprise') return <Badge variant="credit" className="bg-violet-500/10 text-violet-400 border-violet-500/20 font-black text-[9px]">ENTERPRISE</Badge>
   if (plan === 'premium') return <Badge variant="credit" className="bg-amber-500/10 text-amber-400 border-amber-500/20 font-black text-[9px]">PREMIUM</Badge>
   if (plan === 'pro')     return <Badge variant="credit" className="bg-cyan-500/10 text-cyan-400 border-cyan-500/20 font-black text-[9px]">PRO</Badge>
   return <Badge variant="default" className="font-black text-[9px]">FREE</Badge>

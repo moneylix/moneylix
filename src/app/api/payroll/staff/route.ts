@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid salary_frequency' }, { status: 400 })
     }
 
-    const result = await db.run(
+    const result = await db.insert(
       `INSERT INTO staff_members (user_id, business_id, name, role_title, email, phone, salary_amount, salary_frequency, joined_date)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [

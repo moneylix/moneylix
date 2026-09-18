@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'A timer is already running. Stop it first.' }, { status: 400 })
       }
 
-      const result = await db.run(
+      const result = await db.insert(
         `INSERT INTO time_entries (user_id, business_id, client_name, project_name, description, start_time, hourly_rate, is_billable, status)
          VALUES (?, ?, ?, ?, ?, datetime('now'), ?, ?, 'running')`,
         [userId, business_id || null, client_name || null, project_name || null, description || null, hourly_rate || null, is_billable ? 1 : 0]
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
       totalAmount = Math.round(((hourly_rate * minutes) / 60) * 100) / 100
     }
 
-    const result = await db.run(
+    const result = await db.insert(
       `INSERT INTO time_entries (user_id, business_id, client_name, project_name, description, start_time, end_time, duration_minutes, hourly_rate, total_amount, is_billable, status)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed')`,
       [

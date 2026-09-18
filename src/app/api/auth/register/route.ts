@@ -23,8 +23,8 @@ export async function POST(request: NextRequest) {
 
     const hash = await hashPassword(password)
 
-    const result = await dbQuery.run(
-      "INSERT INTO users (username, email, password, role, email_verified, created_at) VALUES (?, ?, ?, 'user', 1, datetime('now'))",
+    const result = await dbQuery.insert(
+      "INSERT INTO users (username, email, password, role, email_verified, created_at) VALUES (?, ?, ?, 'user', TRUE, datetime('now'))",
       [username, email, hash]
     )
     const userId = result.lastInsertRowid as number

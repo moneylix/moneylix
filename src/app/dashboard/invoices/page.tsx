@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { useBusiness } from '@/lib/contexts/BusinessContext'
 import { useCurrency } from '@/lib/contexts/CurrencyContext'
+import { useTranslation } from '@/lib/i18n'
 
 interface InvoiceItem {
   description: string
@@ -40,13 +41,15 @@ interface Invoice {
   created_at: string
 }
 
-const statusCfg: Record<string, { label: string; cls: string }> = {
-  draft:     { label: 'Draft',     cls: 'bg-neutral-100 text-neutral-600' },
-  sent:      { label: 'Sent',      cls: 'bg-blue-100 text-blue-700' },
-  viewed:    { label: 'Viewed',    cls: 'bg-cyan-100 text-cyan-700' },
-  paid:      { label: 'Paid',      cls: 'bg-lime-100 text-lime-700' },
-  overdue:   { label: 'Overdue',   cls: 'bg-rose-100 text-rose-700' },
-  cancelled: { label: 'Cancelled', cls: 'bg-neutral-100 text-neutral-400' },
+function getStatusCfg(t: (key: string) => string): Record<string, { label: string; cls: string }> {
+  return {
+    draft:     { label: t('invoices.draft'),     cls: 'bg-neutral-100 text-neutral-600' },
+    sent:      { label: t('invoices.sent'),      cls: 'bg-blue-100 text-blue-700' },
+    viewed:    { label: t('invoices.viewed'),    cls: 'bg-cyan-100 text-cyan-700' },
+    paid:      { label: t('invoices.paid'),      cls: 'bg-lime-100 text-lime-700' },
+    overdue:   { label: t('invoices.overdue'),   cls: 'bg-rose-100 text-rose-700' },
+    cancelled: { label: t('invoices.cancelled'), cls: 'bg-neutral-100 text-neutral-400' },
+  }
 }
 
 const emptyItem: InvoiceItem = { description: '', quantity: 1, rate: 0, amount: 0 }
@@ -54,6 +57,8 @@ const emptyItem: InvoiceItem = { description: '', quantity: 1, rate: 0, amount: 
 export default function InvoicesPage() {
   const { activeBusiness } = useBusiness()
   const { currentCurrency, currencies } = useCurrency()
+  const { t } = useTranslation()
+  const statusCfg = getStatusCfg(t)
 
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [total, setTotal] = useState(0)
@@ -250,21 +255,21 @@ export default function InvoicesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-base font-bold text-neutral-900">Invoices</h1>
-          <p className="text-[10px] text-neutral-400">Create and send professional invoices</p>
+          <h1 className="text-base font-bold text-neutral-900">{t('invoices.title')}</h1>
+          <p className="text-[10px] text-neutral-400">{t('invoices.subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
           <Link
             href="/dashboard/invoices/settings"
             className="text-xs px-2.5 py-1.5 rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition font-medium"
           >
-            Settings
+            {t('common.settings')}
           </Link>
           <button
             onClick={() => { resetForm(); setShowModal(true) }}
             className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-lime-400 text-neutral-900 hover:bg-lime-300 transition font-bold"
           >
-            <Plus className="w-3 h-3" /> New Invoice
+            <Plus className="w-3 h-3" /> {t('invoices.createInvoice')}
           </button>
         </div>
       </div>
@@ -273,22 +278,22 @@ export default function InvoicesPage() {
       <div className="flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-neutral-50 text-neutral-700">
           <FileText className="w-3 h-3" />
-          <span className="text-[10px] text-neutral-400">Drafts:</span>
+          <span className="text-[10px] text-neutral-400">{t('invoices.drafts')}:</span>
           <span className="text-xs font-bold font-mono">{totalDraft}</span>
         </div>
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-50 text-blue-700">
           <Send className="w-3 h-3" />
-          <span className="text-[10px] text-neutral-400">Sent:</span>
+          <span className="text-[10px] text-neutral-400">{t('invoices.sent')}:</span>
           <span className="text-xs font-bold font-mono">{totalSent}</span>
         </div>
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-lime-50 text-lime-700">
           <Check className="w-3 h-3" />
-          <span className="text-[10px] text-neutral-400">Paid:</span>
+          <span className="text-[10px] text-neutral-400">{t('invoices.paid')}:</span>
           <span className="text-xs font-bold font-mono">{fmt(totalPaidAmt)}</span>
         </div>
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 text-amber-700">
           <CreditCard className="w-3 h-3" />
-          <span className="text-[10px] text-neutral-400">Outstanding:</span>
+          <span className="text-[10px] text-neutral-400">{t('invoices.outstanding')}:</span>
           <span className="text-xs font-bold font-mono">{fmt(totalOutstanding)}</span>
         </div>
       </div>
@@ -301,12 +306,12 @@ export default function InvoicesPage() {
             type="text"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(0) }}
-            placeholder="Search invoices..."
+            placeholder={t('invoices.searchPlaceholder')}
             className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-neutral-200 bg-white focus:outline-none focus:ring-2 focus:ring-lime-400/40"
           />
         </div>
         <div className="flex gap-1">
-          {['all', 'draft', 'sent', 'viewed', 'paid', 'overdue', 'cancelled'].map((f) => (
+          {(['all', 'draft', 'sent', 'viewed', 'paid', 'overdue', 'cancelled'] as const).map((f) => (
             <button
               key={f}
               onClick={() => { setFilter(f); setPage(0) }}
@@ -314,7 +319,7 @@ export default function InvoicesPage() {
                 filter === f ? 'bg-lime-100 text-lime-700' : 'bg-white text-neutral-400 hover:text-neutral-900'
               }`}
             >
-              {f}
+              {f === 'all' ? t('common.all') : t(`invoices.${f}`)}
             </button>
           ))}
         </div>
@@ -330,9 +335,9 @@ export default function InvoicesPage() {
           <div className="flex flex-col items-center justify-center h-32 text-neutral-400 text-xs gap-1">
             <FileText className="w-8 h-8 mb-1 opacity-30" />
             <p>
-              No invoices yet.{' '}
+              {t('invoices.noInvoicesYet')}{' '}
               <button onClick={() => setShowModal(true)} className="text-lime-700 font-semibold">
-                Create one
+                {t('invoices.createOne')}
               </button>
             </p>
           </div>
@@ -342,7 +347,7 @@ export default function InvoicesPage() {
               <table className="w-full text-xs">
                 <thead className="border-b border-black/5 bg-neutral-50">
                   <tr>
-                    {['Invoice #', 'Client', 'Date', 'Due', 'Amount', 'Status', 'Actions'].map((h) => (
+                    {[t('invoices.invoiceNumber'), t('invoices.client'), t('common.date'), t('invoices.dueDate'), t('common.amount'), t('common.status'), t('common.actions')].map((h) => (
                       <th key={h} className="px-3 py-2 text-left text-[10px] font-medium text-neutral-400">
                         {h}
                       </th>
@@ -456,7 +461,7 @@ export default function InvoicesPage() {
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowModal(false)} />
             <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-bold text-neutral-900">New Invoice</h2>
+                <h2 className="text-base font-bold text-neutral-900">{t('invoices.createInvoice')}</h2>
                 <button onClick={() => setShowModal(false)}>
                   <X className="w-5 h-5 text-neutral-400 hover:text-neutral-900" />
                 </button>
@@ -465,7 +470,7 @@ export default function InvoicesPage() {
                 {/* Client Info */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[10px] font-medium text-neutral-500 block mb-1">Client Name *</label>
+                    <label className="text-[10px] font-medium text-neutral-500 block mb-1">{t('invoices.clientName')} *</label>
                     <input
                       type="text"
                       value={form.client_name}
@@ -475,7 +480,7 @@ export default function InvoicesPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-medium text-neutral-500 block mb-1">Client Email</label>
+                    <label className="text-[10px] font-medium text-neutral-500 block mb-1">{t('invoices.clientEmail')}</label>
                     <input
                       type="email"
                       value={form.client_email}
@@ -485,7 +490,7 @@ export default function InvoicesPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-[10px] font-medium text-neutral-500 block mb-1">Client Address</label>
+                  <label className="text-[10px] font-medium text-neutral-500 block mb-1">{t('invoices.clientAddress')}</label>
                   <textarea
                     value={form.client_address}
                     onChange={(e) => setForm({ ...form, client_address: e.target.value })}
@@ -496,13 +501,13 @@ export default function InvoicesPage() {
 
                 {/* Line Items */}
                 <div>
-                  <label className="text-[10px] font-medium text-neutral-500 block mb-2">Items</label>
+                  <label className="text-[10px] font-medium text-neutral-500 block mb-2">{t('invoices.items')}</label>
                   <div className="space-y-2">
                     {form.items.map((item, idx) => (
                       <div key={idx} className="flex items-center gap-2">
                         <input
                           type="text"
-                          placeholder="Description"
+                          placeholder={t('invoices.description')}
                           value={item.description}
                           onChange={(e) => updateItem(idx, 'description', e.target.value)}
                           required
@@ -510,7 +515,7 @@ export default function InvoicesPage() {
                         />
                         <input
                           type="number"
-                          placeholder="Qty"
+                          placeholder={t('invoices.quantity')}
                           value={item.quantity || ''}
                           onChange={(e) => updateItem(idx, 'quantity', parseFloat(e.target.value) || 0)}
                           min={1}
@@ -518,7 +523,7 @@ export default function InvoicesPage() {
                         />
                         <input
                           type="number"
-                          placeholder="Rate"
+                          placeholder={t('invoices.rate')}
                           value={item.rate || ''}
                           onChange={(e) => updateItem(idx, 'rate', parseFloat(e.target.value) || 0)}
                           min={0}
@@ -539,14 +544,14 @@ export default function InvoicesPage() {
                     onClick={addItem}
                     className="mt-2 text-[10px] text-lime-700 font-bold hover:text-lime-900"
                   >
-                    + Add Item
+                    + {t('invoices.addItem')}
                   </button>
                 </div>
 
                 {/* Totals Row */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                   <div>
-                    <label className="text-[10px] font-medium text-neutral-500 block mb-1">Tax Rate (%)</label>
+                    <label className="text-[10px] font-medium text-neutral-500 block mb-1">{t('invoices.taxRate')}</label>
                     <input
                       type="number"
                       value={form.tax_rate || ''}
@@ -557,7 +562,7 @@ export default function InvoicesPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-medium text-neutral-500 block mb-1">Discount</label>
+                    <label className="text-[10px] font-medium text-neutral-500 block mb-1">{t('invoices.discount')}</label>
                     <input
                       type="number"
                       value={form.discount_amount || ''}
@@ -567,7 +572,7 @@ export default function InvoicesPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-medium text-neutral-500 block mb-1">Due Date</label>
+                    <label className="text-[10px] font-medium text-neutral-500 block mb-1">{t('invoices.dueDate')}</label>
                     <input
                       type="date"
                       value={form.due_date}
@@ -576,34 +581,34 @@ export default function InvoicesPage() {
                     />
                   </div>
                   <div className="flex flex-col justify-end">
-                    <p className="text-[10px] text-neutral-400">Subtotal: {fmt(subtotal)}</p>
-                    {taxAmount > 0 && <p className="text-[10px] text-neutral-400">Tax: {fmt(taxAmount)}</p>}
+                    <p className="text-[10px] text-neutral-400">{t('invoices.subtotal')}: {fmt(subtotal)}</p>
+                    {taxAmount > 0 && <p className="text-[10px] text-neutral-400">{t('invoices.tax')}: {fmt(taxAmount)}</p>}
                     {form.discount_amount > 0 && (
-                      <p className="text-[10px] text-neutral-400">Discount: -{fmt(form.discount_amount)}</p>
+                      <p className="text-[10px] text-neutral-400">{t('invoices.discount')}: -{fmt(form.discount_amount)}</p>
                     )}
-                    <p className="text-xs font-black text-neutral-900">Total: {fmt(grandTotal)}</p>
+                    <p className="text-xs font-black text-neutral-900">{t('invoices.total')}: {fmt(grandTotal)}</p>
                   </div>
                 </div>
 
                 {/* Notes & Terms */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[10px] font-medium text-neutral-500 block mb-1">Notes</label>
+                    <label className="text-[10px] font-medium text-neutral-500 block mb-1">{t('common.notes')}</label>
                     <textarea
                       value={form.notes}
                       onChange={(e) => setForm({ ...form, notes: e.target.value })}
                       rows={2}
-                      placeholder="Any notes for the client..."
+                      placeholder={t('invoices.notesPlaceholder')}
                       className="w-full px-3 py-2 text-xs rounded-lg border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-lime-400/40 resize-none"
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-medium text-neutral-500 block mb-1">Terms</label>
+                    <label className="text-[10px] font-medium text-neutral-500 block mb-1">{t('invoices.terms')}</label>
                     <textarea
                       value={form.terms}
                       onChange={(e) => setForm({ ...form, terms: e.target.value })}
                       rows={2}
-                      placeholder="Payment terms..."
+                      placeholder={t('invoices.termsPlaceholder')}
                       className="w-full px-3 py-2 text-xs rounded-lg border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-lime-400/40 resize-none"
                     />
                   </div>
@@ -614,7 +619,7 @@ export default function InvoicesPage() {
                   disabled={submitting || !form.client_name}
                   className="w-full py-2.5 rounded-xl bg-lime-400 text-neutral-900 font-bold text-xs hover:bg-lime-300 transition disabled:opacity-40"
                 >
-                  {submitting ? 'Creating...' : 'Create Invoice'}
+                  {submitting ? t('invoices.creating') : t('invoices.createInvoice')}
                 </button>
               </form>
             </div>

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import db from '@/lib/db.async'
+import { toPgQuery } from '@/lib/db.postgres'
 import { categorySchema } from '@/lib/schemas'
 
 export async function GET() {
@@ -23,10 +24,13 @@ export async function POST(request: Request) {
 
     const { name, icon, color, type } = validation.data
 
-    const category = await db.transaction((tx) => {
-      const result = tx.prepare('INSERT INTO categories (name, icon, color, type, created_at) VALUES (?, ?, ?, ?, ?)').run(name, icon, color, type, new Date().toISOString())
-      return tx.prepare('SELECT * FROM categories WHERE id = ?').get(result.lastInsertRowid)
+    const insertResult = await db.transaction(async (tx) => {
+      return tx.query(
+        toPgQuery('INSERT INTO categories (name, icon, color, type, created_at) VALUES (?, ?, ?, ?, ?) RETURNING *'),
+        [name, icon, color, type, new Date().toISOString()]
+      )
     })
+    const category = insertResult.rows[0]
 
     return NextResponse.json(category, { status: 201 })
   } catch (error) {
