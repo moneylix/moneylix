@@ -72,14 +72,29 @@ function sqliteTypeToPg(sqliteType: string): string {
 }
 
 /**
+ * The only column in the Postgres schema that's a genuine BOOLEAN rather
+ * than an INTEGER 0/1 flag (see db.postgres.ts's deliberate decision to
+ * keep flag columns as INTEGER everywhere else). SQLite stores this as
+ * 0/1 too, so it needs an explicit int→bool conversion before insert —
+ * the pg driver won't implicitly coerce an integer parameter into a
+ * BOOLEAN column.
+ */
+const BOOLEAN_COLUMNS: Record<string, string[]> = {
+  users: ['email_verified'],
+}
+
+/**
  * Convert a SQLite row value to PostgreSQL-compatible value.
  * Handles:
  *   - SQLite INTEGER booleans (0/1) for known boolean columns
  *   - null values
  *   - datetime strings (passed as-is, PG handles ISO8601)
  */
-function convertValue(value: unknown, _colName: string, _colType: string): unknown {
+function convertValue(value: unknown, colName: string, _colType: string, tableName?: string): unknown {
   if (value === null || value === undefined) return null
+  if (tableName && BOOLEAN_COLUMNS[tableName]?.includes(colName)) {
+    return value === 1 || value === true
+  }
   return value
 }
 
@@ -172,7 +187,7 @@ async function migrateTable(
         const colInfo = columns[colIdx]
         const paramNum = rowIdx * colNames.length + colIdx + 1
         placeholders.push(`$${paramNum}`)
-        values.push(convertValue(row[col], col, colInfo.type))
+        values.push(convertValue(row[col], col, colInfo.type, tableName))
       }
 
       valueClauses.push(`(${placeholders.join(', ')})`)
@@ -189,7 +204,7 @@ async function migrateTable(
       // Try row-by-row for this batch to identify problematic rows
       for (const row of batch) {
         const rowValues = colNames.map((col, idx) =>
-          convertValue(row[col], col, columns[idx].type)
+          convertValue(row[col], col, columns[idx].type, tableName)
         )
         const rowPlaceholders = colNames.map((_, idx) => `$${idx + 1}`).join(', ')
         const rowQuotedCols = colNames.map(c => `"${c}"`).join(', ')
