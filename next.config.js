@@ -1,9 +1,15 @@
 /** @type {import('next').NextConfig} */
+// Temporarily force-disabled: next-pwa's separate service-worker compilation
+// pass was implicated in a production-build-only "Module not found" failure
+// on Render (Linux) that couldn't be reproduced locally despite extensive
+// investigation - file content, casing, Node version, clean installs, and
+// repo structure were all verified correct. Disabling this to unblock
+// deployment; re-enable and investigate properly once the site is live.
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
+  disable: true,
   runtimeCaching: [
     {
       urlPattern: /^https:\/\/moneylix\.in\/.*/i,
