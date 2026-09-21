@@ -1,3 +1,33 @@
+// Temporary diagnostic - runs unconditionally on every `next build`/`next dev`
+// since next.config.js is always loaded regardless of how the build was
+// invoked (bypasses uncertainty about whether npm lifecycle hooks like
+// prebuild actually ran). Remove once the Render module-resolution issue
+// is resolved.
+;(function renderDebug() {
+  const fs = require('fs')
+  const path = require('path')
+  console.log('=== RENDER-DEBUG (next.config.js) START ===')
+  console.log('cwd:', process.cwd())
+  console.log('node version:', process.version)
+  const targets = [
+    'src/components/ui/Button.tsx',
+    'src/components/ui/Input.tsx',
+    'src/components/ui/Badge.tsx',
+    'src/lib/utils/format.ts',
+  ]
+  for (const t of targets) {
+    const full = path.join(process.cwd(), t)
+    console.log(`exists(${t}):`, fs.existsSync(full))
+  }
+  try {
+    console.log('ls src/components/ui/:', fs.readdirSync(path.join(process.cwd(), 'src/components/ui')).sort().join(', '))
+  } catch (e) { console.log('ERROR ls ui:', e.message) }
+  try {
+    console.log('ls src/lib/utils/:', fs.readdirSync(path.join(process.cwd(), 'src/lib/utils')).sort().join(', '))
+  } catch (e) { console.log('ERROR ls utils:', e.message) }
+  console.log('=== RENDER-DEBUG (next.config.js) END ===')
+})()
+
 /** @type {import('next').NextConfig} */
 // Temporarily force-disabled: next-pwa's separate service-worker compilation
 // pass was implicated in a production-build-only "Module not found" failure
