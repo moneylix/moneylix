@@ -29,28 +29,31 @@
 })()
 
 /** @type {import('next').NextConfig} */
-// Temporarily force-disabled: next-pwa's separate service-worker compilation
-// pass was implicated in a production-build-only "Module not found" failure
-// on Render (Linux) that couldn't be reproduced locally despite extensive
-// investigation - file content, casing, Node version, clean installs, and
-// repo structure were all verified correct. Disabling this to unblock
-// deployment; re-enable and investigate properly once the site is live.
-const withPWA = require('next-pwa')({
-  dest: 'public',
-  register: true,
-  skipWaiting: true,
-  disable: true,
-  runtimeCaching: [
-    {
-      urlPattern: /^https:\/\/moneylix\.in\/.*/i,
-      handler: 'NetworkFirst',
-      options: {
-        cacheName: 'moneylix-cache',
-        expiration: { maxEntries: 200, maxAgeSeconds: 24 * 60 * 60 },
-      },
-    },
-  ],
-})
+// Temporarily removed entirely (not just its own `disable` flag): next-pwa's
+// withPWA() wrapper, even with disable:true, changes how Next.js composes a
+// user-supplied webpack() function - combining the two triggered a spurious
+// "Cannot find module for page: /_document" PageNotFoundError during
+// "Collecting page data" that doesn't happen with either piece alone. Since
+// this build also needs a custom webpack() (see below, for a separate
+// Render-only module-resolution issue), dropping withPWA entirely was the
+// clean way to keep both working. Re-add and investigate once live.
+//
+// const withPWA = require('next-pwa')({
+//   dest: 'public',
+//   register: true,
+//   skipWaiting: true,
+//   disable: true,
+//   runtimeCaching: [
+//     {
+//       urlPattern: /^https:\/\/moneylix\.in\/.*/i,
+//       handler: 'NetworkFirst',
+//       options: {
+//         cacheName: 'moneylix-cache',
+//         expiration: { maxEntries: 200, maxAgeSeconds: 24 * 60 * 60 },
+//       },
+//     },
+//   ],
+// })
 
 const securityHeaders = [
   { key: 'X-DNS-Prefetch-Control', value: 'on' },
@@ -77,6 +80,8 @@ const securityHeaders = [
   },
 ]
 
+const path = require('path')
+
 const nextConfig = {
   reactStrictMode: true,
   experimental: { instrumentationHook: true },
@@ -88,6 +93,24 @@ const nextConfig = {
       },
     ]
   },
+  // Explicit absolute-path aliases for 3 modules (Button.tsx, Input.tsx,
+  // format.ts) that Render's production build consistently fails to
+  // resolve via the normal tsconfig-based "@/*" alias, despite the files
+  // being verified present, correctly cased, and resolvable via plain
+  // Node.js require.resolve() at that exact build path (see git history
+  // around this line for the investigation). Bypasses whatever's going
+  // wrong in the tsconfig-paths webpack plugin for just these targets by
+  // resolving them to an absolute path computed from this file's own
+  // location, which doesn't depend on the same mechanism that's failing.
+  webpack(config, options) {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@/components/ui/Button': path.resolve(__dirname, 'src/components/ui/Button.tsx'),
+      '@/components/ui/Input': path.resolve(__dirname, 'src/components/ui/Input.tsx'),
+      '@/lib/utils/format': path.resolve(__dirname, 'src/lib/utils/format.ts'),
+    }
+    return config
+  },
 }
 
-module.exports = withPWA(nextConfig)
+module.exports = nextConfig
