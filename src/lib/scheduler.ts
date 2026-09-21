@@ -50,7 +50,14 @@ const jobs: CronJob[] = [
 ]
 
 async function runJob(job: CronJob): Promise<void> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3006'
+  // Always call the server's own local port, never the public domain -
+  // this is a server-to-itself call, and depending on NEXT_PUBLIC_APP_URL
+  // made it fragile during infra migrations: when that env var pointed at
+  // www.moneylix.in while DNS still resolved to the old Proxmox server,
+  // these requests silently hit that unrelated old server instead of
+  // this one, 404-ing on any route that didn't exist in whatever older
+  // code was running there.
+  const baseUrl = `http://localhost:${process.env.PORT || 3006}`
   const cronSecret = process.env.CRON_SECRET || ''
 
   try {
