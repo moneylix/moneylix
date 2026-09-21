@@ -46,6 +46,15 @@ function getPool(): Pool {
       max: 20,              // max connections in pool
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000,
+      // Managed Postgres providers (Supabase's pooler here) commonly present
+      // a certificate chain that doesn't validate against Node's default CA
+      // bundle - a well-known, standard tradeoff for connecting to these
+      // services (the connection is still encrypted via TLS; this only
+      // skips validating the cert chain against a known root). Every query
+      // was silently failing with SELF_SIGNED_CERT_IN_CHAIN in production
+      // without this - caught by this file's own try/catch blocks, which
+      // masked it as a fake empty/zero success instead of a real error.
+      ssl: { rejectUnauthorized: false },
     })
 
     pool.on('error', (err) => {

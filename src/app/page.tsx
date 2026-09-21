@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
 import {
   Wallet, Receipt, BarChart3, Sparkles, TrendingUp, Brain, Shield, Lock,
   CheckCircle, Globe, ArrowRight, Check, Menu, X, ChevronRight,
@@ -37,6 +38,22 @@ export default function LandingPage() {
   const [yearly, setYearly] = useState(false)
   const [faq, setFaq] = useState<number | null>(0)
   const [theme, setTheme] = useState<"dark" | "light">("dark")
+
+  // Mouse-parallax tilt for the hero dashboard mockup (Linear/Stripe style)
+  const heroRef = useRef<HTMLDivElement>(null)
+  const mvX = useMotionValue(0)
+  const mvY = useMotionValue(0)
+  const springX = useSpring(mvX, { stiffness: 150, damping: 20 })
+  const springY = useSpring(mvY, { stiffness: 150, damping: 20 })
+  const rotateX = useTransform(springY, [-0.5, 0.5], [8, -8])
+  const rotateY = useTransform(springX, [-0.5, 0.5], [-8, 8])
+  const handleHeroMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = heroRef.current?.getBoundingClientRect()
+    if (!rect) return
+    mvX.set((e.clientX - rect.left) / rect.width - 0.5)
+    mvY.set((e.clientY - rect.top) / rect.height - 0.5)
+  }
+  const handleHeroMouseLeave = () => { mvX.set(0); mvY.set(0) }
 
   // Load saved theme preference
   useEffect(() => {
@@ -175,32 +192,85 @@ export default function LandingPage() {
       </nav>
 
       {/* ── HERO ── */}
-      <section className="relative overflow-hidden">
-        <div style={{ background: "radial-gradient(600px 300px at 70% 20%, rgba(16,185,129,0.12), transparent)" }} className="absolute inset-0 pointer-events-none" />
+      <section ref={heroRef} onMouseMove={handleHeroMouseMove} onMouseLeave={handleHeroMouseLeave} className="relative overflow-hidden">
+        {/* Animated gradient mesh blobs */}
+        <motion.div
+          aria-hidden
+          className="absolute -top-32 -right-20 w-[560px] h-[560px] rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, rgba(16,185,129,0.28), transparent 70%)", filter: "blur(60px)" }}
+          animate={{ x: [0, 40, -20, 0], y: [0, -30, 20, 0], scale: [1, 1.12, 0.95, 1] }}
+          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          aria-hidden
+          className="absolute top-1/3 -left-32 w-[480px] h-[480px] rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, rgba(34,211,238,0.22), transparent 70%)", filter: "blur(70px)" }}
+          animate={{ x: [0, -30, 25, 0], y: [0, 30, -15, 0], scale: [1, 0.9, 1.1, 1] }}
+          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          aria-hidden
+          className="absolute bottom-0 right-1/4 w-[360px] h-[360px] rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, rgba(167,139,250,0.16), transparent 70%)", filter: "blur(60px)" }}
+          animate={{ x: [0, 25, -15, 0], y: [0, -20, 10, 0] }}
+          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+        />
         <div className="max-w-7xl mx-auto px-6 lg:px-10 py-16 lg:py-24 grid lg:grid-cols-2 gap-12 items-center relative">
           {/* Left copy */}
-          <div>
-            <div style={{ background: CARD, border: `1px solid ${BORDER}` }} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6">
+          <motion.div
+            initial="hidden"
+            animate="show"
+            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.12 } } }}
+          >
+            <motion.div
+              variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              style={{ background: CARD, border: `1px solid ${BORDER}` }} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6"
+            >
               <span style={{ background: EMERGREEN() }} className="w-1.5 h-1.5 rounded-full" />
               <span className="text-[11px] font-bold" style={{ color: MUT }}>RBI-regulated Account Aggregator</span>
-            </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[1.05] tracking-tight">
-              AI-ready finance platform for <span style={{ background: GRAD, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>Indian businesses</span>
-            </h1>
-            <p className="mt-6 text-lg leading-relaxed max-w-lg" style={{ color: MUT }}>
+            </motion.div>
+            <motion.h1
+              variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="text-4xl md:text-5xl lg:text-6xl font-black leading-[1.05] tracking-tight"
+            >
+              AI-ready finance platform for <span className="animate-gradient-text" style={{ backgroundImage: GRAD, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>Indian businesses</span>
+            </motion.h1>
+            <motion.p
+              variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="mt-6 text-lg leading-relaxed max-w-lg" style={{ color: MUT }}
+            >
               Manage end-to-end money — from UPI bank sync & GST invoicing to payroll, inventory & an AI advisor. The only India-first app that does it all in one place.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link href="/auth/register" style={{ background: GRAD, color: "#04121e" }} className="inline-flex items-center gap-2 px-7 py-4 rounded-xl font-black text-base hover:opacity-90 transition active:scale-95">
+            </motion.p>
+            <motion.div
+              variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="mt-8 flex flex-wrap items-center gap-3"
+            >
+              <Link href="/auth/register" style={{ background: GRAD, color: "#04121e" }} className="inline-flex items-center gap-2 px-7 py-4 rounded-xl font-black text-base hover:opacity-90 hover:scale-[1.03] transition active:scale-95">
                 Start Free <ArrowRight className="w-4 h-4" />
               </Link>
               <a href="#pricing" style={{ border: `1px solid ${BORDER2}`, color: TXT }} className="px-7 py-4 rounded-xl font-bold text-base hover:opacity-70 transition">View Pricing</a>
-            </div>
-            <p className="mt-5 text-xs" style={{ color: MUT2 }}>No credit card required · Free plan forever · 🇮🇳 Made for India</p>
-          </div>
+            </motion.div>
+            <motion.p
+              variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="mt-5 text-xs" style={{ color: MUT2 }}
+            >
+              No credit card required · Free plan forever · 🇮🇳 Made for India
+            </motion.p>
+          </motion.div>
           {/* Right: dashboard mockup */}
-          <div className="relative hidden lg:block pb-10 pr-6">
-            <div style={{ background: CARD, border: `1px solid ${BORDER}`, boxShadow: "0 30px 80px rgba(0,0,0,0.5)" }} className="relative z-10 rounded-2xl p-5">
+          <div className="relative hidden lg:block pb-10 pr-6" style={{ perspective: 1200 }}>
+            <motion.div
+              style={{ background: CARD, border: `1px solid ${BORDER}`, boxShadow: "0 30px 80px rgba(0,0,0,0.5)", rotateX, rotateY, transformStyle: "preserve-3d" }}
+              initial={{ opacity: 0, scale: 0.94, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
+              className="relative z-10 rounded-2xl p-5"
+            >
               {/* Top bar: business switcher + AA badge */}
               <div className="flex items-center justify-between mb-5 pb-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
                 <div style={{ background: BG2, border: `1px solid ${BORDER}` }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg">
@@ -241,17 +311,27 @@ export default function LandingPage() {
                   <span className="text-[11px] font-black" style={{ color: a.startsWith("+") ? EMERGREEN() : "#fb7185" }}>{a}</span>
                 </div>
               ))}
-            </div>
+            </motion.div>
 
             {/* Floating GST invoice accent card */}
-            <div style={{ background: CARD, border: `1px solid ${BORDER}`, boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }} className="absolute -bottom-6 -left-6 z-20 w-52 rounded-2xl p-4">
+            <motion.div
+              style={{ background: CARD, border: `1px solid ${BORDER}`, boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}
+              initial={{ opacity: 0, scale: 0.9, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: [0, -10, 0] }}
+              transition={{
+                opacity: { duration: 0.6, delay: 0.6 },
+                scale: { duration: 0.6, delay: 0.6 },
+                y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.2 },
+              }}
+              className="absolute -bottom-6 -left-6 z-20 w-52 rounded-2xl p-4"
+            >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[11px] font-black" style={{ color: TXT }}>INV-0042</span>
                 <span style={{ background: "rgba(16,185,129,0.15)", color: EMERGREEN() }} className="text-[8px] font-bold px-2 py-0.5 rounded-full">GST Ready</span>
               </div>
               <p className="text-lg font-black" style={{ color: TXT }}>₹59,000</p>
               <p className="text-[10px]" style={{ color: MUT2 }}>CGST + SGST @ 9%</p>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
