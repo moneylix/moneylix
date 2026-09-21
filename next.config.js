@@ -93,21 +93,22 @@ const nextConfig = {
       },
     ]
   },
-  // Explicit absolute-path aliases for 3 modules (Button.tsx, Input.tsx,
-  // format.ts) that Render's production build consistently fails to
-  // resolve via the normal tsconfig-based "@/*" alias, despite the files
-  // being verified present, correctly cased, and resolvable via plain
-  // Node.js require.resolve() at that exact build path (see git history
-  // around this line for the investigation). Bypasses whatever's going
-  // wrong in the tsconfig-paths webpack plugin for just these targets by
-  // resolving them to an absolute path computed from this file's own
-  // location, which doesn't depend on the same mechanism that's failing.
-  webpack(config, options) {
+  // Blanket "@" -> absolute src/ alias, mirroring tsconfig.json's own
+  // "@/*": ["./src/*"] mapping exactly. Render's production build has
+  // consistently failed to resolve various @/... imports across many
+  // different files, always in batches of exactly 5 (Next.js's webpack
+  // error display caps at 5 shown errors), and which 5 shift every time
+  // a previously-shown one gets fixed - meaning the real scope is almost
+  // certainly the whole @/ alias mechanism failing broadly, not specific
+  // files (all individually verified present/correct/resolvable via plain
+  // Node.js require.resolve() - see git history for the investigation
+  // that ruled out file content, casing, Node version, next-pwa, ulimits,
+  // and build cache staleness). This explicit webpack-level alias doesn't
+  // depend on whatever's broken in the automatic tsconfig-paths plugin.
+  webpack(config) {
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@/components/ui/Button': path.resolve(__dirname, 'src/components/ui/Button.tsx'),
-      '@/components/ui/Input': path.resolve(__dirname, 'src/components/ui/Input.tsx'),
-      '@/lib/utils/format': path.resolve(__dirname, 'src/lib/utils/format.ts'),
+      '@': path.resolve(__dirname, 'src'),
     }
     return config
   },
